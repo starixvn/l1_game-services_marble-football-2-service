@@ -1,30 +1,31 @@
-import GameManagementApiClientFactory from "sc-game-base/src/core/game-management-api";
+import { TableGameConfigBot } from "sc-game-base/src/table/crons";
 import GameData from "../game-data";
-import GameDefinition from "../game-definition";
-import { BaseBot } from "sc-game-base/src/core/crons";
-import { BaseEventPublishers } from "sc-game-base/src/core";
-import { IRound } from "../models/rounds";
-import mongoose from "mongoose";
-import { logger } from "sc-common";
 
-export default class Bot extends BaseBot {
+export default class Bot extends TableGameConfigBot {
     declare gameData: GameData;
-    declare definition: GameDefinition;
-    publisher: BaseEventPublishers.BaseEventPublisher;
-    roundsRepository: mongoose.Model<IRound>;
-    logService: typeof logger;
 
-    constructor(
-        gameManagementApiClientFactory: GameManagementApiClientFactory,
-        gameData: GameData,
-        definition: GameDefinition,
-        publisher: BaseEventPublishers.BaseEventPublisher,
-        roundsRepository: mongoose.Model<IRound>,
-        logService: typeof logger
-    ) {
-        super(definition, gameData, gameManagementApiClientFactory);
-        this.publisher = publisher;
-        this.roundsRepository = roundsRepository;
-        this.logService = logService;
+    updateBalanceAndPublishBetPayload(botId: string, choice: string, amount: number, balance: number) {
+        if (this.gameData.players[botId]) {
+            this.gameData.players[botId].red = balance;
+        }
+        this.updatePlayerBetCount(botId, choice);
+    }
+
+    updatePlayerBetCount(playerId: string, choice: string) {
+        if (this.definition.choices.includes(choice)) {
+            if (!this.gameData.playerBetCount[choice]) {
+                this.gameData.playerBetCount[choice] = [];
+            }
+            !this.gameData.playerBetCount[choice].includes(playerId) && this.gameData.playerBetCount[choice].push(playerId);
+        }
+    }
+
+    override addToPlayersAndPublish(bot: any) {
+        this.gameData.players[bot.id] = bot;
+    }
+
+    override removeBot(botId: string) {
+        delete this.gameData.players[botId];
+        delete (this.botsInRoom as any)[botId];
     }
 }

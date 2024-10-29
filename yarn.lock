@@ -2328,20 +2328,20 @@
   resolved "http://npm.lumigame.com/@types/range-parser/-/range-parser-1.2.7.tgz#50ae4353eaaddc04044279812f52c8c65857dbcb"
   integrity sha512-hKormJbkJqzQGhziax5PItDUTMAM9uE2XXQmM37dyd4hVM+5aVl7oVxMVUiVQn2oCQFN/LKCZdvSM0pFRqbSmQ==
 
-"@types/sc-common@1.0.0-beta.0":
-  version "1.0.0-beta.0"
-  resolved "http://npm.lumigame.com/@types/sc-common/-/sc-common-1.0.0-beta.0.tgz#494a143c7a1373d59f1677f8d4375b8c478059aa"
-  integrity sha512-Ql33qm27bpXj5lTXAmEZYA5AcLm+xEKD3oRQh++MFsfUVwqA5B1C9hjNl9jncwpBC6wzLC+Zv0ARysctltR+vw==
+"@types/sc-common@^1.0.0":
+  version "1.0.0"
+  resolved "http://npm.lumigame.com/@types/sc-common/-/sc-common-1.0.0.tgz#03834ca1a7eaf102a983b659d9ea506462f73584"
+  integrity sha512-gD03QcJr+AnDv4rPd76TNl14RP3bUA1s6qLaQcSM5tSLHmwPD8oFyxxGaRhUsbWf0YrQVdogj8aCWq1tqRd8fw==
 
-"@types/sc-game-base@1.0.0-beta.2":
-  version "1.0.0-beta.2"
-  resolved "http://npm.lumigame.com/@types/sc-game-base/-/sc-game-base-1.0.0-beta.2.tgz#25e54c9f435ad92cf9298498c779b2dbaa5d3498"
-  integrity sha512-SruuWQhUHp41/xUJgnPtcnRx6oDHozRdZw2BzBKMegbzJ6Np+BP5bhR9jf3LNSOTYcixvkNxTlIlyiyUwMvaqw==
+"@types/sc-game-base@^1.0.0":
+  version "1.0.0"
+  resolved "http://npm.lumigame.com/@types/sc-game-base/-/sc-game-base-1.0.0.tgz#0e636cf277ae2e5ed72cddd8106ae1863554ca1b"
+  integrity sha512-MjACDkNSR/1CjcYxUabxl3H/E9RgH3uTeWtm1GFaN/2456Usmzwf1ir1h1u56cWrUtmRT1RWgAsgmKbJr4Wm8A==
 
-"@types/sc-game-service-integration-utils@1.0.0-beta.1":
-  version "1.0.0-beta.1"
-  resolved "http://npm.lumigame.com/@types/sc-game-service-integration-utils/-/sc-game-service-integration-utils-1.0.0-beta.1.tgz#2117e469802277aca6dba579b92f8771b48cd0d5"
-  integrity sha512-d5e0ktDHbqYbjf0pFRWElW72MxzyroAC/cDqTXxAP3f2Z2+QwWIwbyMUsCogwqmXz0zAFUweTXvnf7w0pri/Pg==
+"@types/sc-game-service-integration-utils@^1.0.0":
+  version "1.0.0"
+  resolved "http://npm.lumigame.com/@types/sc-game-service-integration-utils/-/sc-game-service-integration-utils-1.0.0.tgz#79f6fc76bc40fd48cfb71922eb69f2e55f9f129c"
+  integrity sha512-S78BHmGvapTCM9LKmMCnzG5YUvjbL1sMlWQLVKW8vQoo93X3f2Wqs8nguZfc0SAehArzCTpI4fGlCEiPxpS9AA==
 
 "@types/send@*":
   version "0.17.4"

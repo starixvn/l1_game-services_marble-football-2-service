@@ -1,44 +1,43 @@
-import { IRound } from "../models/rounds";
-import mongoose from "mongoose";
-import GameDefinition from "../game-definition";
+import { TableSettleGameRoundConsumer as SettleGameRoundConsumerBase } from "sc-game-base/src/table/event-consumers";
 import GameData from "../game-data";
-import { Core } from "sc-game-base";
-import { RoundResultPublisher, UserBetResultPublisher } from "sc-game-base/src/core/event-publishers";
-import GameManagementApiClientFactory from "sc-game-base/src/core/game-management-api";
 
-export default class SettleGameRoundConsumer extends Core.BaseEventConsumers.SettleGameRoundConsumer {
-    declare roundsRepository: mongoose.Model<IRound>;
-    declare gameData: GameData;
-    declare definition: GameDefinition;
-
-    constructor({
-        definition,
-        gameData,
-        roundResultPublisher,
-        userBetResultPublisher,
-        endGame,
-        roundsRepository,
-        betsRepository,
-        gameManagementApiClientFactory,
-    }: {
-        definition: GameDefinition;
-        gameData: GameData;
-        roundResultPublisher: RoundResultPublisher;
-        userBetResultPublisher: UserBetResultPublisher;
-        endGame: any;
-        roundsRepository: mongoose.Model<IRound>;
-        betsRepository: mongoose.Model<any>;
-        gameManagementApiClientFactory: GameManagementApiClientFactory;
-    }) {
-        super({
-            definition,
-            gameData,
-            roundResultPublisher,
-            userBetResultPublisher,
-            endGame,
-            roundsRepository,
-            betsRepository,
-            gameManagementApiClientFactory,
+export default class SettleGameRoundConsumer extends SettleGameRoundConsumerBase {
+    override async settleRound() {
+        const result = this.generateResult();
+        const settlementResult = this.definition.settle(result);
+        const { roundId, exchangeRates, match } = this.gameData as GameData;
+        const newRound = await this.roundsRepository.create({
+            id: roundId,
+            result,
+            settlementResult,
+            time: new Date(),
+            exchangeRateId: exchangeRates.exId,
+            match,
         });
+
+        if (newRound) {
+            this.roundResultPublisher.publishRoundResult(this.collectRoundResult(result, settlementResult, roundId));
+
+            const finish = {
+                settlementResult,
+                result,
+                roundId: newRound.id,
+                time: newRound.time,
+            };
+
+            this.gameData.roundId = finish.roundId + 1;
+
+            await this.settleBets(finish);
+
+            this.roundResultPublisher.publishWinners(roundId, this.gameData.winningPlayers);
+        }
+    }
+
+    collectRoundResult(result: any, settlementResult: any, roundId: any) {
+        return {
+            result,
+            settlementResult,
+            roundId,
+        };
     }
 }
