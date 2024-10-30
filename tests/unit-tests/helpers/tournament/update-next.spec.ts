@@ -18,7 +18,50 @@ describe(updateNext.name, () => {
     });
 
     describe("when the input is valid", () => {
-        it("should update the match in tournament", () => {
+        test.each([
+            [
+                2,
+                "5",
+                [
+                    { home: "1", away: "2" },
+                    { home: "3", away: "4" },
+                    { home: "5", away: "6" },
+                    { home: "7", away: "8" },
+                    { home: "9", away: "10" },
+                    { home: "11", away: "12" },
+                    { home: "13", away: "14" },
+                    { home: "15", away: "16" },
+                    { home: "1", away: "4" },
+                    { home: "5", away: "" },
+                    { home: "", away: "" },
+                    { home: "", away: "" },
+                    { home: "", away: "" },
+                    { home: "", away: "" },
+                    { home: "", away: "" },
+                ],
+            ],
+            [
+                3,
+                "8",
+                [
+                    { home: "1", away: "2" },
+                    { home: "3", away: "4" },
+                    { home: "5", away: "6" },
+                    { home: "7", away: "8" },
+                    { home: "9", away: "10" },
+                    { home: "11", away: "12" },
+                    { home: "13", away: "14" },
+                    { home: "15", away: "16" },
+                    { home: "1", away: "4" },
+                    { home: "", away: "8" },
+                    { home: "", away: "" },
+                    { home: "", away: "" },
+                    { home: "", away: "" },
+                    { home: "", away: "" },
+                    { home: "", away: "" },
+                ],
+            ],
+        ])("should update the match in tournament", (index, value, expected) => {
             // Arrange
             const matches = [
                 { home: "1", away: "2" },
@@ -38,26 +81,8 @@ describe(updateNext.name, () => {
                 { home: "", away: "" },
             ];
 
-            const expected = [
-                { home: "1", away: "2" },
-                { home: "3", away: "4" },
-                { home: "5", away: "6" },
-                { home: "7", away: "8" },
-                { home: "9", away: "10" },
-                { home: "11", away: "12" },
-                { home: "13", away: "14" },
-                { home: "15", away: "16" },
-                { home: "1", away: "4" },
-                { home: "5", away: "" },
-                { home: "", away: "" },
-                { home: "", away: "" },
-                { home: "", away: "" },
-                { home: "", away: "" },
-                { home: "", away: "" },
-            ];
-
             // Act
-            updateNext(matches, 2, "5");
+            updateNext(matches, index, value);
 
             // Assert
             expect(matches).toStrictEqual(expected);
