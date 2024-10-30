@@ -8,5 +8,5 @@ export default function isHomeUpcoming<Match>(matches: Match[], index: number): 
         throw new Error("Invalid parameter");
     }
 
-    return (matches.length + index + 1) % 2 == 0;
+    return (matches.length + index + 1) % 2 === 0;
 }
