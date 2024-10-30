@@ -3,11 +3,13 @@ import GameData from "../game-data";
 import { calculateUserBetPercentage, roundUserBetPercentage } from "../helpers/bet-percentage";
 
 export default class InGameConsumer extends TableInGameConsumer {
+    declare gameData: GameData;
+
     async buildPayload(realPlayer: any) {
         const payload = await super.buildPayload(realPlayer);
-        const { playerBetCount, match } = this.gameData as GameData;
+        const { playerBetCount } = this.gameData;
         const userBetPercentage = this.getUserBetPercentage(playerBetCount);
-        return { ...payload, userBetPercentage, match };
+        return { ...payload, userBetPercentage };
     }
 
     getUserBetPercentage(playerBetCount: Record<string, string[]>) {

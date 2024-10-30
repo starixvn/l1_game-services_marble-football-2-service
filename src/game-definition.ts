@@ -1,5 +1,5 @@
 import { GameDefinition as BaseGameDefinition } from "sc-game-base/src/core";
-import { Duration as BaseDuration } from "sc-game-base/src/core/game-definition";
+import { Duration } from "sc-game-base/src/core/game-definition";
 export default class GameDefinition extends BaseGameDefinition {
     declare durations: Duration;
     constructor(gameSettings: GameSettings, generateResult: Function, settle: Function, generateRawResultForHash: Function) {
@@ -19,5 +19,3 @@ export type GameSettings = {
     numberOfRoundHistory: number;
     historyPageSize: number;
 };
-
-export type Duration = BaseDuration & {};

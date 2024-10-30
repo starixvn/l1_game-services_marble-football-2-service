@@ -5063,6 +5063,14 @@ jest-message-util@^29.7.0:
     slash "^3.0.0"
     stack-utils "^2.0.3"
 
+jest-micro-auto-stub@^1.0.9:
+  version "1.0.9"
+  resolved "http://npm.lumigame.com/jest-micro-auto-stub/-/jest-micro-auto-stub-1.0.9.tgz#bedd0b815e148ab13df68f5ba519316ac5377992"
+  integrity sha512-eLOU9mWzDGnuCgBnExEng0l6nWCEOQ46mzpjVLL7dN49+TPTU0Ulin+WNyOQWas0OadTLTD48uW07LyLjj0axg==
+  dependencies:
+    jest "^26.6.3"
+    mongoose "^5.9.25"
+
 jest-mock@^26.6.2:
   version "26.6.2"
   resolved "http://npm.lumigame.com/jest-mock/-/jest-mock-26.6.2.tgz#d6cb712b041ed47fe0d9b6fc3474bc6543feb302"

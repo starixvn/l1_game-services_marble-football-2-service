@@ -1,30 +1,25 @@
-import { stub } from "jest-auto-stub";
 import GameCron from "../../../src/crons/game-cron";
-import GameManagementApiClientFactory from "sc-game-base/src/core/game-management-api";
+import { stub } from "jest-auto-stub";
+
+import {
+    bot,
+    gameManagementApiClientFactory,
+    gameStatusPublisher,
+    provablyFairConsumer,
+    roundIdConsumer,
+    roundResultConsumer,
+    runningRoundPublisher,
+    settleGameConsumer,
+    unsettledRoundConsumer,
+} from "../global-stubs";
 import GameData from "../../../src/game-data";
 import GameDefinition from "../../../src/game-definition";
-import { ProvablyFairConsumer, UnsettledRoundConsumer } from "sc-game-base/src/core/event-consumers";
-import { Core } from "sc-game-base";
-import SettleGameConsumer from "../../../src/consumers/settle-game-round-consumer";
-import Bot from "../../../src/crons/bot";
-
-jest.mock("sc-game-base/src/core/game-management-api", () => ({
-    getOrDefault: jest.fn(),
-}));
 
 describe("GameCron", () => {
     let gameCron: GameCron;
+
     const gameData = stub<GameData>();
     const definition = stub<GameDefinition>();
-    const bot = stub<Bot>();
-    const settleGameConsumer = stub<SettleGameConsumer>();
-    const gameStatusPublisher = stub<Core.BaseEventPublishers.GameStatusPublisher>();
-    const runningRoundPublisher = stub<Core.BaseEventPublishers.RunningRoundInfoPublisher>();
-    const roundResultConsumer = stub<Core.BaseEventConsumers.RoundResultConsumer>();
-    const gameManagementApiClientFactory = stub<GameManagementApiClientFactory>();
-    const roundIdConsumer = stub<Core.BaseEventConsumers.RoundIdConsumer>();
-    const provablyFairConsumer = stub<ProvablyFairConsumer>();
-    const unsettledRoundConsumer = stub<UnsettledRoundConsumer>();
 
     definition.durations = {
         wholeRound: 10,
