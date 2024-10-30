@@ -62,4 +62,8 @@ export default {
         enabled: true,
         endpoint: "http://10.2.189.50:4318/v1/traces",
     },
+    tournament: {
+        code: "SEAOC",
+        teams: ["BRN", "KHM", "IDN", "LAO", "MYS", "PHL", "SGP", "THA", "TLS", "VNM", "JPN", "KOR", "CHN", "TWN", "HKG", "IND"],
+    },
 };
