@@ -1,12 +1,8 @@
 import { asClass, asValue, AwilixContainer } from "awilix";
 import { Table } from "sc-game-base";
-import GameCron from "./crons/game-cron";
-import ProcessBetQueue from "./crons/process-bet-queue";
-import { InGameConsumer, PlaceBetConsumer, SettleGameRoundConsumer, UserDisconnectConsumer } from "./consumers";
+import { InGameConsumer, UserDisconnectConsumer } from "./consumers";
 import { betLogs, bets, rounds, tmpBets } from "./models";
-import Bot from "./crons/bot";
-import SocketRouter from "./router/socket-router";
-import { GameStatusPublisher, RoundResultPublisher } from "./publishers";
+import { Bot, GameCron, ProcessBetQueue } from "./crons";
 
 export default class ContainerRegistry extends Table.TableContainerRegistry {
     register(appConfigs: any, definition: any, gameData: any): AwilixContainer<any> {
@@ -42,24 +38,6 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
         this.container.register({
             userDisconnectConsumer: asClass(UserDisconnectConsumer).singleton(),
             inGameConsumer: asClass(InGameConsumer).singleton(),
-            placeBetConsumer: asClass(PlaceBetConsumer).singleton(),
-            settleGameRoundConsumer: asClass(SettleGameRoundConsumer).singleton().proxy(),
-        });
-    }
-
-    registerPublishers() {
-        super.registerPublishers();
-
-        this.container.register({
-            roundResultPublisher: asClass(RoundResultPublisher).singleton(),
-            gameStatusPublisher: asClass(GameStatusPublisher).singleton(),
-        });
-    }
-
-    registerRouters() {
-        super.registerRouters();
-        this.container.register({
-            socketRouter: asClass(SocketRouter).proxy(),
         });
     }
 }

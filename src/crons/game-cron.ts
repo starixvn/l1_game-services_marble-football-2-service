@@ -1,16 +1,39 @@
+import { halfConfigs, OddsType } from "./../match-configs";
 import { Table } from "sc-game-base";
-import GameData from "../game-data";
+import GameData, { MatchConfigType } from "../game-data";
+import Chance from "chance";
 
 export default class GameCron extends Table.Crons.TableGameCron {
     declare gameData: GameData;
+    chance = new Chance();
 
     override resetForNewRound() {
         super.resetForNewRound();
         this.gameData.playerBetCount = {};
     }
 
+    getMatchConfig(): MatchConfigType {
+        const firstHalf = this.chance.pickone(halfConfigs);
+        const secondHalf = this.chance.pickone(halfConfigs);
+
+        return {
+            firstHalf,
+            secondHalf,
+            ou: firstHalf.ou + secondHalf.ou,
+        };
+    }
+
+    calculateOdds() {
+        return {} as OddsType;
+    }
+
     async generateRoundData() {
+        this.gameData.matchConfig = this.getMatchConfig();
+
+        this.gameData.odds = this.calculateOdds();
+
         await this.roundResultConsumer.generateResult();
+
         this.gameData.settlementResultFromAdmin = {};
     }
 

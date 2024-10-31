@@ -8,6 +8,8 @@ export type ResultType = {
     secondHalfVideo: string;
     firstHalfTimeline: number[];
     secondHalfTimeline: number[];
+    overUnderValue: number;
+    firstHalfOverUnderValue: number;
 };
 
 const resultSchema = new mongoose.Schema<ResultType>(
@@ -18,6 +20,8 @@ const resultSchema = new mongoose.Schema<ResultType>(
         secondHalfVideo: { type: String },
         firstHalfTimeline: { type: [Number] },
         secondHalfTimeline: { type: [Number] },
+        overUnderValue: { type: Number },
+        firstHalfOverUnderValue: { type: Number },
     },
     { _id: false }
 );
@@ -33,6 +37,11 @@ const settlementResultSchema = new mongoose.Schema<SettlementResultType>(
         draw: { type: Boolean },
         over: { type: Boolean },
         under: { type: Boolean },
+        firstHalfHome: { type: Boolean },
+        firstHalfAway: { type: Boolean },
+        firstHalfDraw: { type: Boolean },
+        firstHalfOver: { type: Boolean },
+        firstHalfUnder: { type: Boolean },
     },
     { _id: false }
 );

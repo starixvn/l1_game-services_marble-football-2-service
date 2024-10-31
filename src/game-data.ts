@@ -1,3 +1,4 @@
+import { HalfConfigType, OddsType } from "./match-configs";
 import { TableGameData } from "sc-game-base/src/table";
 
 export default class GameData extends TableGameData {
@@ -8,7 +9,8 @@ export default class GameData extends TableGameData {
         this.playerBetCount = {};
     }
     playerBetCount: Record<string, string[]> = {};
-    match: Match = { home: "", away: "", startTime: "" };
+    matchConfig: MatchConfigType = {} as MatchConfigType;
+    odds: OddsType = {} as OddsType;
 }
 
 export type RealPlayer = {
@@ -18,8 +20,8 @@ export type RealPlayer = {
     socketClient: any;
 };
 
-export type Match = {
-    home: string;
-    away: string;
-    startTime: string;
+export type MatchConfigType = {
+    firstHalf: HalfConfigType;
+    secondHalf: HalfConfigType;
+    ou: number;
 };
