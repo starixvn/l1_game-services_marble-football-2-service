@@ -35,8 +35,6 @@ export default class GameCron extends Table.Crons.TableGameCron {
             this.appConfigs.enabledBoostedOdds && (await this.updatePromotionOddsAndNotify());
 
             await this.generateRoundData();
-
-            // TODO: Publish round data for play video
         }
 
         if (remainingTime === durations.placingBets + 1) {

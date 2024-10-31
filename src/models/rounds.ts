@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import { BET_CHOICES } from "../constants";
 
 export type ResultType = {
@@ -45,14 +45,14 @@ export interface IRound {
     exchangeRateId: number;
 }
 
-const Schema = new mongoose.Schema<IRound>({
+const RoundSchema = new mongoose.Schema<IRound>({
     id: { type: Number, required: true },
     result: resultSchema,
     settlementResult: settlementResultSchema,
-    time: { type: Date, default: new Date() },
+    time: { type: Schema.Types.Date, default: () => new Date() },
     exchangeRateId: { type: Number, required: true },
 });
 
-const Round = mongoose.model("marblefootball_rounds", Schema);
+const Round = mongoose.model("marblefootball_rounds", RoundSchema);
 
 export default Round;
