@@ -1,5 +1,3 @@
-// @ts-ignore
-import { stubMongoose, stub } from "jest-micro-auto-stub";
 import mongoose from "mongoose";
 import {
     BaseEventPublisher,
@@ -21,12 +19,33 @@ import {
 import { Core } from "sc-game-base";
 import BaseMetrics from "sc-game-base/src/core/base-metrics";
 import { logger } from "sc-common";
+import { IRound } from "../../src/models/rounds";
+import { stub } from "jest-auto-stub";
 jest.mock("sc-game-management-client");
 
-const roundsRepository: mongoose.Model<any> = stubMongoose(mongoose.Model);
-const betsRepository: mongoose.Model<any> = stubMongoose(mongoose.Model);
-const tempBetsRepository: mongoose.Model<any> = stubMongoose(mongoose.Model);
-const betLogsRepository: mongoose.Model<any> = stubMongoose(mongoose.Model);
+const roundsRepository = {
+    create: jest.fn(),
+    findOneAndUpdate: jest.fn().mockReturnThis(),
+    exec: jest.fn(),
+} as unknown as mongoose.Model<IRound>;
+
+const betsRepository = {
+    create: jest.fn(),
+    findOneAndUpdate: jest.fn().mockReturnThis(),
+    exec: jest.fn(),
+} as unknown as mongoose.Model<any>;
+
+const tempBetsRepository = {
+    create: jest.fn(),
+    findOneAndUpdate: jest.fn().mockReturnThis(),
+    exec: jest.fn(),
+} as unknown as mongoose.Model<any>;
+
+const betLogsRepository = {
+    create: jest.fn(),
+    findOneAndUpdate: jest.fn().mockReturnThis(),
+    exec: jest.fn(),
+} as unknown as mongoose.Model<any>;
 
 const endGame = jest.fn();
 const placeBet = jest.fn();
