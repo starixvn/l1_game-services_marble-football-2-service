@@ -47,6 +47,12 @@ const betLogsRepository = {
     exec: jest.fn(),
 } as unknown as mongoose.Model<any>;
 
+const resultsRepository = {
+    create: jest.fn(),
+    findOneAndUpdate: jest.fn().mockReturnThis(),
+    exec: jest.fn(),
+} as unknown as mongoose.Model<any>;
+
 const endGame = jest.fn();
 const placeBet = jest.fn();
 const gameManagementApiClientFactory = new GameManagementApiClientFactory({});
@@ -80,6 +86,7 @@ export {
     betLogsRepository,
     endGame,
     placeBet,
+    resultsRepository,
     roundResultPublisher,
     userBetResultPublisher,
     gameManagementApiClientFactory,

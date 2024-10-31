@@ -57,7 +57,7 @@ const generateResultForHalf = (halfConfig: HalfConfigType) => {
     return result.join("");
 };
 
-const getScoreFromRate = (scores: string[], rates: number[]) => {
+export const getScoreFromRate = (scores: string[], rates: number[]) => {
     const chance = new Chance();
     return chance.weighted(scores, rates);
 };
