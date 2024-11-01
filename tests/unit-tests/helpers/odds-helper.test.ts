@@ -1,6 +1,6 @@
 import { MatchConfigType } from "../../../src/game-data";
 import { HalfConfigType } from "../../../src/match-configs";
-import { oddsHelper } from "../../../src/helpers";
+import * as oddsHelper from "../../../src/helpers/odds-helper";
 
 describe("odds helper", () => {
     describe("oddsHelper.parseScore", () => {
@@ -75,19 +75,41 @@ describe("odds helper", () => {
         });
     });
 
-    describe("oddsHelper.calculateOddsFromProb", () => {
+    describe("oddsHelper.probabilityToBetOdds", () => {
         it("should calculate odds from a given probability with a margin", () => {
             // Arrange
             const probabilities = [0.5, 0.3];
             const margins = [0.05, 0.1];
 
             // Act & Assert
-            expect(oddsHelper.calculateOddsFromProb(probabilities[0], margins[0])).toBeCloseTo(1.9);
-            expect(oddsHelper.calculateOddsFromProb(probabilities[1], margins[1])).toBeCloseTo(3.0);
+            expect(oddsHelper.probabilityToBetOdds(probabilities[0], margins[0])).toBeCloseTo(1.9);
+            expect(oddsHelper.probabilityToBetOdds(probabilities[1], margins[1])).toBeCloseTo(3.0);
         });
     });
 
-    describe("oddsHelper.calculateOdds", () => {
+    describe("oddsHelper.calculateBetOdds", () => {
+        const margins = [
+            { max: 100, choice1: 0.2, choice2: 0.2 },
+            { max: 5, choice1: 0.02, choice2: 0.02 },
+            { max: 2, choice1: 0.01, choice2: 0.01 },
+        ];
+
+        const testCases = [
+            { prob: { choice1: 0.5, choice2: 0.5 }, margins, expected: { choice1: 1.98, choice2: 1.98 } },
+            { prob: { choice1: 0.25, choice2: 0.25 }, margins, expected: { choice1: 3.92, choice2: 3.92 } },
+            { prob: { choice1: 0.1, choice2: 0.1 }, margins, expected: { choice1: 8, choice2: 8 } },
+            { prob: { choice1: 0.1, choice2: 0.0124 }, margins, expected: { choice1: 8, choice2: 64 } },
+        ];
+        it.each(testCases)("should return expected", ({ prob, margins, expected }) => {
+            // act
+            const actual = oddsHelper.calculateBetOdds(prob, margins);
+
+            // assert
+            expect(actual).toEqual(expected);
+        });
+    });
+
+    describe("oddsHelper.calculateFulltimeOdds", () => {
         it("should calculate odds and over/under for a match", () => {
             // Arrange
             const matchConfig: MatchConfigType = {
@@ -103,10 +125,29 @@ describe("odds helper", () => {
                 },
                 ou: 2.5,
             };
-            const margin = 0.05;
 
             // Act
-            const result = oddsHelper.calculateOdds(matchConfig, margin);
+            const result = oddsHelper.calculateFulltimeOdds(matchConfig, []);
+
+            // Assert
+            expect(result.odds.home).toBeGreaterThan(0);
+            expect(result.odds.away).toBeGreaterThan(0);
+            expect(result.odds.draw).toBeGreaterThan(0);
+            expect(result.ou).toBeGreaterThan(0);
+        });
+    });
+
+    describe("oddsHelper.calculateHalfOdds", () => {
+        it("should calculate odds and over/under for a half", () => {
+            // Arrange
+            const halfConfig: HalfConfigType = {
+                scoreRate: { "1-0": 0.2, "0-1": 0.15, "2-0": 0.05 },
+                odds: { home: 1.95, draw: 3.4, away: 3.9, over: 2.05, under: 1.85 },
+                ou: 1.5,
+            };
+
+            // Act
+            const result = oddsHelper.calculateHalfOdds(halfConfig, []);
 
             // Assert
             expect(result.odds.home).toBeGreaterThan(0);

@@ -1,7 +1,8 @@
-import { halfConfigs, OddsType } from "./../match-configs";
+import { halfConfigs } from "./../match-configs";
 import { Table } from "sc-game-base";
 import GameData, { MatchConfigType } from "../game-data";
 import Chance from "chance";
+import { calculateFulltimeOdds, calculateHalfOdds } from "../helpers/odds-helper";
 
 export default class GameCron extends Table.Crons.TableGameCron {
     declare gameData: GameData;
@@ -24,13 +25,38 @@ export default class GameCron extends Table.Crons.TableGameCron {
     }
 
     calculateOdds() {
-        return {} as OddsType;
+        const matchConfig = this.gameData.matchConfig;
+        const firstHalfOdds = calculateHalfOdds(matchConfig.firstHalf, this.gameData.gameConfigs?.margin);
+        const fulltimeOdds = calculateFulltimeOdds(this.gameData.matchConfig, this.gameData.gameConfigs?.margin);
+
+        const odds = {
+            home: fulltimeOdds.odds.home,
+            draw: fulltimeOdds.odds.draw,
+            away: fulltimeOdds.odds.away,
+            over: fulltimeOdds.odds.over,
+            under: fulltimeOdds.odds.under,
+            firstHalfHome: firstHalfOdds.odds.home,
+            firstHalfDraw: firstHalfOdds.odds.draw,
+            firstHalfAway: firstHalfOdds.odds.away,
+            firstHalfOver: firstHalfOdds.odds.over,
+            firstHalfUnder: firstHalfOdds.odds.under,
+        };
+
+        return {
+            odds,
+            overUnderValue: fulltimeOdds.ou,
+            firstHalfOverUnderValue: firstHalfOdds.ou,
+        };
     }
 
     async generateRoundData() {
         this.gameData.matchConfig = this.getMatchConfig();
 
-        this.gameData.odds = this.calculateOdds();
+        const { odds, overUnderValue, firstHalfOverUnderValue } = this.calculateOdds();
+
+        this.gameData.matchConfig.firstHalf.ou = firstHalfOverUnderValue;
+        this.gameData.matchConfig.ou = overUnderValue;
+        this.gameData.odds = odds;
 
         await this.roundResultConsumer.generateResult();
 
