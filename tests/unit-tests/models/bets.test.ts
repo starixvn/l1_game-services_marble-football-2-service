@@ -5,7 +5,7 @@ describe("Bets", () => {
     describe("when create the new instance of Bet", () => {
         it("should create a bet with default properties", () => {
             // Arrange
-            const mockId = new mongoose.Types.ObjectId();
+            const mockId = new mongoose.Types.ObjectId("672452f978c8cd0e08122643");
 
             const expected = {
                 _id: mockId,
@@ -16,7 +16,7 @@ describe("Bets", () => {
             };
 
             // Act
-            const actual = new bets({ _id: mockId.toHexString() });
+            const actual = new bets({ _id: "672452f978c8cd0e08122643" });
 
             // Assert
             expect(actual.toObject()).toStrictEqual(expected);
