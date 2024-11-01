@@ -58,7 +58,10 @@ export const calculateProbabilitiesForBetChoices = (scoreRates: Record<string, n
     awayScore /= totalRates;
 
     let ou = Math.floor((homeScore + awayScore) / 0.5) * 0.5;
-    if (Math.round(ou * 2) % 2 === 0) ou += 0.5;
+
+    if (Math.round(ou * 2) % 2 === 0) {
+        ou += 0.5;
+    }
 
     for (const [score, rate] of Object.entries(scoreRates)) {
         const [homeGoals, awayGoals] = parseScore(score);
