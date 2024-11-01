@@ -18,7 +18,7 @@ const Schema = new mongoose.Schema<ITournaments>({
     matches: { type: [Object], required: true },
     currentMatch: { type: Number, default: 0 },
     ended: { type: Boolean, default: false },
-    time: { type: Date, default: new Date() },
+    time: { type: Date, default: () => new Date() },
 });
 
 const Tournament = mongoose.model("marblefootball_tournaments", Schema);

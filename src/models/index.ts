@@ -1,5 +1,6 @@
+import betLogs from "./bet-logs";
 import { bets, tmpBets } from "./bets";
 import rounds from "./rounds";
-import betLogs from "./bet-logs";
+import tournament from "./tournaments";
 
-export { rounds, bets, betLogs, tmpBets };
+export { betLogs, bets, rounds, tmpBets, tournament };
