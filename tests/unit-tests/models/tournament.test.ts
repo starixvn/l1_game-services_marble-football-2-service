@@ -1,11 +1,11 @@
 import { tournament } from "../../../src/models";
-import mongoose from "mongoose";
+import { mongo } from "mongoose";
 
 describe("Tournament", () => {
     describe("when create the new instance of Tournament", () => {
         it("should create a tournament with default properties", () => {
             // Arrange
-            const mockId = new mongoose.Types.ObjectId("672452f978c8cd0e08122643");
+            const mockId = new mongo.ObjectId("672452f978c8cd0e08122643");
             const today = new Date("2024-01-01");
 
             jest.useFakeTimers().setSystemTime(today);

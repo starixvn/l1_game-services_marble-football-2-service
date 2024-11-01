@@ -1,11 +1,11 @@
 import { betLogs } from "../../../src/models";
-import mongoose from "mongoose";
+import { mongo } from "mongoose";
 
 describe("Bet Logs", () => {
     describe("when create the new instance of BetLogs", () => {
         it("should create a bet log with default properties", () => {
             // Arrange
-            const mockId = new mongoose.Types.ObjectId("672452f978c8cd0e08122643");
+            const mockId = new mongo.ObjectId("672452f978c8cd0e08122643");
 
             const expected = {
                 _id: mockId,
