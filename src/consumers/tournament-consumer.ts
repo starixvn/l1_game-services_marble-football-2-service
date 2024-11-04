@@ -18,7 +18,7 @@ export default class TournamentConsumer {
 
         if (runningTournament) {
             await this.tournamentRepository.updateOne(
-                { id: runningTournament._id },
+                { _id: runningTournament._id },
                 {
                     ended: runningTournament.currentMatch + 1 >= runningTournament.matches.length,
                     currentMatch: runningTournament.currentMatch + 1,
