@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose from "mongoose";
 import { BET_CHOICES } from "../constants";
 
 export type ResultType = {
@@ -58,7 +58,7 @@ const RoundSchema = new mongoose.Schema<IRound>({
     id: { type: Number, required: true },
     result: resultSchema,
     settlementResult: settlementResultSchema,
-    time: { type: Schema.Types.Date, default: () => new Date() },
+    time: { type: Date, default: () => new Date() },
     exchangeRateId: { type: Number, required: true },
 });
 
