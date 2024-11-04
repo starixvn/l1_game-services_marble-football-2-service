@@ -1,11 +1,12 @@
-import mongoose from "mongoose";
+import mongoose, { ObjectId } from "mongoose";
 
 export type MatchType = {
     home: string;
     away: string;
 };
 
-export interface ITournaments {
+export interface ITournament {
+    _id: ObjectId;
     code: string;
     matches: MatchType[];
     currentMatch: number;
@@ -13,7 +14,7 @@ export interface ITournaments {
     time: Date;
 }
 
-const Schema = new mongoose.Schema<ITournaments>({
+const Schema = new mongoose.Schema<ITournament>({
     code: { type: String, required: true },
     matches: { type: [Object], required: true },
     currentMatch: { type: Number, default: 0 },

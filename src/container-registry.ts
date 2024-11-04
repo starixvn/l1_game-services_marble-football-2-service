@@ -1,8 +1,8 @@
 import { asClass, asValue, AwilixContainer } from "awilix";
 import { Table } from "sc-game-base";
-import { InGameConsumer, RoundResultConsumer, UserDisconnectConsumer } from "./consumers";
-import { betLogs, bets, rounds, tmpBets } from "./models";
+import { InGameConsumer, TournamentConsumer, UserDisconnectConsumer, RoundResultConsumer } from "./consumers";
 import { Bot, GameCron, ProcessBetQueue } from "./crons";
+import { betLogs, bets, rounds, tmpBets, tournament } from "./models";
 
 export default class ContainerRegistry extends Table.TableContainerRegistry {
     register(appConfigs: any, definition: any, gameData: any): AwilixContainer<any> {
@@ -19,6 +19,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
             betsRepository: asValue(bets),
             tempBetsRepository: asValue(tmpBets),
             betLogsRepository: asValue(betLogs),
+            tournamentRepository: asValue(tournament),
         });
     }
 
@@ -38,7 +39,8 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
         this.container.register({
             userDisconnectConsumer: asClass(UserDisconnectConsumer).singleton(),
             inGameConsumer: asClass(InGameConsumer).singleton(),
-            roundResultConsumer: asClass(RoundResultConsumer).singleton(),
+            tournamentConsumer: asClass(TournamentConsumer).singleton().proxy(),
+            roundResultConsumer: asClass(RoundResultConsumer).singleton().proxy(),
         });
     }
 }
