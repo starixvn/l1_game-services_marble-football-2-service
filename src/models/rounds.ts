@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { BET_CHOICES } from "../constants";
 
 export type ResultType = {
+    tournamentId?: string;
     firstHalf: string;
     secondHalf: string;
     firstHalfVideo: string;
@@ -14,6 +15,7 @@ export type ResultType = {
 
 const resultSchema = new mongoose.Schema<ResultType>(
     {
+        tournamentId: { type: String },
         firstHalf: { type: String },
         secondHalf: { type: String },
         firstHalfVideo: { type: String },
