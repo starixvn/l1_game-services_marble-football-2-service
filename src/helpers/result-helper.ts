@@ -5,11 +5,21 @@ import Chance from "chance";
 import { shuffle } from "./shuffle";
 
 export const generateResult = (matchConfig: MatchConfigType): ResultType => {
+    const chance = new Chance();
+
     const firstHalf = generateResultForHalf(matchConfig.firstHalf);
     const secondHalf = generateResultForHalf(matchConfig.secondHalf);
     const videoInfo = getVideoInfoFromResult(firstHalf, secondHalf);
+    const homeWinsOnDraw = chance.bool();
 
-    return { firstHalf, secondHalf, ...videoInfo, overUnderValue: matchConfig.ou, firstHalfOverUnderValue: matchConfig.firstHalf.ou };
+    return {
+        firstHalf,
+        secondHalf,
+        ...videoInfo,
+        overUnderValue: matchConfig.ou,
+        firstHalfOverUnderValue: matchConfig.firstHalf.ou,
+        homeWinsOnDraw,
+    };
 };
 
 export const getSettlementResult = (roundResult: ResultType): SettlementResultType => {

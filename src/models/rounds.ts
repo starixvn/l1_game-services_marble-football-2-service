@@ -11,6 +11,7 @@ export type ResultType = {
     secondHalfTimeline: number[];
     overUnderValue: number;
     firstHalfOverUnderValue: number;
+    homeWinsOnDraw: boolean;
 };
 
 const resultSchema = new mongoose.Schema<ResultType>(
@@ -24,6 +25,7 @@ const resultSchema = new mongoose.Schema<ResultType>(
         secondHalfTimeline: { type: [Number] },
         overUnderValue: { type: Number },
         firstHalfOverUnderValue: { type: Number },
+        homeWinsOnDraw: { type: Boolean },
     },
     { _id: false }
 );
