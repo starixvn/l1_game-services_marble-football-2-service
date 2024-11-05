@@ -14,12 +14,14 @@ import {
 } from "../global-stubs";
 import GameData from "../../../src/game-data";
 import GameDefinition from "../../../src/game-definition";
+import { TournamentConsumer } from "../../../src/consumers";
 
 describe("GameCron", () => {
     let gameCron: GameCron;
 
     const gameData = stub<GameData>();
     const definition = stub<GameDefinition>();
+    const tournament = stub<TournamentConsumer>();
 
     definition.durations = {
         wholeRound: 10,
@@ -45,6 +47,7 @@ describe("GameCron", () => {
             roundIdConsumer,
             provablyFairConsumer,
             unsettledRoundConsumer,
+            tournamentConsumer: tournament,
         });
 
         gameCron.gameManagementApiClient = {
@@ -127,6 +130,7 @@ describe("GameCron", () => {
         it("should reset remaining time and settle round if remaining time is less than 0", async () => {
             // arrange
             gameData.remainingTime = -1;
+            (definition.settle as jest.Mock).mockReturnValue({ draw: false });
 
             // act
             await gameCron.proceed();
@@ -134,6 +138,18 @@ describe("GameCron", () => {
             // assert
             expect(gameData.remainingTime).toBe(definition.durations.wholeRound);
             expect(settleGameConsumer.settleRound).toHaveBeenCalled();
+        });
+
+        it("should update tournament if remaining time is less than 0", async () => {
+            // arrange
+            gameData.remainingTime = -1;
+            (definition.settle as jest.Mock).mockReturnValue({ draw: false });
+
+            // act
+            await gameCron.proceed();
+
+            // assert
+            expect(tournament.updateMatchResult).toHaveBeenCalled();
         });
 
         it("should run bot and publish running round info during bet time", async () => {

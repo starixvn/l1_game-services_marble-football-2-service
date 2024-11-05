@@ -1,6 +1,8 @@
+import mongoose from "mongoose";
 import type appConfigs from "../app-configs";
 import { shuffle } from "../helpers";
 import generate from "../helpers/tournament/generate";
+import updateNext from "../helpers/tournament/update-next";
 import type { tournament } from "../models";
 import type { ITournament } from "../models/tournaments";
 
@@ -13,18 +15,30 @@ export default class TournamentConsumer {
         this.appConfigs = container.appConfigs;
     }
 
-    async getTournamentIdForNextRound(): Promise<string> {
+    async updateMatchResult(tournamentId: string, homeWin: boolean) {
+        const tournament: ITournament = await this.tournamentRepository.findById(tournamentId).lean().exec();
+
+        if (tournament) {
+            const match = tournament.matches[tournament.currentMatch];
+            const team = homeWin ? match.home : match.away;
+
+            updateNext(tournament.matches, tournament.currentMatch, team);
+
+            await this.tournamentRepository.updateOne(
+                { _id: tournament._id },
+                {
+                    matches: tournament.matches,
+                    ended: tournament.currentMatch + 1 >= tournament.matches.length,
+                    currentMatch: tournament.currentMatch + 1,
+                }
+            );
+        }
+    }
+
+    async getCurrentTournamentId(): Promise<string> {
         const runningTournament: ITournament = await this.tournamentRepository.findOne({ ended: false }).lean().exec();
 
         if (runningTournament) {
-            await this.tournamentRepository.updateOne(
-                { _id: runningTournament._id },
-                {
-                    ended: runningTournament.currentMatch + 1 >= runningTournament.matches.length,
-                    currentMatch: runningTournament.currentMatch + 1,
-                }
-            );
-
             return runningTournament._id.toString();
         }
 

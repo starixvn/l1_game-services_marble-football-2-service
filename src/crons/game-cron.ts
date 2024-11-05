@@ -1,12 +1,20 @@
-import { halfConfigs } from "./../match-configs";
-import { Table } from "sc-game-base";
-import GameData, { MatchConfigType } from "../game-data";
 import Chance from "chance";
+import { Table } from "sc-game-base";
+import type { TournamentConsumer } from "../consumers";
+import GameData, { MatchConfigType } from "../game-data";
 import { calculateFulltimeOdds, calculateHalfOdds } from "../helpers/odds-helper";
+import { halfConfigs } from "./../match-configs";
 
 export default class GameCron extends Table.Crons.TableGameCron {
     declare gameData: GameData;
+    tournamentConsumer: TournamentConsumer;
     chance = new Chance();
+
+    constructor(container: any) {
+        super(container);
+
+        this.tournamentConsumer = container.tournamentConsumer;
+    }
 
     override resetForNewRound() {
         super.resetForNewRound();
@@ -99,12 +107,20 @@ export default class GameCron extends Table.Crons.TableGameCron {
             this.gameData.remainingTime = durations.wholeRound;
 
             await this.settleGameRoundConsumer.settleRound();
+            await this.updateTournament();
         }
 
         if (this.isDuringBetTime(remainingTime)) {
             this.bot && (await this.bot.run());
             this.runningRoundInfoPublisher.publish();
         }
+    }
+
+    async updateTournament() {
+        const settlementResult = this.definition.settle(this.gameData.result);
+        const homeWins = settlementResult.draw ? this.gameData.result.homeWinsOnDraw : settlementResult.home;
+
+        await this.tournamentConsumer.updateMatchResult(this.gameData.result.tournamentId, homeWins);
     }
 
     isDuringBetTime(remainingTime: number) {

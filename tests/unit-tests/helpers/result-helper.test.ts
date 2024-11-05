@@ -55,6 +55,7 @@ describe("Result Helper", () => {
                 secondHalfVideo: "http://marble-football/watch?v=AA",
                 firstHalfTimeline: [],
                 secondHalfTimeline: [],
+                homeWinsOnDraw: false,
             };
 
             const settlementResult = getSettlementResult(roundResult);

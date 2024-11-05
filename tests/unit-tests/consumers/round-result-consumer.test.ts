@@ -48,7 +48,7 @@ describe("RoundResultConsumer", () => {
             roundResultPublisher,
             resultsRepository,
             provablyFairConsumer,
-            tournamentConsumer: { getTournamentIdForNextRound: async () => "fake_id" },
+            tournamentConsumer: { getCurrentTournamentId: async () => "fake_id" },
         });
     });
 

@@ -25,6 +25,6 @@ export default class RoundResultConsumer extends RoundResultConsumerBase {
     async generateResult() {
         await super.generateResult();
 
-        this.gameData.result.tournamentId = await this.tournamentConsumer.getTournamentIdForNextRound();
+        this.gameData.result.tournamentId = await this.tournamentConsumer.getCurrentTournamentId();
     }
 }
