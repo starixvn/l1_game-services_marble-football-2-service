@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import type appConfigs from "../app-configs";
 import { shuffle } from "../helpers";
 import generate from "../helpers/tournament/generate";
@@ -47,7 +46,7 @@ export default class TournamentConsumer {
         return tournament._id.toString();
     }
 
-    async createNewTournament() {
+    private async createNewTournament() {
         const configs = await this.getTournamentConfigs();
         const teams = shuffle(configs.teams);
 
@@ -59,7 +58,7 @@ export default class TournamentConsumer {
         });
     }
 
-    async getTournamentConfigs() {
+    private async getTournamentConfigs() {
         return this.appConfigs.tournament;
     }
 }

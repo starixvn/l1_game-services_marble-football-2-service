@@ -127,29 +127,42 @@ describe("GameCron", () => {
             expect(gameCron.publishRoundData).toHaveBeenCalled();
         });
 
-        it("should reset remaining time and settle round if remaining time is less than 0", async () => {
-            // arrange
-            gameData.remainingTime = -1;
-            (definition.settle as jest.Mock).mockReturnValue({ draw: false });
+        describe("when the remaining time is less than 0", () => {
+            it("should reset remaining time", async () => {
+                // arrange
+                gameData.remainingTime = -1;
+                (definition.settle as jest.Mock).mockReturnValue({ draw: false });
 
-            // act
-            await gameCron.proceed();
+                // act
+                await gameCron.proceed();
 
-            // assert
-            expect(gameData.remainingTime).toBe(definition.durations.wholeRound);
-            expect(settleGameConsumer.settleRound).toHaveBeenCalled();
-        });
+                // assert
+                expect(gameData.remainingTime).toBe(definition.durations.wholeRound);
+            });
 
-        it("should update tournament if remaining time is less than 0", async () => {
-            // arrange
-            gameData.remainingTime = -1;
-            (definition.settle as jest.Mock).mockReturnValue({ draw: false });
+            it("should settle round", async () => {
+                // arrange
+                gameData.remainingTime = -1;
+                (definition.settle as jest.Mock).mockReturnValue({ draw: false });
 
-            // act
-            await gameCron.proceed();
+                // act
+                await gameCron.proceed();
 
-            // assert
-            expect(tournament.updateMatchResult).toHaveBeenCalled();
+                // assert
+                expect(settleGameConsumer.settleRound).toHaveBeenCalled();
+            });
+
+            it("should update tournament", async () => {
+                // arrange
+                gameData.remainingTime = -1;
+                (definition.settle as jest.Mock).mockReturnValue({ draw: false });
+
+                // act
+                await gameCron.proceed();
+
+                // assert
+                expect(tournament.updateMatchResult).toHaveBeenCalled();
+            });
         });
 
         it("should run bot and publish running round info during bet time", async () => {

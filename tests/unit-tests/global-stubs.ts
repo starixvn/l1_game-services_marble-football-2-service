@@ -1,4 +1,15 @@
+import { stub } from "jest-auto-stub";
 import mongoose from "mongoose";
+import { logger } from "sc-common";
+import { Core } from "sc-game-base";
+import BaseMetrics from "sc-game-base/src/core/base-metrics";
+import {
+    ProvablyFairConsumer,
+    RoundIdConsumer,
+    RoundResultConsumer,
+    SettleGameRoundConsumer,
+    UnsettledRoundConsumer,
+} from "sc-game-base/src/core/event-consumers";
 import {
     BaseEventPublisher,
     GameStatusPublisher,
@@ -9,18 +20,7 @@ import {
 } from "sc-game-base/src/core/event-publishers";
 import GameManagementApiClientFactory from "sc-game-base/src/core/game-management-api";
 import Bot from "../../src/crons/bot";
-import {
-    ProvablyFairConsumer,
-    RoundIdConsumer,
-    UnsettledRoundConsumer,
-    RoundResultConsumer,
-    SettleGameRoundConsumer,
-} from "sc-game-base/src/core/event-consumers";
-import { Core } from "sc-game-base";
-import BaseMetrics from "sc-game-base/src/core/base-metrics";
-import { logger } from "sc-common";
 import { IRound } from "../../src/models/rounds";
-import { stub } from "jest-auto-stub";
 jest.mock("sc-game-management-client");
 
 const roundsRepository = {
@@ -53,6 +53,15 @@ const resultsRepository = {
     exec: jest.fn(),
 } as unknown as mongoose.Model<any>;
 
+const tournamentRepository = {
+    findById: jest.fn().mockReturnThis(),
+    findOne: jest.fn().mockReturnThis(),
+    updateOne: jest.fn(),
+    create: jest.fn(),
+    exec: jest.fn(),
+    lean: jest.fn().mockReturnThis(),
+} as unknown as mongoose.Model<any>;
+
 const endGame = jest.fn();
 const placeBet = jest.fn();
 const gameManagementApiClientFactory = new GameManagementApiClientFactory({});
@@ -80,27 +89,28 @@ const logService: typeof logger = {
 } as unknown as typeof logger;
 
 export {
-    roundsRepository,
-    betsRepository,
-    tempBetsRepository,
-    betLogsRepository,
-    endGame,
-    placeBet,
-    resultsRepository,
-    roundResultPublisher,
-    userBetResultPublisher,
-    gameManagementApiClientFactory,
-    bot,
-    settleGameConsumer,
-    gameStatusPublisher,
-    runningRoundPublisher,
-    roundResultConsumer,
-    roundIdConsumer,
-    provablyFairConsumer,
-    unsettledRoundConsumer,
-    roundQuery,
-    publisher,
-    placeBetPublisher,
     baseMetrics,
+    betLogsRepository,
+    betsRepository,
+    bot,
+    endGame,
+    gameManagementApiClientFactory,
+    gameStatusPublisher,
     logService,
+    placeBet,
+    placeBetPublisher,
+    provablyFairConsumer,
+    publisher,
+    resultsRepository,
+    roundIdConsumer,
+    roundQuery,
+    roundResultConsumer,
+    roundResultPublisher,
+    roundsRepository,
+    runningRoundPublisher,
+    settleGameConsumer,
+    tempBetsRepository,
+    tournamentRepository,
+    unsettledRoundConsumer,
+    userBetResultPublisher,
 };
