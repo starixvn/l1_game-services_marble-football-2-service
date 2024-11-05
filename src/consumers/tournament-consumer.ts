@@ -20,14 +20,17 @@ export default class TournamentConsumer {
         if (tournament) {
             const match = tournament.matches[tournament.currentMatch];
             const team = homeWin ? match.home : match.away;
+            const ended = tournament.currentMatch + 1 >= tournament.matches.length;
 
-            updateNext(tournament.matches, tournament.currentMatch, team);
+            if (!ended) {
+                updateNext(tournament.matches, tournament.currentMatch, team);
+            }
 
             await this.tournamentRepository.updateOne(
                 { _id: tournament._id },
                 {
                     matches: tournament.matches,
-                    ended: tournament.currentMatch + 1 >= tournament.matches.length,
+                    ended: ended,
                     currentMatch: tournament.currentMatch + 1,
                 }
             );
