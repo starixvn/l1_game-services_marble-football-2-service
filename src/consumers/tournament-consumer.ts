@@ -14,7 +14,7 @@ export default class TournamentConsumer {
         this.appConfigs = container.appConfigs;
     }
 
-    async updateMatchResult(tournamentId: string, homeWin: boolean) {
+    async updateMatchResult(roundId: number, tournamentId: string, homeWin: boolean) {
         const tournament: ITournament = await this.tournamentRepository.findById(tournamentId).lean().exec();
 
         if (tournament) {
@@ -24,6 +24,8 @@ export default class TournamentConsumer {
 
             if (!ended) {
                 updateNext(tournament.matches, tournament.currentMatch, team);
+
+                tournament.matches[tournament.currentMatch].id = roundId;
             }
 
             await this.tournamentRepository.updateOne(

@@ -120,7 +120,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
         const settlementResult = this.definition.settle(this.gameData.result);
         const homeWins = settlementResult.draw ? this.gameData.result.homeWinsOnDraw : settlementResult.home;
 
-        await this.tournamentConsumer.updateMatchResult(this.gameData.result.tournamentId, homeWins);
+        await this.tournamentConsumer.updateMatchResult(this.gameData.roundId - 1, this.gameData.result.tournamentId, homeWins);
     }
 
     isDuringBetTime(remainingTime: number) {

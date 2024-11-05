@@ -1,6 +1,7 @@
 import mongoose, { ObjectId } from "mongoose";
 
 export type MatchType = {
+    id?: number;
     home: string;
     away: string;
 };

@@ -75,7 +75,7 @@ describe(TournamentConsumer.name, () => {
             (tournamentRepository as any).exec.mockReturnValue(null);
 
             // Act
-            await consumer.updateMatchResult("tournament_id", false);
+            await consumer.updateMatchResult(0, "tournament_id", false);
 
             // Assert
             expect(tournamentRepository.findById).toHaveBeenCalledWith("tournament_id");
@@ -160,6 +160,7 @@ describe(TournamentConsumer.name, () => {
                     {
                         home: "VNM",
                         away: "SGP",
+                        id: 0,
                     },
                     {
                         home: "PHL",
@@ -220,7 +221,7 @@ describe(TournamentConsumer.name, () => {
                 ];
 
                 // Act
-                await consumer.updateMatchResult("tournament_id", false);
+                await consumer.updateMatchResult(0, "tournament_id", false);
 
                 // Assert
                 expect(tournamentRepository.updateOne).toHaveBeenCalledWith(
