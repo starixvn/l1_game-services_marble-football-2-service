@@ -1,7 +1,7 @@
 import { RoundResultConsumer as RoundResultConsumerBase } from "sc-game-base/src/core/event-consumers";
 import GameData from "../game-data";
 import type TournamentConsumer from "./tournament-consumer";
-
+import { resultHelper } from "../helpers";
 export default class RoundResultConsumer extends RoundResultConsumerBase {
     declare gameData: GameData;
     tournamentConsumer: TournamentConsumer;
@@ -22,9 +22,20 @@ export default class RoundResultConsumer extends RoundResultConsumerBase {
         return this.gameData.matchConfig;
     }
 
-    async generateResult() {
+    override async generateResult() {
         await super.generateResult();
 
         this.gameData.result.tournamentId = await this.tournamentConsumer.getCurrentTournamentId();
+    }
+
+    override generateResultFromAdmin() {
+        const { roundId, settlementResultFromAdmin: resultFromAdmin } = this.gameData;
+
+        if (roundId === resultFromAdmin.roundId) {
+            this.gameData.result = resultHelper.generateResultFromAdminRawResult(this.gameData.matchConfig, resultFromAdmin.result);
+            return true;
+        }
+
+        return false;
     }
 }

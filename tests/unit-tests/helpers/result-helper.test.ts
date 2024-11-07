@@ -1,4 +1,9 @@
-import { generateResult, getSettlementResult } from "../../../src/helpers/result-helper";
+import {
+    generateResult,
+    generateResultFromAdminRawResult,
+    getSettlementResult,
+    getScoreFromRate,
+} from "../../../src/helpers/result-helper";
 import { MatchConfigType } from "../../../src/game-data";
 import { ResultType } from "../../../src/models/rounds";
 
@@ -70,6 +75,49 @@ describe("Result Helper", () => {
             expect(settlementResult.firstHalfDraw).toBe(false);
             expect(settlementResult.firstHalfOver).toBe(true);
             expect(settlementResult.firstHalfUnder).toBe(false);
+        });
+    });
+
+    describe("generateResultFromAdminRawResult", () => {
+        it("should generate a result from admin raw result", () => {
+            const matchConfig: MatchConfigType = {
+                firstHalf: {
+                    scoreRate: { "1-0": 1, "0-1": 1 },
+                    ou: 1.5,
+                } as any,
+
+                secondHalf: {
+                    scoreRate: { "1-0": 1, "0-1": 1 },
+                } as any,
+
+                ou: 2.5,
+            };
+
+            const roundResult = {
+                firstHalf: "HAAA",
+                secondHalf: "AHHH",
+                homeWinsOnDraw: false,
+            } as ResultType;
+
+            const result = generateResultFromAdminRawResult(matchConfig, roundResult);
+
+            expect(result.firstHalf).toBe("HAAA");
+            expect(result.secondHalf).toBe("AHHH");
+            expect(result.overUnderValue).toBe(2.5);
+            expect(result.firstHalfOverUnderValue).toBe(1.5);
+            expect(result.firstHalfVideo).toBe("http://marble-football/watch?v=HAAA");
+            expect(result.secondHalfVideo).toBe("http://marble-football/watch?v=AHHH");
+        });
+    });
+
+    describe("getScoreFromRate", () => {
+        it("should return a score based on rate", () => {
+            const scores = ["1-0", "0-1", "2-0"];
+            const rates = [0, 0, 1];
+
+            const score = getScoreFromRate(scores, rates);
+
+            expect(score).toBe("2-0");
         });
     });
 });

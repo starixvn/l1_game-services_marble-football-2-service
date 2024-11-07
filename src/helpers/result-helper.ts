@@ -22,6 +22,18 @@ export const generateResult = (matchConfig: MatchConfigType): ResultType => {
     };
 };
 
+export const generateResultFromAdminRawResult = (matchConfig: MatchConfigType, roundResult: ResultType): ResultType => {
+    const { firstHalf, secondHalf } = roundResult;
+    const videoInfo = getVideoInfoFromResult(firstHalf, secondHalf);
+
+    return {
+        ...roundResult,
+        ...videoInfo,
+        overUnderValue: matchConfig.ou,
+        firstHalfOverUnderValue: matchConfig.firstHalf.ou,
+    };
+};
+
 export const getSettlementResult = (roundResult: ResultType): SettlementResultType => {
     const { firstHalf, secondHalf } = roundResult;
 

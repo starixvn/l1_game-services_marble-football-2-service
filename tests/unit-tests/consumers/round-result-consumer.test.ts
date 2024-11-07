@@ -9,6 +9,7 @@ import { stub } from "jest-auto-stub";
 import RoundResultConsumer from "../../../src/consumers/round-result-consumer";
 import GameData from "../../../src/game-data";
 import GameDefinition from "../../../src/game-definition";
+import * as ResultHelper from "../../../src/helpers/result-helper";
 
 jest.mock("sc-game-base/src/core/event-consumers", () => {
     class RoundResultConsumer {
@@ -27,6 +28,10 @@ jest.mock("sc-game-base/src/core/event-consumers", () => {
 
     return { RoundResultConsumer };
 });
+
+jest.mock("../../../src/helpers/result-helper", () => ({
+    generateResultFromAdminRawResult: jest.fn(),
+}));
 
 describe("RoundResultConsumer", () => {
     let roundResultConsumer: RoundResultConsumer;
@@ -50,6 +55,10 @@ describe("RoundResultConsumer", () => {
             provablyFairConsumer,
             tournamentConsumer: { getCurrentTournamentId: async () => "fake_id" },
         });
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
     });
 
     describe("getDataForGenerateResult", () => {
@@ -78,6 +87,71 @@ describe("RoundResultConsumer", () => {
             // Assert
             expect(gameData.result).toStrictEqual({
                 tournamentId: "fake_id",
+            });
+        });
+    });
+
+    describe("generateResultFromAdmin", () => {
+        describe("when roundId is the same", () => {
+            beforeEach(() => {
+                // Arrange
+                gameData.matchConfig = {
+                    matchConfig: "match config data",
+                } as any;
+                gameData.roundId = 1;
+                gameData.settlementResultFromAdmin = {
+                    roundId: 1,
+                    result: {
+                        firstHalf: "H",
+                        secondHalf: "A",
+                        homeWinsOnDraw: false,
+                    },
+                };
+            });
+            it("should generate result from admin", () => {
+                // Act
+                const result = roundResultConsumer.generateResultFromAdmin();
+
+                // Assert
+                expect(result).toBe(true);
+            });
+
+            it("should call generateResultFromAdminRawResult", () => {
+                // Act
+                roundResultConsumer.generateResultFromAdmin();
+
+                // Assert
+                expect(ResultHelper.generateResultFromAdminRawResult).toHaveBeenCalledWith(
+                    gameData.matchConfig,
+                    gameData.settlementResultFromAdmin.result
+                );
+            });
+        });
+
+        describe("when roundId is different", () => {
+            it("should not generate result from admin", () => {
+                // Arrange
+                gameData.roundId = 1;
+                gameData.settlementResultFromAdmin = {
+                    roundId: 2,
+                    result: {
+                        firstHalf: "H",
+                        secondHalf: "A",
+                        overUnderValue: 2.5,
+                        firstHalfOverUnderValue: 1.5,
+                        firstHalfVideo: "http://marble-football/watch?v=H",
+                        secondHalfVideo: "http://marble-football/watch?v=A",
+                        firstHalfTimeline: [],
+                        secondHalfTimeline: [],
+                        homeWinsOnDraw: false,
+                    },
+                };
+
+                // Act
+                const result = roundResultConsumer.generateResultFromAdmin();
+
+                // Assert
+                expect(result).toBe(false);
             });
         });
     });
