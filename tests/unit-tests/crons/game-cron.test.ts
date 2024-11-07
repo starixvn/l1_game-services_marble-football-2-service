@@ -27,8 +27,6 @@ describe("GameCron", () => {
         wholeRound: 10,
         placingBets: 5,
         lockingBet: 2,
-        showingResult: 1,
-        startingRound: 1,
     } as any;
 
     beforeEach(() => {
@@ -114,17 +112,15 @@ describe("GameCron", () => {
             expect(gameStatusPublisher.publishStartPlacingBetStatus).toHaveBeenCalled();
         });
 
-        it("should publish end placing bet status and round data at locking bet time", async () => {
+        it("should publish end placing bet status locking bet time", async () => {
             // arrange
             gameData.remainingTime = definition.durations.lockingBet;
-            jest.spyOn(gameCron, "publishRoundData").mockImplementation(() => {});
 
             // act
             await gameCron.proceed();
 
             // assert
             expect(gameStatusPublisher.publishEndPlacingBetStatus).toHaveBeenCalled();
-            expect(gameCron.publishRoundData).toHaveBeenCalled();
         });
 
         describe("when the remaining time is less than 0", () => {

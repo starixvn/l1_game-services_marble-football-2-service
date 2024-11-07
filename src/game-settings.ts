@@ -6,10 +6,8 @@ export default {
     configName: "marblefootball",
     durations: {
         wholeRound: 126,
-        placingBets: 120,
-        lockingBet: 90,
-        showingResult: 3,
-        startingRound: 3,
+        placingBets: 30,
+        lockingBet: 3,
     },
     choices: Object.values(BET_CHOICES),
     choicesMapper: { home: 1, away: 2, draw: 3, over: 4, under: 5 },

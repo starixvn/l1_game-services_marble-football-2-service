@@ -71,8 +71,6 @@ export default class GameCron extends Table.Crons.TableGameCron {
         this.gameData.settlementResultFromAdmin = {};
     }
 
-    publishRoundData() {}
-
     override async proceed() {
         const { durations } = this.definition;
 
@@ -100,7 +98,6 @@ export default class GameCron extends Table.Crons.TableGameCron {
 
         if (remainingTime === durations.lockingBet) {
             this.gameStatusPublisher.publishEndPlacingBetStatus();
-            this.publishRoundData();
         }
 
         if (remainingTime < 0) {
