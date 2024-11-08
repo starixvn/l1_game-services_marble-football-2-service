@@ -2,6 +2,7 @@ import { RoundResultConsumer as RoundResultConsumerBase } from "sc-game-base/src
 import GameData from "../game-data";
 import type TournamentConsumer from "./tournament-consumer";
 import { resultHelper } from "../helpers";
+import { encrypt } from "sc-game-base/src/core/helpers/crypto-helper";
 export default class RoundResultConsumer extends RoundResultConsumerBase {
     declare gameData: GameData;
     tournamentConsumer: TournamentConsumer;
@@ -26,6 +27,7 @@ export default class RoundResultConsumer extends RoundResultConsumerBase {
         await super.generateResult();
 
         this.gameData.result.tournamentId = await this.tournamentConsumer.getCurrentTournamentId();
+        await this.createResultRecord();
     }
 
     override generateResultFromAdmin() {
@@ -37,5 +39,13 @@ export default class RoundResultConsumer extends RoundResultConsumerBase {
         }
 
         return false;
+    }
+
+    async createResultRecord() {
+        await this.resultsRepository.create({
+            roundId: this.gameData.roundId,
+            encryptedResultHash: encrypt(JSON.stringify(this.gameData.resultHash)),
+            encryptedResult: encrypt(JSON.stringify(this.gameData.result)),
+        });
     }
 }

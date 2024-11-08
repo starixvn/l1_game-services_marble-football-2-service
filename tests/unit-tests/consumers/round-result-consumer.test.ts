@@ -33,6 +33,10 @@ jest.mock("../../../src/helpers/result-helper", () => ({
     generateResultFromAdminRawResult: jest.fn(),
 }));
 
+jest.mock("sc-game-base/src/core/helpers/crypto-helper", () => ({
+    encrypt: jest.fn().mockReturnValue("encrypted"),
+}));
+
 describe("RoundResultConsumer", () => {
     let roundResultConsumer: RoundResultConsumer;
 
@@ -88,6 +92,17 @@ describe("RoundResultConsumer", () => {
             expect(gameData.result).toStrictEqual({
                 tournamentId: "fake_id",
             });
+        });
+
+        it("should call createResultRecord", async () => {
+            // Arrange
+            jest.spyOn(roundResultConsumer, "createResultRecord").mockResolvedValue();
+
+            // Act
+            await roundResultConsumer.generateResult();
+
+            // Assert
+            expect(roundResultConsumer.createResultRecord).toHaveBeenCalled();
         });
     });
 
@@ -152,6 +167,23 @@ describe("RoundResultConsumer", () => {
 
                 // Assert
                 expect(result).toBe(false);
+            });
+        });
+    });
+
+    describe("createResultRecord", () => {
+        it("should create a result record", async () => {
+            // Arrange
+            gameData.roundId = 1;
+
+            // Act
+            await roundResultConsumer.createResultRecord();
+
+            // Assert
+            expect(resultsRepository.create).toHaveBeenCalledWith({
+                roundId: 1,
+                encryptedResultHash: "encrypted",
+                encryptedResult: "encrypted",
             });
         });
     });
