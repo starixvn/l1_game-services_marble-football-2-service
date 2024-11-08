@@ -4,9 +4,11 @@ import type { TournamentConsumer } from "../consumers";
 import GameData, { MatchConfigType } from "../game-data";
 import { calculateFulltimeOdds, calculateHalfOdds } from "../helpers/odds-helper";
 import { halfConfigs } from "./../match-configs";
+import GameDefinition from "../game-definition";
 
 export default class GameCron extends Table.Crons.TableGameCron {
     declare gameData: GameData;
+    declare definition: GameDefinition;
     tournamentConsumer: TournamentConsumer;
     chance = new Chance();
 
@@ -71,6 +73,14 @@ export default class GameCron extends Table.Crons.TableGameCron {
         this.gameData.settlementResultFromAdmin = {};
     }
 
+    publishVideoStream() {
+        const payload = {
+            videoResult: this.gameData.result,
+        };
+
+        this.gameStatusPublisher.publishToAllUsers(payload);
+    }
+
     override async proceed() {
         const { durations } = this.definition;
 
@@ -78,11 +88,11 @@ export default class GameCron extends Table.Crons.TableGameCron {
             await this.checkGameStatus();
         }
 
-        const remainingTime = this.gameData.remainingTime;
-
         if (!this.gameData.disabled) {
             this.gameData.remainingTime--;
         }
+
+        const remainingTime = this.gameData.remainingTime;
 
         if (this.isStartingTime(remainingTime, durations)) {
             this.resetForNewRound();
@@ -92,12 +102,16 @@ export default class GameCron extends Table.Crons.TableGameCron {
             await this.generateRoundData();
         }
 
-        if (remainingTime === durations.placingBets + 1) {
+        if (remainingTime === durations.placingBets) {
             this.gameStatusPublisher.publishStartPlacingBetStatus();
         }
 
-        if (remainingTime === durations.lockingBet) {
+        if (remainingTime === durations.lockingBet - 1) {
             this.gameStatusPublisher.publishEndPlacingBetStatus();
+        }
+
+        if (remainingTime === durations.streamingVideo - 1) {
+            this.publishVideoStream();
         }
 
         if (remainingTime < 0) {
