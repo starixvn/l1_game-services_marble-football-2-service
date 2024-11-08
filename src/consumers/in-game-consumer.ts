@@ -1,6 +1,7 @@
 import { TableInGameConsumer } from "sc-game-base/src/table/event-consumers";
 import GameData from "../game-data";
-import { calculateUserBetPercentage, roundUserBetPercentage } from "../helpers/bet-percentage";
+import { calculatePlayerBetPercentage } from "../helpers/bet-percentage";
+import { BET_CHOICES } from "../constants";
 
 export default class InGameConsumer extends TableInGameConsumer {
     declare gameData: GameData;
@@ -13,7 +14,7 @@ export default class InGameConsumer extends TableInGameConsumer {
     }
 
     getUserBetPercentage(playerBetCount: Record<string, string[]>) {
-        return roundUserBetPercentage(calculateUserBetPercentage(playerBetCount));
+        return calculatePlayerBetPercentage(playerBetCount, [BET_CHOICES.home, BET_CHOICES.draw, BET_CHOICES.away]);
     }
 
     async consume(realPlayer: any) {

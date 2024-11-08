@@ -21,18 +21,20 @@ describe("InGameConsumer test", () => {
     });
 
     describe("getUserBetPercentage", () => {
-        jest.spyOn(helper.betPercentage, "roundUserBetPercentage").mockImplementation(jest.fn());
-        jest.spyOn(helper.betPercentage, "calculateUserBetPercentage").mockReturnValue({
+        jest.spyOn(helper.betPercentage, "calculatePlayerBetPercentage").mockReturnValue({
             home: 66.6,
             away: 33.3,
         });
 
         it("should call roundUserBetPercentage with correct value", () => {
+            // arrange
+            const playerBetCount = { home: ["111", "113"], away: ["112"] };
+
             // act
-            consumer.getUserBetPercentage({ home: ["111", "113"], away: ["112"] });
+            consumer.getUserBetPercentage(playerBetCount);
 
             // assert
-            expect(helper.betPercentage.roundUserBetPercentage).toHaveBeenCalledWith({ home: 66.6, away: 33.3 });
+            expect(helper.betPercentage.calculatePlayerBetPercentage).toHaveBeenCalledWith(playerBetCount, ["home", "draw", "away"]);
         });
     });
 
