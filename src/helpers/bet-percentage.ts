@@ -1,10 +1,8 @@
 export const calculatePlayerBetPercentage = (playerBetCount: Record<string, string[]>, betChoices: string[]): Record<string, number> => {
     const total = betChoices.reduce((t, choice) => t + (playerBetCount[choice]?.length || 0), 0);
 
-    const percentage = betChoices.reduce((result, choice) => {
+    return betChoices.reduce((result, choice) => {
         result[choice] = total > 0 && playerBetCount[choice] ? Math.round((playerBetCount[choice].length * 100) / total) : 0;
         return result;
     }, {} as Record<string, number>);
-
-    return percentage;
 };
