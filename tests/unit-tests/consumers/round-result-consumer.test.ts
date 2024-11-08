@@ -182,7 +182,6 @@ describe("RoundResultConsumer", () => {
             // Assert
             expect(resultsRepository.create).toHaveBeenCalledWith({
                 roundId: 1,
-                encryptedResultHash: "encrypted",
                 encryptedResult: "encrypted",
             });
         });

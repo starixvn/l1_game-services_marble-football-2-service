@@ -44,7 +44,6 @@ export default class RoundResultConsumer extends RoundResultConsumerBase {
     async createResultRecord() {
         await this.resultsRepository.create({
             roundId: this.gameData.roundId,
-            encryptedResultHash: encrypt(JSON.stringify(this.gameData.resultHash)),
             encryptedResult: encrypt(JSON.stringify(this.gameData.result)),
         });
     }

@@ -1,6 +1,6 @@
 import { asClass, asValue, AwilixContainer } from "awilix";
 import { Table } from "sc-game-base";
-import { InGameConsumer, TournamentConsumer, UserDisconnectConsumer, RoundResultConsumer } from "./consumers";
+import { InGameConsumer, TournamentConsumer, UserDisconnectConsumer, RoundResultConsumer, UnsettledRoundConsumer } from "./consumers";
 import { Bot, GameCron, ProcessBetQueue } from "./crons";
 import { betLogs, bets, results, rounds, tmpBets, tournament } from "./models";
 
@@ -42,6 +42,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
             inGameConsumer: asClass(InGameConsumer).singleton(),
             tournamentConsumer: asClass(TournamentConsumer).singleton().proxy(),
             roundResultConsumer: asClass(RoundResultConsumer).singleton().proxy(),
+            unsettledRoundConsumer: asClass(UnsettledRoundConsumer).singleton().proxy(),
         });
     }
 }
