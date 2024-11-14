@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { BET_CHOICES } from "../constants";
+import { BET_CHOICES, IS_DEV_ENV } from "../constants";
 
 export type ResultType = {
     tournamentId?: string;
@@ -66,6 +66,7 @@ const RoundSchema = new mongoose.Schema<IRound>({
     exchangeRateId: { type: Number, required: true },
 });
 
-const Round = mongoose.model("marblefootball_rounds", RoundSchema);
+const modelName = IS_DEV_ENV ? "marblefootball_dev_rounds" : "marblefootball_rounds";
+const Round = mongoose.model(modelName, RoundSchema);
 
 export default Round;

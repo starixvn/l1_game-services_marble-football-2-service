@@ -1,4 +1,4 @@
-import { tournament } from "../../../src/models";
+import { tournaments } from "../../../src/models";
 import { mongo } from "mongoose";
 
 describe("Tournament", () => {
@@ -20,7 +20,7 @@ describe("Tournament", () => {
             };
 
             // Act
-            const actual = new tournament({ _id: "672452f978c8cd0e08122643", code: "code" });
+            const actual = new tournaments({ _id: "672452f978c8cd0e08122643", code: "code" });
 
             // Assert
             expect(actual.toObject()).toStrictEqual(expected);
@@ -28,13 +28,64 @@ describe("Tournament", () => {
 
         it("should verify the required properties", () => {
             // Arrange
-            const actual = new tournament({});
+            const actual = new tournaments({});
 
             // Act
             const error = actual.validateSync();
 
             // Assert
             expect(error.message).toBe(`marblefootball_tournaments validation failed: code: Path \`code\` is required.`);
+        });
+    });
+
+    describe("modelName property", () => {
+        const originalEnv = process.env;
+
+        beforeEach(() => {
+            jest.resetModules();
+            process.env = { ...originalEnv };
+        });
+
+        afterEach(() => {
+            process.env = originalEnv;
+        });
+        it("should have _dev in development environment", async () => {
+            // Arrange
+            process.env.NODE_ENV = "development";
+
+            const { tournaments } = await import("../../../src/models");
+
+            // Act
+            const model = new tournaments({});
+
+            // Assert
+            expect(model.collection.name).toBe("marblefootball_dev_tournaments");
+        });
+
+        it("should not have _dev suffix in production environment", async () => {
+            // Arrange
+            process.env.NODE_ENV = "production";
+
+            const { tournaments } = await import("../../../src/models");
+
+            // Act
+            const model = new tournaments({});
+
+            // Assert
+            expect(model.collection.name).toBe("marblefootball_tournaments");
+        });
+
+        it("should handle undefined environment as production", async () => {
+            // Arrange
+            delete process.env.NODE_ENV;
+
+            const { tournaments } = await import("../../../src/models");
+
+            // Act
+            const model = new tournaments({});
+
+            // Assert
+            expect(model.collection.name).toBe("marblefootball_tournaments");
         });
     });
 });

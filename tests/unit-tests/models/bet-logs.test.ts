@@ -1,5 +1,5 @@
-import { betLogs } from "../../../src/models";
 import { mongo } from "mongoose";
+import { betLogs } from "../../../src/models";
 
 describe("Bet Logs", () => {
     describe("when create the new instance of BetLogs", () => {
@@ -32,6 +32,57 @@ describe("Bet Logs", () => {
             expect(error.message).toBe(
                 `marblefootball_betlogs validation failed: operatorId: Path \`operatorId\` is required., rate: Path \`rate\` is required., currency: Path \`currency\` is required., name: Path \`name\` is required., uid: Path \`uid\` is required.`
             );
+        });
+    });
+
+    describe("modelName property", () => {
+        const originalEnv = process.env;
+
+        beforeEach(() => {
+            jest.resetModules();
+            process.env = { ...originalEnv };
+        });
+
+        afterEach(() => {
+            process.env = originalEnv;
+        });
+        it("should have _dev in development environment", async () => {
+            // Arrange
+            process.env.NODE_ENV = "development";
+
+            const { betLogs } = await import("../../../src/models");
+
+            // Act
+            const model = new betLogs({});
+
+            // Assert
+            expect(model.collection.name).toBe("marblefootball_dev_betlogs");
+        });
+
+        it("should not have _dev suffix in production environment", async () => {
+            // Arrange
+            process.env.NODE_ENV = "production";
+
+            const { betLogs } = await import("../../../src/models");
+
+            // Act
+            const model = new betLogs({});
+
+            // Assert
+            expect(model.collection.name).toBe("marblefootball_betlogs");
+        });
+
+        it("should handle undefined environment as production", async () => {
+            // Arrange
+            delete process.env.NODE_ENV;
+
+            const { betLogs } = await import("../../../src/models");
+
+            // Act
+            const model = new betLogs({});
+
+            // Assert
+            expect(model.collection.name).toBe("marblefootball_betlogs");
         });
     });
 });

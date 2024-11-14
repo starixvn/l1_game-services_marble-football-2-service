@@ -17,3 +17,5 @@ export const FULL_TIME_BET_CHOICES = {
 export const BET_CHOICES = { ...HALF_TIME_BET_CHOICES, ...FULL_TIME_BET_CHOICES };
 
 export const DEFAULT_MARGIN = 0.02;
+
+export const IS_DEV_ENV = process.env.NODE_ENV === "development";

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { IS_DEV_ENV } from "../constants";
 
 const Schema = new mongoose.Schema({
     uid: { type: String, required: true },
@@ -17,4 +18,6 @@ const Schema = new mongoose.Schema({
     roundId: { type: Number, default: 0, required: true },
 });
 
-export default mongoose.model("marblefootball_betlogs", Schema);
+const modelName = IS_DEV_ENV ? "marblefootball_dev_betlogs" : "marblefootball_betlogs";
+
+export default mongoose.model(modelName, Schema);

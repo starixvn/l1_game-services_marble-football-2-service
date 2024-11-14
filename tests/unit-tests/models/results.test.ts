@@ -33,4 +33,55 @@ describe("Results", () => {
             expect(error.message).toBe(`marblefootball_results validation failed: roundId: Path \`roundId\` is required.`);
         });
     });
+
+    describe("modelName property", () => {
+        const originalEnv = process.env;
+
+        beforeEach(() => {
+            jest.resetModules();
+            process.env = { ...originalEnv };
+        });
+
+        afterEach(() => {
+            process.env = originalEnv;
+        });
+        it("should have _dev in development environment", async () => {
+            // Arrange
+            process.env.NODE_ENV = "development";
+
+            const { results } = await import("../../../src/models");
+
+            // Act
+            const model = new results({});
+
+            // Assert
+            expect(model.collection.name).toBe("marblefootball_dev_results");
+        });
+
+        it("should not have _dev suffix in production environment", async () => {
+            // Arrange
+            process.env.NODE_ENV = "production";
+
+            const { results } = await import("../../../src/models");
+
+            // Act
+            const model = new results({});
+
+            // Assert
+            expect(model.collection.name).toBe("marblefootball_results");
+        });
+
+        it("should handle undefined environment as production", async () => {
+            // Arrange
+            delete process.env.NODE_ENV;
+
+            const { results } = await import("../../../src/models");
+
+            // Act
+            const model = new results({});
+
+            // Assert
+            expect(model.collection.name).toBe("marblefootball_results");
+        });
+    });
 });

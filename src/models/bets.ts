@@ -1,4 +1,8 @@
 import mongoose from "mongoose";
+import { IS_DEV_ENV } from "../constants";
+
+const modelName = IS_DEV_ENV ? "marblefootball_dev_bets" : "marblefootball_bets";
+const tmpModelName = IS_DEV_ENV ? "marblefootball_dev_tmpbets" : "marblefootball_tmpbets";
 
 const bet = {
     roundId: { type: Number, required: true },
@@ -18,7 +22,7 @@ const bet = {
 };
 
 const bets = mongoose.model(
-    "marblefootball_bets",
+    modelName,
     new mongoose.Schema({
         ...bet,
         currency: { type: String },
@@ -26,6 +30,6 @@ const bets = mongoose.model(
     })
 );
 
-const tmpBets = mongoose.model("marblefootball_tmpbets", new mongoose.Schema(bet));
+const tmpBets = mongoose.model(tmpModelName, new mongoose.Schema(bet));
 
 export { bets, tmpBets };

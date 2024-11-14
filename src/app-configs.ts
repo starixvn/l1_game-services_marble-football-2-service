@@ -2,8 +2,8 @@ const appConfigs = {
     hostingPort: 5000,
     apiSettings: {
         enabledApi: true,
-        apiUrl: "http://l1-game-api-local-service:5000",
-        authUrl: "http://l1-auth-api-local-service:5000",
+        apiUrl: "https://l1-proxy3.lumigame.com/game-api",
+        authUrl: "https://l1-auth3.lumigame.com",
         client: {
             id: "game-server",
             secret: "gameserver@20luminet&",
@@ -24,21 +24,21 @@ const appConfigs = {
     },
     enabledLogs: true,
     database: {
-        url: "mongodb://mongo:27017",
+        url: "mongodb://lmn_backend:LmnBackend@10.10.50.12:39103,10.10.50.13:39103,10.10.50.14:39103/",
         options: {
-            dbName: "marble-football-service-dev-db",
+            dbName: "minigame",
             useNewUrlParser: true,
             useUnifiedTopology: true,
             auto_reconnect: true,
         },
     },
     sentry: {
-        sentryUrl: "",
+        sentryUrl: "https://13f39b8359404ed5aec23655e64ccf78@sentry.lumigame.com/2",
         logIdentifier: "MarbleFootBall",
         env: "DEV",
     },
     authenticateSettings: {
-        url: "https://auth.lumigame.com",
+        url: "https://l1-auth3.lumigame.com",
         id: "game-services",
         secret: "gameservices@20luminet&",
         requestTimeout: 10000,
@@ -46,7 +46,7 @@ const appConfigs = {
         audiences: ["api", "admin-api"],
     },
     userServiceSettings: {
-        url: "http://127.0.0.1:5000",
+        url: "https://l1-proxy3.lumigame.com/user",
     },
     adminSecretKey: "asWDEerfOIdgsdqRTFabvmgh",
     metrics: {
@@ -55,7 +55,7 @@ const appConfigs = {
     },
     enableMsgpackParser: false,
     gameManagementApiSettings: {
-        BASE: "http://l1-game-management-service-local-service:5000",
+        BASE: "https://l1-proxy3.lumigame.com/game-management-service",
     },
     disableCors: true,
     otel: {

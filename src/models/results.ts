@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { IS_DEV_ENV } from "../constants";
 
 export interface IResult {
     roundId: number;
@@ -13,6 +14,7 @@ const ResultSchema = new mongoose.Schema({
     time: { type: Date, default: () => new Date() },
 });
 
-const Result = mongoose.model("marblefootball_results", ResultSchema);
+const modelName = IS_DEV_ENV ? "marblefootball_dev_results" : "marblefootball_results";
+const Result = mongoose.model(modelName, ResultSchema);
 
 export default Result;

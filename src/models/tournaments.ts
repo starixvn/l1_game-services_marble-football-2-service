@@ -1,4 +1,5 @@
 import mongoose, { ObjectId } from "mongoose";
+import { IS_DEV_ENV } from "../constants";
 
 export type MatchType = {
     id?: number;
@@ -23,6 +24,7 @@ const Schema = new mongoose.Schema<ITournament>({
     time: { type: Date, default: () => new Date() },
 });
 
-const Tournament = mongoose.model("marblefootball_tournaments", Schema);
+const modelName = IS_DEV_ENV ? "marblefootball_dev_tournaments" : "marblefootball_tournaments";
+const Tournament = mongoose.model(modelName, Schema);
 
 export default Tournament;

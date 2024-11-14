@@ -35,4 +35,55 @@ describe("Bets", () => {
             );
         });
     });
+
+    describe("modelName property", () => {
+        const originalEnv = process.env;
+
+        beforeEach(() => {
+            jest.resetModules();
+            process.env = { ...originalEnv };
+        });
+
+        afterEach(() => {
+            process.env = originalEnv;
+        });
+        it("should have _dev in development environment", async () => {
+            // Arrange
+            process.env.NODE_ENV = "development";
+
+            const { bets } = await import("../../../src/models");
+
+            // Act
+            const model = new bets({});
+
+            // Assert
+            expect(model.collection.name).toBe("marblefootball_dev_bets");
+        });
+
+        it("should not have _dev suffix in production environment", async () => {
+            // Arrange
+            process.env.NODE_ENV = "production";
+
+            const { bets } = await import("../../../src/models");
+
+            // Act
+            const model = new bets({});
+
+            // Assert
+            expect(model.collection.name).toBe("marblefootball_bets");
+        });
+
+        it("should handle undefined environment as production", async () => {
+            // Arrange
+            delete process.env.NODE_ENV;
+
+            const { bets } = await import("../../../src/models");
+
+            // Act
+            const model = new bets({});
+
+            // Assert
+            expect(model.collection.name).toBe("marblefootball_bets");
+        });
+    });
 });

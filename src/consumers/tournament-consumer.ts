@@ -2,11 +2,11 @@ import type appConfigs from "../app-configs";
 import { shuffle } from "../helpers";
 import generate from "../helpers/tournament/generate";
 import updateNext from "../helpers/tournament/update-next";
-import type { tournament } from "../models";
+import type { tournaments } from "../models";
 import type { ITournament } from "../models/tournaments";
 
 export default class TournamentConsumer {
-    tournamentRepository: typeof tournament;
+    tournamentRepository: typeof tournaments;
     appConfigs: typeof appConfigs;
 
     constructor(container: any) {
