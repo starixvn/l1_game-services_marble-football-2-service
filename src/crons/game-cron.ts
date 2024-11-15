@@ -66,7 +66,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
 
         this.gameData.matchConfig.firstHalf.ou = firstHalfOverUnderValue;
         this.gameData.matchConfig.ou = overUnderValue;
-        this.gameData.odds = odds;
+        this.gameData.gameConfigs.odds = odds;
 
         await this.roundResultConsumer.generateResult();
 

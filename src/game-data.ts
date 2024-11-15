@@ -10,7 +10,6 @@ export default class GameData extends TableGameData {
     }
     playerBetCount: Record<string, string[]> = {};
     matchConfig: MatchConfigType = {} as MatchConfigType;
-    odds: OddsType = {} as OddsType;
 }
 
 export type RealPlayer = {
