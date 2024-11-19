@@ -3,6 +3,10 @@ import { mongo } from "mongoose";
 
 describe("Results", () => {
     describe("when create the new instance of Results", () => {
+        afterEach(() => {
+            jest.useRealTimers();
+            jest.clearAllMocks();
+        });
         it("should create a result with default properties", () => {
             // Arrange
             const mockId = new mongo.ObjectId("672452f978c8cd0e08122643");

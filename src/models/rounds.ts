@@ -41,11 +41,8 @@ const settlementResultSchema = new mongoose.Schema<SettlementResultType>(
         draw: { type: Boolean },
         over: { type: Boolean },
         under: { type: Boolean },
-        firstHalfHome: { type: Boolean },
-        firstHalfAway: { type: Boolean },
-        firstHalfDraw: { type: Boolean },
-        firstHalfOver: { type: Boolean },
-        firstHalfUnder: { type: Boolean },
+        odd: { type: Boolean },
+        even: { type: Boolean },
     },
     { _id: false }
 );

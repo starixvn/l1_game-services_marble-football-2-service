@@ -15,6 +15,7 @@ export default {
     hedgeBetGroups: [
         [BET_CHOICES.home, BET_CHOICES.away],
         [BET_CHOICES.over, BET_CHOICES.under],
+        [BET_CHOICES.odd, BET_CHOICES.even],
     ],
     provablyFair: false,
     historyPageSize: 100,
@@ -22,6 +23,6 @@ export default {
     botSettings: {
         ratio: { mainOpts: 60, subOpts: 40 },
         mainOpts: [BET_CHOICES.home, BET_CHOICES.away],
-        subOpts: [BET_CHOICES.away, BET_CHOICES.over, BET_CHOICES.under],
+        subOpts: [BET_CHOICES.draw, BET_CHOICES.over, BET_CHOICES.under, BET_CHOICES.odd, BET_CHOICES.even],
     },
 };

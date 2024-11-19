@@ -70,11 +70,8 @@ describe("Result Helper", () => {
             expect(settlementResult.draw).toBe(true);
             expect(settlementResult.over).toBe(true);
             expect(settlementResult.under).toBe(false);
-            expect(settlementResult.firstHalfHome).toBe(true);
-            expect(settlementResult.firstHalfAway).toBe(false);
-            expect(settlementResult.firstHalfDraw).toBe(false);
-            expect(settlementResult.firstHalfOver).toBe(true);
-            expect(settlementResult.firstHalfUnder).toBe(false);
+            expect(settlementResult.odd).toBe(false);
+            expect(settlementResult.even).toBe(true);
         });
     });
 

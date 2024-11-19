@@ -3,6 +3,11 @@ import { mongo } from "mongoose";
 
 describe("Round", () => {
     describe("when create the new instance of Round", () => {
+        afterEach(() => {
+            jest.useRealTimers();
+            jest.clearAllMocks();
+        });
+
         it("should create a round with default properties", () => {
             // Arrange
             const mockId = new mongo.ObjectId("672452f978c8cd0e08122643");

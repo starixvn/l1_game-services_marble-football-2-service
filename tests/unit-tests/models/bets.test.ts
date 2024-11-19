@@ -13,6 +13,13 @@ describe("Bets", () => {
                 freeBet: false,
                 paid: false,
                 totalAmount: 0,
+                home: 0,
+                away: 0,
+                draw: 0,
+                over: 0,
+                under: 0,
+                odd: 0,
+                even: 0,
             };
 
             // Act

@@ -19,6 +19,14 @@ const bet = {
     currency: { type: String, required: false },
     rate: { type: Number, required: false },
     paid: { type: Boolean, default: false },
+
+    home: { type: Number, default: 0 },
+    away: { type: Number, default: 0 },
+    draw: { type: Number, default: 0 },
+    over: { type: Number, default: 0 },
+    under: { type: Number, default: 0 },
+    odd: { type: Number, default: 0 },
+    even: { type: Number, default: 0 },
 };
 
 const bets = mongoose.model(
