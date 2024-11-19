@@ -43,7 +43,6 @@ describe("Result Helper", () => {
             expect(result.firstHalf).toBe("H");
             expect(result.secondHalf).toBe("A");
             expect(result.overUnderValue).toBe(2.5);
-            expect(result.firstHalfOverUnderValue).toBe(1.5);
             expect(result.firstHalfVideo).toBe("http://marble-football/watch?v=H");
             expect(result.secondHalfVideo).toBe("http://marble-football/watch?v=A");
         });
@@ -55,7 +54,6 @@ describe("Result Helper", () => {
                 firstHalf: "HH",
                 secondHalf: "AA",
                 overUnderValue: 3.5,
-                firstHalfOverUnderValue: 1.5,
                 firstHalfVideo: "http://marble-football/watch?v=HH",
                 secondHalfVideo: "http://marble-football/watch?v=AA",
                 firstHalfTimeline: [],
@@ -101,7 +99,6 @@ describe("Result Helper", () => {
             expect(result.firstHalf).toBe("HAAA");
             expect(result.secondHalf).toBe("AHHH");
             expect(result.overUnderValue).toBe(2.5);
-            expect(result.firstHalfOverUnderValue).toBe(1.5);
             expect(result.firstHalfVideo).toBe("http://marble-football/watch?v=HAAA");
             expect(result.secondHalfVideo).toBe("http://marble-football/watch?v=AHHH");
         });

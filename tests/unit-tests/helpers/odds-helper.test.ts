@@ -26,7 +26,7 @@ describe("odds helper", () => {
 
             // Act & Assert
             expect(oddsHelper.roundToPrecision(numbers[0], precisions[0])).toBeCloseTo(1.12);
-            expect(oddsHelper.roundToPrecision(numbers[1], precisions[1])).toBeCloseTo(1.988);
+            expect(oddsHelper.roundToPrecision(numbers[1], precisions[1])).toBeCloseTo(1.987);
         });
     });
 
@@ -35,13 +35,13 @@ describe("odds helper", () => {
             // Arrange
             const firstHalf: HalfConfigType = {
                 scoreRate: { "1-0": 0.1, "0-1": 0.1 },
-                odds: { home: 1.9, draw: 3.5, away: 4.0, over: 2.0, under: 1.8 },
+                odds: { home: 1.9, draw: 3.5, away: 4.0, over: 2.0, under: 1.8, odd: 1.9, even: 1.9 },
                 ou: 2.5,
             };
 
             const secondHalf: HalfConfigType = {
                 scoreRate: { "1-0": 0.2, "0-1": 0.3 },
-                odds: { home: 2.0, draw: 3.4, away: 3.8, over: 2.1, under: 1.9 },
+                odds: { home: 2.0, draw: 3.4, away: 3.8, over: 2.1, under: 1.9, odd: 1.9, even: 1.9 },
                 ou: 2.5,
             };
 
@@ -115,12 +115,12 @@ describe("odds helper", () => {
             const matchConfig: MatchConfigType = {
                 firstHalf: {
                     scoreRate: { "1-0": 0.1, "0-1": 0.2 },
-                    odds: { home: 2.5, draw: 3.1, away: 2.9, over: 2.2, under: 1.75 },
+                    odds: { home: 2.5, draw: 3.1, away: 2.9, over: 2.2, under: 1.75, odd: 1.9, even: 1.9 },
                     ou: 2.5,
                 },
                 secondHalf: {
                     scoreRate: { "1-1": 0.3, "0-2": 0.1 },
-                    odds: { home: 2.7, draw: 3.4, away: 2.6, over: 2.3, under: 1.8 },
+                    odds: { home: 2.7, draw: 3.4, away: 2.6, over: 2.3, under: 1.8, odd: 1.9, even: 1.9 },
                     ou: 2.5,
                 },
                 ou: 2.5,
@@ -142,7 +142,7 @@ describe("odds helper", () => {
             // Arrange
             const halfConfig: HalfConfigType = {
                 scoreRate: { "1-0": 0.2, "0-1": 0.15, "2-0": 0.05 },
-                odds: { home: 1.95, draw: 3.4, away: 3.9, over: 2.05, under: 1.85 },
+                odds: { home: 1.95, draw: 3.4, away: 3.9, over: 2.05, under: 1.85, odd: 1.9, even: 1.9 },
                 ou: 1.5,
             };
 

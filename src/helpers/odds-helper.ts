@@ -8,7 +8,7 @@ export const parseScore = (score: string): [number, number] => {
 };
 
 export const roundToPrecision = (value: number, precision = 100) => {
-    return Math.round(value * precision) / precision;
+    return Math.floor(value * precision) / precision;
 };
 
 export const calculateFullTimeScoreRates = (firstHalf: HalfConfigType, secondHalf: HalfConfigType): Record<string, number> => {
@@ -22,7 +22,7 @@ export const calculateFullTimeScoreRates = (firstHalf: HalfConfigType, secondHal
             const finalScore = `${fhHome + shHome}-${fhAway + shAway}`;
             const combinedRate = fhRate * shRate;
 
-            fulltimeScoreRates[finalScore] = (fulltimeScoreRates[finalScore] || 0) + roundToPrecision(combinedRate, 100000);
+            fulltimeScoreRates[finalScore] = (fulltimeScoreRates[finalScore] || 0) + combinedRate;
         }
     }
 
@@ -38,7 +38,9 @@ export const calculateProbabilitiesForBetChoices = (scoreRates: Record<string, n
         away = 0,
         draw = 0,
         over = 0,
-        under = 0;
+        under = 0,
+        odd = 0,
+        even = 0;
 
     for (const [score, rate] of Object.entries(scoreRates)) {
         const [homeGoals, awayGoals] = parseScore(score);
@@ -72,6 +74,12 @@ export const calculateProbabilitiesForBetChoices = (scoreRates: Record<string, n
         } else if (totalGoals < ou) {
             under += rate;
         }
+
+        if (totalGoals % 2 === 0) {
+            even += rate;
+        } else {
+            odd += rate;
+        }
     }
 
     return {
@@ -81,6 +89,8 @@ export const calculateProbabilitiesForBetChoices = (scoreRates: Record<string, n
             draw: draw / totalRates,
             over: over / totalRates,
             under: under / totalRates,
+            even: even / totalRates,
+            odd: odd / totalRates,
         },
         ou,
     };

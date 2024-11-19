@@ -35,8 +35,6 @@ export default class GameCron extends Table.Crons.TableGameCron {
     }
 
     calculateOdds() {
-        const matchConfig = this.gameData.matchConfig;
-        const firstHalfOdds = calculateHalfOdds(matchConfig.firstHalf, this.gameData.gameConfigs?.margin);
         const fulltimeOdds = calculateFulltimeOdds(this.gameData.matchConfig, this.gameData.gameConfigs?.margin);
 
         const odds = {
@@ -45,26 +43,21 @@ export default class GameCron extends Table.Crons.TableGameCron {
             away: fulltimeOdds.odds.away,
             over: fulltimeOdds.odds.over,
             under: fulltimeOdds.odds.under,
-            firstHalfHome: firstHalfOdds.odds.home,
-            firstHalfDraw: firstHalfOdds.odds.draw,
-            firstHalfAway: firstHalfOdds.odds.away,
-            firstHalfOver: firstHalfOdds.odds.over,
-            firstHalfUnder: firstHalfOdds.odds.under,
+            odd: fulltimeOdds.odds.odd,
+            even: fulltimeOdds.odds.even,
         };
 
         return {
             odds,
             overUnderValue: fulltimeOdds.ou,
-            firstHalfOverUnderValue: firstHalfOdds.ou,
         };
     }
 
     async generateRoundData() {
         this.gameData.matchConfig = this.getMatchConfig();
 
-        const { odds, overUnderValue, firstHalfOverUnderValue } = this.calculateOdds();
+        const { odds, overUnderValue } = this.calculateOdds();
 
-        this.gameData.matchConfig.firstHalf.ou = firstHalfOverUnderValue;
         this.gameData.matchConfig.ou = overUnderValue;
         this.gameData.gameConfigs.odds = odds;
 
@@ -96,7 +89,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
 
         if (this.isStartingTime(remainingTime, durations)) {
             this.resetForNewRound();
-            this.bot && this.bot.reset();
+            this.bot?.reset();
             this.appConfigs.enabledBoostedOdds && (await this.updatePromotionOddsAndNotify());
 
             await this.generateRoundData();

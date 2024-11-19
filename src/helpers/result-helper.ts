@@ -17,7 +17,6 @@ export const generateResult = (matchConfig: MatchConfigType): ResultType => {
         secondHalf,
         ...videoInfo,
         overUnderValue: matchConfig.ou,
-        firstHalfOverUnderValue: matchConfig.firstHalf.ou,
         homeWinsOnDraw,
     };
 };
@@ -30,7 +29,6 @@ export const generateResultFromAdminRawResult = (matchConfig: MatchConfigType, r
         ...roundResult,
         ...videoInfo,
         overUnderValue: matchConfig.ou,
-        firstHalfOverUnderValue: matchConfig.firstHalf.ou,
     };
 };
 
