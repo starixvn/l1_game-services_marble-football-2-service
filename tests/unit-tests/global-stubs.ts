@@ -72,7 +72,7 @@ const publisher = stub<BaseEventPublisher>();
 const bot = stub<Bot>();
 const settleGameConsumer: SettleGameRoundConsumer = stub<SettleGameRoundConsumer>();
 const gameStatusPublisher: GameStatusPublisher = stub<GameStatusPublisher>();
-const runningRoundPublisher: RunningRoundInfoPublisher = stub<RunningRoundInfoPublisher>();
+const runningRoundInfoPublisher: RunningRoundInfoPublisher = stub<RunningRoundInfoPublisher>();
 const roundResultConsumer: RoundResultConsumer = stub<RoundResultConsumer>();
 const roundIdConsumer: RoundIdConsumer = stub<RoundIdConsumer>();
 const provablyFairConsumer: ProvablyFairConsumer = stub<ProvablyFairConsumer>();
@@ -107,7 +107,7 @@ export {
     roundResultConsumer,
     roundResultPublisher,
     roundsRepository,
-    runningRoundPublisher,
+    runningRoundInfoPublisher,
     settleGameConsumer,
     tempBetsRepository,
     tournamentRepository,

@@ -2,7 +2,7 @@ import Chance from "chance";
 import { Table } from "sc-game-base";
 import type { TournamentConsumer } from "../consumers";
 import GameData, { MatchConfigType } from "../game-data";
-import { calculateFulltimeOdds, calculateHalfOdds } from "../helpers/odds-helper";
+import { calculateFulltimeOdds } from "../helpers/odds-helper";
 import { halfConfigs } from "./../match-configs";
 import GameDefinition from "../game-definition";
 
@@ -67,11 +67,14 @@ export default class GameCron extends Table.Crons.TableGameCron {
     }
 
     publishVideoStream() {
-        const payload = {
-            videoResult: this.gameData.result,
+        const videoResult = {
+            firstHalfVideo: this.gameData.result.firstHalfVideo,
+            secondHalfVideo: this.gameData.result.secondHalfVideo,
+            firstHalfTimeline: this.gameData.result.firstHalfTimeline,
+            secondHalfTimeline: this.gameData.result.secondHalfTimeline,
         };
 
-        this.gameStatusPublisher.publishToAllUsers(payload);
+        this.runningRoundInfoPublisher.publishToAllUsers({ videoResult });
     }
 
     override async proceed() {

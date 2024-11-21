@@ -8,7 +8,7 @@ import {
     provablyFairConsumer,
     roundIdConsumer,
     roundResultConsumer,
-    runningRoundPublisher,
+    runningRoundInfoPublisher,
     settleGameConsumer,
     unsettledRoundConsumer,
 } from "../global-stubs";
@@ -40,7 +40,7 @@ describe("GameCron", () => {
             bot: bot as any,
             settleGameRoundConsumer: settleGameConsumer,
             gameStatusPublisher,
-            runningRoundInfoPublisher: runningRoundPublisher,
+            runningRoundInfoPublisher,
             logService: null as any,
             roundResultConsumer,
             resultsRepository: {} as any,
@@ -142,14 +142,24 @@ describe("GameCron", () => {
         it("should publish video stream at the correct time", async () => {
             // arrange
             gameCron.gameData.remainingTime = definition.durations.streamingVideo;
-            gameCron.gameData.result = { result: "result" };
+            gameCron.gameData.result = {
+                firstHalfVideo: "http://marble-football/watch?v=HH",
+                secondHalfVideo: "http://marble-football/watch?v=AA",
+                firstHalfTimeline: [1, 2],
+                secondHalfTimeline: [3, 4],
+            };
 
             // act
             await gameCron.proceed();
 
             // assert
-            expect(gameStatusPublisher.publishToAllUsers).toHaveBeenCalledWith({
-                videoResult: { result: "result" },
+            expect(runningRoundInfoPublisher.publishToAllUsers).toHaveBeenCalledWith({
+                videoResult: {
+                    firstHalfVideo: "http://marble-football/watch?v=HH",
+                    secondHalfVideo: "http://marble-football/watch?v=AA",
+                    firstHalfTimeline: [1, 2],
+                    secondHalfTimeline: [3, 4],
+                },
             });
         });
 
@@ -200,7 +210,7 @@ describe("GameCron", () => {
 
             // assert
             expect(bot.run).toHaveBeenCalled();
-            expect(runningRoundPublisher.publish).toHaveBeenCalled();
+            expect(runningRoundInfoPublisher.publish).toHaveBeenCalled();
         });
 
         it("should not decrement remaining time if game is disabled", async () => {
@@ -234,7 +244,7 @@ describe("GameCron", () => {
             await gameCron.proceed();
 
             // assert
-            expect(runningRoundPublisher.publish).not.toHaveBeenCalled();
+            expect(runningRoundInfoPublisher.publish).not.toHaveBeenCalled();
         });
     });
 });
