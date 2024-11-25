@@ -3,9 +3,12 @@ import GameData from "../game-data";
 import type TournamentConsumer from "./tournament-consumer";
 import { resultHelper } from "../helpers";
 import { encrypt } from "sc-game-base/src/core/helpers/crypto-helper";
+import type appConfigs from "../app-configs";
+
 export default class RoundResultConsumer extends RoundResultConsumerBase {
     declare gameData: GameData;
     tournamentConsumer: TournamentConsumer;
+    appConfigs: typeof appConfigs;
 
     constructor(container: any) {
         super(
@@ -17,24 +20,32 @@ export default class RoundResultConsumer extends RoundResultConsumerBase {
         );
 
         this.tournamentConsumer = container.tournamentConsumer;
-    }
-
-    override getDataForGenerateResult() {
-        return this.gameData.matchConfig;
+        this.appConfigs = container.appConfigs;
     }
 
     override async generateResult() {
-        await super.generateResult();
+        const isResultFromAdminGenerated = await this.generateResultFromAdminAsync();
+
+        if (!isResultFromAdminGenerated) {
+            this.gameData.result = await resultHelper.generateResult({
+                matchConfig: this.gameData.matchConfig,
+                appConfigs: this.appConfigs,
+            });
+        }
 
         this.gameData.result.tournamentId = await this.tournamentConsumer.getCurrentTournamentId();
         await this.createResultRecord();
     }
 
-    override generateResultFromAdmin() {
+    async generateResultFromAdminAsync() {
         const { roundId, settlementResultFromAdmin: resultFromAdmin } = this.gameData;
 
         if (roundId === resultFromAdmin.roundId) {
-            this.gameData.result = resultHelper.generateResultFromAdminRawResult(this.gameData.matchConfig, resultFromAdmin.result);
+            this.gameData.result = await resultHelper.generateResultFromAdminRawResult(
+                this.gameData.matchConfig,
+                resultFromAdmin.result,
+                this.appConfigs
+            );
             return true;
         }
 

@@ -3,13 +3,15 @@ import { HalfConfigType } from "../match-configs";
 import { ResultType, SettlementResultType } from "../models/rounds";
 import Chance from "chance";
 import { shuffle } from "./shuffle";
+import crypto from "crypto";
+import AppConfigs from "../app-configs";
 
-export const generateResult = (matchConfig: MatchConfigType): ResultType => {
+export const generateResult = async ({ matchConfig, appConfigs }: { matchConfig: MatchConfigType; appConfigs: typeof AppConfigs }) => {
     const chance = new Chance();
 
     const firstHalf = generateResultForHalf(matchConfig.firstHalf);
     const secondHalf = generateResultForHalf(matchConfig.secondHalf);
-    const videoInfo = getVideoInfoFromResult(firstHalf, secondHalf);
+    const videoInfo = await getVideoInfoFromResult(firstHalf, secondHalf, appConfigs);
     const homeWinsOnDraw = chance.bool();
 
     return {
@@ -21,12 +23,19 @@ export const generateResult = (matchConfig: MatchConfigType): ResultType => {
     };
 };
 
-export const generateResultFromAdminRawResult = (matchConfig: MatchConfigType, roundResult: ResultType): ResultType => {
-    const { firstHalf, secondHalf } = roundResult;
-    const videoInfo = getVideoInfoFromResult(firstHalf, secondHalf);
+export const generateResultFromAdminRawResult = async (
+    matchConfig: MatchConfigType,
+    roundResult: ResultType,
+    appConfigs: typeof AppConfigs
+): Promise<ResultType> => {
+    const firstHalf = roundResult.firstHalf || "0";
+    const secondHalf = roundResult.secondHalf || "0";
+    const videoInfo = await getVideoInfoFromResult(firstHalf, secondHalf, appConfigs);
 
     return {
-        ...roundResult,
+        firstHalf,
+        secondHalf,
+        homeWinsOnDraw: roundResult.homeWinsOnDraw,
         ...videoInfo,
         overUnderValue: matchConfig.ou,
     };
@@ -69,9 +78,9 @@ const generateResultForHalf = (halfConfig: HalfConfigType) => {
     const [homeGoals, awayGoals] = scoreResult.split("-").map(Number);
     const sequence = Array(homeGoals).fill("H").concat(Array(awayGoals).fill("A"));
 
-    const result = shuffle(sequence);
+    const result = shuffle(sequence).join("");
 
-    return result.join("");
+    return result || "0";
 };
 
 export const getScoreFromRate = (scores: string[], rates: number[]) => {
@@ -79,11 +88,20 @@ export const getScoreFromRate = (scores: string[], rates: number[]) => {
     return chance.weighted(scores, rates);
 };
 
-const getVideoInfoFromResult = (firstHalf: string, secondHalf: string) => {
+const getVideoInfoFromResult = async (firstHalf: string, secondHalf: string, appConfigs: typeof AppConfigs) => {
+    const firstHalfVideo = generateVideoName(firstHalf);
+    const secondHalfVideo = generateVideoName(secondHalf);
+
     return {
-        firstHalfVideo: `http://marble-football/watch?v=${firstHalf}`,
-        secondHalfVideo: `http://marble-football/watch?v=${secondHalf}`,
-        firstHalfTimeline: [] as number[],
-        secondHalfTimeline: [] as number[],
+        firstHalfVideo,
+        secondHalfVideo,
     };
+};
+
+export const generateVideoName = (result: string, numberOfVideos = 1) => {
+    const videoIndex = numberOfVideos > 1 ? Math.floor(Math.random() * (numberOfVideos - 1)) : 1;
+
+    const videoName = crypto.createHash("md5").update(`${result}-${videoIndex}`).digest("hex");
+
+    return videoName;
 };

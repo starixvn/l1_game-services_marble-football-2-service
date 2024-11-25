@@ -145,8 +145,6 @@ describe("GameCron", () => {
             gameCron.gameData.result = {
                 firstHalfVideo: "http://marble-football/watch?v=HH",
                 secondHalfVideo: "http://marble-football/watch?v=AA",
-                firstHalfTimeline: [1, 2],
-                secondHalfTimeline: [3, 4],
             };
 
             // act
@@ -157,8 +155,6 @@ describe("GameCron", () => {
                 videoResult: {
                     firstHalfVideo: "http://marble-football/watch?v=HH",
                     secondHalfVideo: "http://marble-football/watch?v=AA",
-                    firstHalfTimeline: [1, 2],
-                    secondHalfTimeline: [3, 4],
                 },
             });
         });

@@ -10,10 +10,18 @@ export default class InGameConsumer extends TableInGameConsumer {
         const payload = await super.buildPayload(realPlayer);
         const { playerBetCount } = this.gameData;
         const userBetPercentage = this.getUserBetPercentage(playerBetCount);
-        return { ...payload, userBetPercentage };
+        const videoResult = this.getCurrentVideoResult();
+        return { ...payload, userBetPercentage, videoResult };
     }
 
     getUserBetPercentage(playerBetCount: Record<string, string[]>) {
         return calculatePlayerBetPercentage(playerBetCount, [BET_CHOICES.home, BET_CHOICES.draw, BET_CHOICES.away]);
+    }
+
+    getCurrentVideoResult() {
+        return {
+            firstHalfVideo: this.gameData.result.firstHalfVideo,
+            secondHalfVideo: this.gameData.result.secondHalfVideo,
+        };
     }
 }

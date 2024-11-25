@@ -7,8 +7,6 @@ export type ResultType = {
     secondHalf: string;
     firstHalfVideo: string;
     secondHalfVideo: string;
-    firstHalfTimeline: number[];
-    secondHalfTimeline: number[];
     overUnderValue: number;
     homeWinsOnDraw: boolean;
 };
@@ -20,8 +18,6 @@ const resultSchema = new mongoose.Schema<ResultType>(
         secondHalf: { type: String },
         firstHalfVideo: { type: String },
         secondHalfVideo: { type: String },
-        firstHalfTimeline: { type: [Number] },
-        secondHalfTimeline: { type: [Number] },
         overUnderValue: { type: Number },
         homeWinsOnDraw: { type: Boolean },
     },

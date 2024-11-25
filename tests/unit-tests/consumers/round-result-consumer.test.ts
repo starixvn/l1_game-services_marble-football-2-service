@@ -30,7 +30,8 @@ jest.mock("sc-game-base/src/core/event-consumers", () => {
 });
 
 jest.mock("../../../src/helpers/result-helper", () => ({
-    generateResultFromAdminRawResult: jest.fn(),
+    generateResult: jest.fn().mockResolvedValue({ result: "generated" }),
+    generateResultFromAdminRawResult: jest.fn().mockResolvedValue({ result: "admin" }),
 }));
 
 jest.mock("sc-game-base/src/core/helpers/crypto-helper", () => ({
@@ -49,6 +50,7 @@ describe("RoundResultConsumer", () => {
         result: {},
     });
     const definition = stub<GameDefinition>();
+    const appConfigs = { some: "config" };
 
     beforeEach(() => {
         roundResultConsumer = new RoundResultConsumer({
@@ -58,6 +60,7 @@ describe("RoundResultConsumer", () => {
             resultsRepository,
             provablyFairConsumer,
             tournamentConsumer: { getCurrentTournamentId: async () => "fake_id" },
+            appConfigs,
         });
     });
 
@@ -65,31 +68,41 @@ describe("RoundResultConsumer", () => {
         jest.clearAllMocks();
     });
 
-    describe("getDataForGenerateResult", () => {
-        it("should return matchConfig from gameData", () => {
-            // act
-            const result = roundResultConsumer.getDataForGenerateResult();
-
-            // assert
-            expect(result).toBe(gameData.matchConfig);
-        });
-    });
-
     describe("generateResult", () => {
-        it("should call super.generateResult", async () => {
+        it("should try admin result first then generate result if no admin result", async () => {
             // Act
             await roundResultConsumer.generateResult();
 
             // Assert
-            expect(roundResultConsumerStub.generateResult).toHaveBeenCalled();
+            expect(ResultHelper.generateResult).toHaveBeenCalledWith({
+                matchConfig: gameData.matchConfig,
+                appConfigs,
+            });
+            expect(gameData.result).toEqual({
+                result: "generated",
+                tournamentId: "fake_id",
+            });
         });
 
-        it("should generate the round result", async () => {
+        it("should use admin result if available", async () => {
+            // Arrange
+            gameData.roundId = 1;
+            gameData.settlementResultFromAdmin = {
+                roundId: 1,
+                result: { someResult: true },
+            };
+
             // Act
             await roundResultConsumer.generateResult();
 
             // Assert
-            expect(gameData.result).toStrictEqual({
+            expect(ResultHelper.generateResultFromAdminRawResult).toHaveBeenCalledWith(
+                gameData.matchConfig,
+                gameData.settlementResultFromAdmin.result,
+                appConfigs
+            );
+            expect(gameData.result).toEqual({
+                result: "admin",
                 tournamentId: "fake_id",
             });
         });
@@ -106,73 +119,46 @@ describe("RoundResultConsumer", () => {
         });
     });
 
-    describe("generateResultFromAdmin", () => {
-        describe("when roundId is the same", () => {
-            beforeEach(() => {
-                // Arrange
-                gameData.matchConfig = {
-                    matchConfig: "match config data",
-                } as any;
-                gameData.roundId = 1;
-                gameData.settlementResultFromAdmin = {
-                    roundId: 1,
-                    result: {
-                        firstHalf: "H",
-                        secondHalf: "A",
-                        homeWinsOnDraw: false,
-                    },
-                };
-            });
-            it("should generate result from admin", () => {
-                // Act
-                const result = roundResultConsumer.generateResultFromAdmin();
+    describe("generateResultFromAdminAsync", () => {
+        it("should generate result when roundId matches", async () => {
+            // Arrange
+            gameData.matchConfig = { matchConfig: "data" } as any;
+            gameData.roundId = 1;
+            gameData.settlementResultFromAdmin = {
+                roundId: 1,
+                result: { someResult: true },
+            };
 
-                // Assert
-                expect(result).toBe(true);
-            });
+            // Act
+            const result = await roundResultConsumer.generateResultFromAdminAsync();
 
-            it("should call generateResultFromAdminRawResult", () => {
-                // Act
-                roundResultConsumer.generateResultFromAdmin();
-
-                // Assert
-                expect(ResultHelper.generateResultFromAdminRawResult).toHaveBeenCalledWith(
-                    gameData.matchConfig,
-                    gameData.settlementResultFromAdmin.result
-                );
-            });
+            // Assert
+            expect(result).toBe(true);
+            expect(ResultHelper.generateResultFromAdminRawResult).toHaveBeenCalledWith(
+                gameData.matchConfig,
+                gameData.settlementResultFromAdmin.result,
+                appConfigs
+            );
         });
 
-        describe("when roundId is different", () => {
-            it("should not generate result from admin", () => {
-                // Arrange
-                gameData.roundId = 1;
-                gameData.settlementResultFromAdmin = {
-                    roundId: 2,
-                    result: {
-                        firstHalf: "H",
-                        secondHalf: "A",
-                        overUnderValue: 2.5,
-                        firstHalfOverUnderValue: 1.5,
-                        firstHalfVideo: "http://marble-football/watch?v=H",
-                        secondHalfVideo: "http://marble-football/watch?v=A",
-                        firstHalfTimeline: [],
-                        secondHalfTimeline: [],
-                        homeWinsOnDraw: false,
-                    },
-                };
+        it("should return false when roundId doesn't match", async () => {
+            // Arrange
+            gameData.roundId = 1;
+            gameData.settlementResultFromAdmin = {
+                roundId: 2,
+                result: { someResult: true },
+            };
 
-                // Act
-                const result = roundResultConsumer.generateResultFromAdmin();
+            // Act
+            const result = await roundResultConsumer.generateResultFromAdminAsync();
 
-                // Assert
-                expect(result).toBe(false);
-            });
+            // Assert
+            expect(result).toBe(false);
         });
     });
 
     describe("createResultRecord", () => {
-        it("should create a result record", async () => {
+        it("should create encrypted result record", async () => {
             // Arrange
             gameData.roundId = 1;
 

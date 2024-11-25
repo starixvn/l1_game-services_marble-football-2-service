@@ -70,8 +70,6 @@ export default class GameCron extends Table.Crons.TableGameCron {
         const videoResult = {
             firstHalfVideo: this.gameData.result.firstHalfVideo,
             secondHalfVideo: this.gameData.result.secondHalfVideo,
-            firstHalfTimeline: this.gameData.result.firstHalfTimeline,
-            secondHalfTimeline: this.gameData.result.secondHalfTimeline,
         };
 
         this.runningRoundInfoPublisher.publishToAllUsers({ videoResult });

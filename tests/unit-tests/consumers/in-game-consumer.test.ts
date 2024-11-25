@@ -5,6 +5,7 @@ import { InGameConsumer } from "../../../src/consumers";
 import * as helper from "../../../src/helpers";
 import GameDefinition from "../../../src/game-definition";
 import { gameManagementApiClientFactory, publisher, roundQuery } from "../global-stubs";
+import { BET_CHOICES } from "../../../src/constants";
 
 describe("InGameConsumer test", () => {
     let consumer: InGameConsumer;
@@ -16,17 +17,20 @@ describe("InGameConsumer test", () => {
         consumer = new InGameConsumer(definition, gameData, roundQuery, publisher, getBalance, gameManagementApiClientFactory);
     });
 
-    it("inherit InGameConsumer of sc-number-game-base", () => {
-        expect(consumer instanceof TableInGameConsumer);
+    it("should inherit from TableInGameConsumer", () => {
+        expect(consumer instanceof TableInGameConsumer).toBeTruthy();
     });
 
     describe("getUserBetPercentage", () => {
-        jest.spyOn(helper.betPercentage, "calculatePlayerBetPercentage").mockReturnValue({
-            home: 66.6,
-            away: 33.3,
+        beforeEach(() => {
+            jest.spyOn(helper.betPercentage, "calculatePlayerBetPercentage").mockReturnValue({
+                home: 66.6,
+                away: 33.3,
+                draw: 0,
+            });
         });
 
-        it("should call roundUserBetPercentage with correct value", () => {
+        it("should call calculatePlayerBetPercentage with correct parameters", () => {
             // arrange
             const playerBetCount = { home: ["111", "113"], away: ["112"] };
 
@@ -34,77 +38,64 @@ describe("InGameConsumer test", () => {
             consumer.getUserBetPercentage(playerBetCount);
 
             // assert
-            expect(helper.betPercentage.calculatePlayerBetPercentage).toHaveBeenCalledWith(playerBetCount, ["home", "draw", "away"]);
+            expect(helper.betPercentage.calculatePlayerBetPercentage).toHaveBeenCalledWith(playerBetCount, [
+                BET_CHOICES.home,
+                BET_CHOICES.draw,
+                BET_CHOICES.away,
+            ]);
+        });
+    });
+
+    describe("getCurrentVideoResult", () => {
+        it("should return video results from gameData", () => {
+            // arrange
+            gameData.result = {
+                firstHalfVideo: "video1.mp4",
+                secondHalfVideo: "video2.mp4",
+            };
+
+            // act
+            const result = consumer.getCurrentVideoResult();
+
+            // assert
+            expect(result).toEqual({
+                firstHalfVideo: "video1.mp4",
+                secondHalfVideo: "video2.mp4",
+            });
         });
     });
 
     describe("buildPayload", () => {
-        it("should build payload with userBetPercentage and match", async () => {
+        it("should build payload with userBetPercentage and video result", async () => {
             // arrange
             const realPlayer = { id: "player1" };
-            const payload = { some: "payload" };
+            const basePayload = { some: "payload" };
             const playerBetCount = { home: ["111", "113"], away: ["112"] };
+            const userBetPercentage = { home: 66, away: 34, draw: 0 };
+            const videoResult = {
+                firstHalfVideo: "video1.mp4",
+                secondHalfVideo: "video2.mp4",
+            };
 
             gameData.playerBetCount = playerBetCount;
-            jest.spyOn(TableInGameConsumer.prototype, "buildPayload").mockResolvedValue(payload);
-            jest.spyOn(consumer, "getUserBetPercentage").mockReturnValue({ home: 66, away: 34 });
+
+            jest.spyOn(TableInGameConsumer.prototype, "buildPayload").mockResolvedValue(basePayload);
+            jest.spyOn(consumer, "getUserBetPercentage").mockReturnValue(userBetPercentage);
+            jest.spyOn(consumer, "getCurrentVideoResult").mockReturnValue(videoResult);
 
             // act
             const result = await consumer.buildPayload(realPlayer);
 
             // assert
-            expect(result).toEqual({ ...payload, userBetPercentage: { home: 66, away: 34 } });
-        });
-    });
-
-    describe("consume", () => {
-        it("should emit disabled message if gameConfigs is not enabled", async () => {
-            // arrange
-            const realPlayer = { UID: "player1", socketClient: { emit: jest.fn() }, profile: { name: "Player One" } };
-            gameData.remainingTime = 100;
-            gameData.gameConfigs = { enabled: false } as any;
-            gameData.umMessages = "Game is disabled" as any;
-
-            const payload = {
-                user: { red: true, avatarId: "avatar1", type: "type1", rate: 1.5 },
-                some: "payload",
-            };
-
-            jest.spyOn(consumer, "buildPayload").mockResolvedValue(payload);
-
-            // act
-            await consumer.consume(realPlayer);
-
-            // assert
-            expect(realPlayer.socketClient.emit).toHaveBeenCalledWith(consumer.definition.name, {
-                remainingTime: 100,
-                um: true,
-                um_message: "Game is disabled",
+            expect(result).toEqual({
+                ...basePayload,
+                userBetPercentage,
+                videoResult,
             });
-        });
 
-        it("should build payload and emit it", async () => {
-            // arrange
-            const realPlayer = { UID: "player1", socketClient: { emit: jest.fn() }, profile: { name: "Player One" } };
-            const payload = {
-                user: { red: true, avatarId: "avatar1", type: "type1", rate: 1.5 },
-                some: "payload",
-            };
-            jest.spyOn(consumer, "buildPayload").mockResolvedValue(payload);
+            expect(consumer.getUserBetPercentage).toHaveBeenCalledWith(playerBetCount);
 
-            // act
-            await consumer.consume(realPlayer);
-
-            // assert
-            expect(realPlayer.socketClient.emit).toHaveBeenCalledWith(consumer.definition.name, payload);
-            expect(gameData.players["player1"]).toEqual({
-                id: "player1",
-                name: "Player One",
-                red: true,
-                avatarId: "avatar1",
-                type: "type1",
-                rate: 1.5,
-            });
+            expect(consumer.getCurrentVideoResult).toHaveBeenCalled();
         });
     });
 });

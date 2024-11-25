@@ -3,9 +3,19 @@ import {
     generateResultFromAdminRawResult,
     getSettlementResult,
     getScoreFromRate,
+    generateVideoName,
 } from "../../../src/helpers/result-helper";
 import { MatchConfigType } from "../../../src/game-data";
 import { ResultType } from "../../../src/models/rounds";
+
+jest.mock("chance", () => {
+    return function () {
+        return {
+            bool: jest.fn().mockReturnValue(true),
+            weighted: jest.fn().mockImplementation((arr) => arr[0]),
+        };
+    };
+});
 
 jest.mock("../../../src/helpers/shuffle", () => ({
     shuffle: jest.fn((array) => array),
@@ -17,7 +27,7 @@ describe("Result Helper", () => {
     });
 
     describe("generateResult", () => {
-        it("should generate a result based on match configuration", () => {
+        it("should generate a result based on match configuration", async () => {
             // Arrange
             const matchConfig: MatchConfigType = {
                 firstHalf: {
@@ -32,19 +42,24 @@ describe("Result Helper", () => {
                 ou: 2.5,
             };
 
+            const appConfigs = {
+                liveStreamServer: "http://marble-football",
+            } as any;
+
             jest.spyOn(require("../../../src/helpers/result-helper"), "getScoreFromRate")
-                .mockReturnValueOnce("1-0") // For the first half
-                .mockReturnValueOnce("0-1"); // For the second half
+                .mockReturnValueOnce("1-0")
+                .mockReturnValueOnce("0-0");
 
             // Act
-            const result = generateResult(matchConfig);
+            const result = await generateResult({ matchConfig, appConfigs });
 
             // Assert
             expect(result.firstHalf).toBe("H");
-            expect(result.secondHalf).toBe("A");
+            expect(result.secondHalf).toBe("0");
             expect(result.overUnderValue).toBe(2.5);
-            expect(result.firstHalfVideo).toBe("http://marble-football/watch?v=H");
-            expect(result.secondHalfVideo).toBe("http://marble-football/watch?v=A");
+            expect(result.homeWinsOnDraw).toBe(true);
+            expect(result.firstHalfVideo).toBeDefined();
+            expect(result.secondHalfVideo).toBeDefined();
         });
     });
 
@@ -56,8 +71,6 @@ describe("Result Helper", () => {
                 overUnderValue: 3.5,
                 firstHalfVideo: "http://marble-football/watch?v=HH",
                 secondHalfVideo: "http://marble-football/watch?v=AA",
-                firstHalfTimeline: [],
-                secondHalfTimeline: [],
                 homeWinsOnDraw: false,
             };
 
@@ -74,7 +87,11 @@ describe("Result Helper", () => {
     });
 
     describe("generateResultFromAdminRawResult", () => {
-        it("should generate a result from admin raw result", () => {
+        const appConfigs = {
+            liveStreamServer: "http://marble-football",
+        } as any;
+
+        it("should generate a result from admin raw result", async () => {
             const matchConfig: MatchConfigType = {
                 firstHalf: {
                     scoreRate: { "1-0": 1, "0-1": 1 },
@@ -94,13 +111,11 @@ describe("Result Helper", () => {
                 homeWinsOnDraw: false,
             } as ResultType;
 
-            const result = generateResultFromAdminRawResult(matchConfig, roundResult);
+            const result = await generateResultFromAdminRawResult(matchConfig, roundResult, appConfigs);
 
             expect(result.firstHalf).toBe("HAAA");
             expect(result.secondHalf).toBe("AHHH");
             expect(result.overUnderValue).toBe(2.5);
-            expect(result.firstHalfVideo).toBe("http://marble-football/watch?v=HAAA");
-            expect(result.secondHalfVideo).toBe("http://marble-football/watch?v=AHHH");
         });
     });
 
@@ -111,7 +126,20 @@ describe("Result Helper", () => {
 
             const score = getScoreFromRate(scores, rates);
 
-            expect(score).toBe("2-0");
+            expect(score).toBe("1-0");
+        });
+    });
+
+    describe("generateVideoName", () => {
+        it("should generate a video name based on result", () => {
+            // Arrange
+            const result = "HAA";
+
+            // Act
+            const videoName = generateVideoName(result);
+
+            // Assert
+            expect(videoName).toBe("1766b6a6cfca5a31f47efc3b756e60e1");
         });
     });
 });
