@@ -17,6 +17,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
         super(container);
 
         this.tournamentConsumer = container.tournamentConsumer;
+        this.gameData.liveStreamServer = this.appConfigs.liveStreamServer;
     }
 
     override resetForNewRound() {
@@ -99,6 +100,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
             secondHalfVideo: this.gameData.result.secondHalfVideo,
             firstHalfTimeline: this.gameData.result.firstHalfTimeline,
             secondHalfTimeline: this.gameData.result.secondHalfTimeline,
+            liveStreamServer: this.gameData.liveStreamServer,
         };
 
         this.runningRoundInfoPublisher.publishToAllUsers({ videoResult });

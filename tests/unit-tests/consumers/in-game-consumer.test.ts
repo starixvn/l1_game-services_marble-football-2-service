@@ -52,7 +52,11 @@ describe("InGameConsumer test", () => {
             gameData.result = {
                 firstHalfVideo: "video1.mp4",
                 secondHalfVideo: "video2.mp4",
+                firstHalfTimeline: [],
+                secondHalfTimeline: [],
             };
+
+            gameData.liveStreamServer = "server1";
 
             // act
             const result = consumer.getCurrentVideoResult();
@@ -61,6 +65,9 @@ describe("InGameConsumer test", () => {
             expect(result).toEqual({
                 firstHalfVideo: "video1.mp4",
                 secondHalfVideo: "video2.mp4",
+                firstHalfTimeline: [],
+                secondHalfTimeline: [],
+                liveStreamServer: "server1",
             });
         });
     });
@@ -77,6 +84,7 @@ describe("InGameConsumer test", () => {
                 secondHalfVideo: "video2.mp4",
                 firstHalfTimeline: [],
                 secondHalfTimeline: [],
+                liveStreamServer: "server1",
             };
 
             gameData.playerBetCount = playerBetCount;

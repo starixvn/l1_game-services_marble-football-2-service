@@ -10,6 +10,7 @@ export default class GameData extends TableGameData {
     }
     playerBetCount: Record<string, string[]> = {};
     matchConfig: MatchConfigType = {} as MatchConfigType;
+    liveStreamServer: string = "";
 }
 
 export type RealPlayer = {

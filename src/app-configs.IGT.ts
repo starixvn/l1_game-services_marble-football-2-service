@@ -23,6 +23,5 @@ export default Object.assign(appConfigs, {
             auto_reconnect: true,
         },
     },
-    enabledBoostedOdds: false,
     disableCors: true,
 });

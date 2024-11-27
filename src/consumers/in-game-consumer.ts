@@ -24,6 +24,7 @@ export default class InGameConsumer extends TableInGameConsumer {
             secondHalfVideo: this.gameData.result.secondHalfVideo,
             firstHalfTimeline: this.gameData.result.firstHalfTimeline,
             secondHalfTimeline: this.gameData.result.secondHalfTimeline,
+            liveStreamServer: this.gameData.liveStreamServer,
         };
     }
 }
