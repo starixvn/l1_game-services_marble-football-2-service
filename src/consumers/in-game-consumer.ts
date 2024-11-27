@@ -22,6 +22,8 @@ export default class InGameConsumer extends TableInGameConsumer {
         return {
             firstHalfVideo: this.gameData.result.firstHalfVideo,
             secondHalfVideo: this.gameData.result.secondHalfVideo,
+            firstHalfTimeline: this.gameData.result.firstHalfTimeline,
+            secondHalfTimeline: this.gameData.result.secondHalfTimeline,
         };
     }
 }

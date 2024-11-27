@@ -1,16 +1,17 @@
-import Chance from "chance";
 import { Table } from "sc-game-base";
 import type { TournamentConsumer } from "../consumers";
 import GameData, { MatchConfigType } from "../game-data";
 import { calculateFulltimeOdds } from "../helpers/odds-helper";
 import { halfConfigs } from "./../match-configs";
 import GameDefinition from "../game-definition";
+import AppConfigs from "../app-configs";
 
 export default class GameCron extends Table.Crons.TableGameCron {
     declare gameData: GameData;
     declare definition: GameDefinition;
+    declare appConfigs: typeof AppConfigs;
+
     tournamentConsumer: TournamentConsumer;
-    chance = new Chance();
 
     constructor(container: any) {
         super(container);
@@ -24,14 +25,40 @@ export default class GameCron extends Table.Crons.TableGameCron {
     }
 
     getMatchConfig(): MatchConfigType {
-        const firstHalf = this.chance.pickone(halfConfigs);
-        const secondHalf = this.chance.pickone(halfConfigs);
+        const firstHalf = halfConfigs[0];
+        const secondHalf = halfConfigs[0];
 
         return {
             firstHalf,
             secondHalf,
             ou: firstHalf.ou + secondHalf.ou,
         };
+    }
+
+    async getVideoTimelineForHalf(videoName: string) {
+        const url = new URL(`${videoName}.json`, this.appConfigs.liveStreamServer);
+
+        try {
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                this.logService(`Failed to fetch video timeline ${url} with error: ${response.status}`);
+                return [];
+            }
+
+            const data = await response.json();
+
+            return data.timeLine;
+        } catch (error) {
+            this.logService(`Failed to get video timeline ${url} with error: ${error}`);
+            return [];
+        }
+    }
+
+    async getVideoTimeline() {
+        this.gameData.result.firstHalfTimeline = await this.getVideoTimelineForHalf(this.gameData.result.firstHalfVideo);
+
+        this.gameData.result.secondHalfTimeline = await this.getVideoTimelineForHalf(this.gameData.result.secondHalfVideo);
     }
 
     calculateOdds() {
@@ -70,6 +97,8 @@ export default class GameCron extends Table.Crons.TableGameCron {
         const videoResult = {
             firstHalfVideo: this.gameData.result.firstHalfVideo,
             secondHalfVideo: this.gameData.result.secondHalfVideo,
+            firstHalfTimeline: this.gameData.result.firstHalfTimeline,
+            secondHalfTimeline: this.gameData.result.secondHalfTimeline,
         };
 
         this.runningRoundInfoPublisher.publishToAllUsers({ videoResult });
@@ -91,7 +120,6 @@ export default class GameCron extends Table.Crons.TableGameCron {
         if (this.isStartingTime(remainingTime, durations)) {
             this.resetForNewRound();
             this.bot?.reset();
-            this.appConfigs.enabledBoostedOdds && (await this.updatePromotionOddsAndNotify());
 
             await this.generateRoundData();
         }
@@ -102,6 +130,10 @@ export default class GameCron extends Table.Crons.TableGameCron {
 
         if (remainingTime === durations.lockingBet - 1) {
             this.gameStatusPublisher.publishEndPlacingBetStatus();
+        }
+
+        if (remainingTime === durations.streamingVideo) {
+            await this.getVideoTimeline();
         }
 
         if (remainingTime === durations.streamingVideo - 1) {

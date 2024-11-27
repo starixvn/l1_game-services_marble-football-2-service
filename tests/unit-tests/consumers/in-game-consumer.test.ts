@@ -75,6 +75,8 @@ describe("InGameConsumer test", () => {
             const videoResult = {
                 firstHalfVideo: "video1.mp4",
                 secondHalfVideo: "video2.mp4",
+                firstHalfTimeline: [],
+                secondHalfTimeline: [],
             };
 
             gameData.playerBetCount = playerBetCount;
