@@ -1,8 +1,10 @@
 import { HalfConfigType } from "./match-configs";
 import { TableGameData } from "sc-game-base/src/table";
+import { ResultType } from "./models/rounds";
 
 export default class GameData extends TableGameData {
     declare realPlayers: { [playerId: string]: RealPlayer };
+    declare result: ResultType;
 
     constructor(remainingTime: number) {
         super(remainingTime);
@@ -10,7 +12,7 @@ export default class GameData extends TableGameData {
     }
     playerBetCount: Record<string, string[]> = {};
     matchConfig: MatchConfigType = {} as MatchConfigType;
-    liveStreamServer: string = "";
+    liveStreamServer = "";
 }
 
 export type RealPlayer = {

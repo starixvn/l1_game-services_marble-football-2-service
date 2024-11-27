@@ -157,7 +157,7 @@ describe("GameCron", () => {
             gameCron.gameData.result = {
                 firstHalfVideo: "http://marble-football/watch?v=HH",
                 secondHalfVideo: "http://marble-football/watch?v=AA",
-            };
+            } as any;
 
             // act
             await gameCron.proceed();
@@ -335,7 +335,7 @@ describe("GameCron", () => {
             gameCron.gameData.result = {
                 firstHalfVideo: "first-half-video",
                 secondHalfVideo: "second-half-video",
-            };
+            } as any;
             jest.spyOn(gameCron, "getVideoTimelineForHalf")
                 .mockResolvedValueOnce(mockFirstHalfTimeline)
                 .mockResolvedValueOnce(mockSecondHalfTimeline);

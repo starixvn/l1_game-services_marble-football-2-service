@@ -54,7 +54,9 @@ describe("InGameConsumer test", () => {
                 secondHalfVideo: "video2.mp4",
                 firstHalfTimeline: [],
                 secondHalfTimeline: [],
-            };
+                firstHalf: "AH",
+                secondHalf: "HA",
+            } as any;
 
             gameData.liveStreamServer = "server1";
 
@@ -68,6 +70,8 @@ describe("InGameConsumer test", () => {
                 firstHalfTimeline: [],
                 secondHalfTimeline: [],
                 liveStreamServer: "server1",
+                firstHalf: "AH",
+                secondHalf: "HA",
             });
         });
     });
@@ -85,6 +89,8 @@ describe("InGameConsumer test", () => {
                 firstHalfTimeline: [],
                 secondHalfTimeline: [],
                 liveStreamServer: "server1",
+                firstHalf: "AH",
+                secondHalf: "HA",
             };
 
             gameData.playerBetCount = playerBetCount;
