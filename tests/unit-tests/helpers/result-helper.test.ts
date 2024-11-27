@@ -27,7 +27,7 @@ describe("Result Helper", () => {
     });
 
     describe("generateResult", () => {
-        it("should generate a result based on match configuration", async () => {
+        it("should generate a result based on match configuration", () => {
             // Arrange
             const matchConfig: MatchConfigType = {
                 firstHalf: {
@@ -42,16 +42,12 @@ describe("Result Helper", () => {
                 ou: 2.5,
             };
 
-            const appConfigs = {
-                liveStreamServer: "http://marble-football",
-            } as any;
-
             jest.spyOn(require("../../../src/helpers/result-helper"), "getScoreFromRate")
                 .mockReturnValueOnce("1-0")
                 .mockReturnValueOnce("0-0");
 
             // Act
-            const result = await generateResult({ matchConfig, appConfigs });
+            const result = generateResult(matchConfig);
 
             // Assert
             expect(result.firstHalf).toBe("H");
@@ -87,11 +83,7 @@ describe("Result Helper", () => {
     });
 
     describe("generateResultFromAdminRawResult", () => {
-        const appConfigs = {
-            liveStreamServer: "http://marble-football",
-        } as any;
-
-        it("should generate a result from admin raw result", async () => {
+        it("should generate a result from admin raw result", () => {
             const matchConfig: MatchConfigType = {
                 firstHalf: {
                     scoreRate: { "1-0": 1, "0-1": 1 },
@@ -111,7 +103,7 @@ describe("Result Helper", () => {
                 homeWinsOnDraw: false,
             } as ResultType;
 
-            const result = await generateResultFromAdminRawResult(matchConfig, roundResult, appConfigs);
+            const result = generateResultFromAdminRawResult(matchConfig, roundResult);
 
             expect(result.firstHalf).toBe("HAAA");
             expect(result.secondHalf).toBe("AHHH");

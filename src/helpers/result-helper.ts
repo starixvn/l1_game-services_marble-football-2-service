@@ -4,14 +4,13 @@ import { ResultType, SettlementResultType } from "../models/rounds";
 import Chance from "chance";
 import { shuffle } from "./shuffle";
 import crypto from "crypto";
-import AppConfigs from "../app-configs";
 
-export const generateResult = async ({ matchConfig, appConfigs }: { matchConfig: MatchConfigType; appConfigs: typeof AppConfigs }) => {
+export const generateResult = (matchConfig: MatchConfigType) => {
     const chance = new Chance();
 
     const firstHalf = generateResultForHalf(matchConfig.firstHalf);
     const secondHalf = generateResultForHalf(matchConfig.secondHalf);
-    const videoInfo = await getVideoInfoFromResult(firstHalf, secondHalf, appConfigs);
+    const videoInfo = getVideoInfoFromResult(firstHalf, secondHalf);
     const homeWinsOnDraw = chance.bool();
 
     return {
@@ -23,14 +22,10 @@ export const generateResult = async ({ matchConfig, appConfigs }: { matchConfig:
     };
 };
 
-export const generateResultFromAdminRawResult = async (
-    matchConfig: MatchConfigType,
-    roundResult: ResultType,
-    appConfigs: typeof AppConfigs
-): Promise<ResultType> => {
+export const generateResultFromAdminRawResult = (matchConfig: MatchConfigType, roundResult: ResultType): ResultType => {
     const firstHalf = roundResult.firstHalf || "0";
     const secondHalf = roundResult.secondHalf || "0";
-    const videoInfo = await getVideoInfoFromResult(firstHalf, secondHalf, appConfigs);
+    const videoInfo = getVideoInfoFromResult(firstHalf, secondHalf);
 
     return {
         firstHalf,
@@ -88,7 +83,7 @@ export const getScoreFromRate = (scores: string[], rates: number[]) => {
     return chance.weighted(scores, rates);
 };
 
-const getVideoInfoFromResult = async (firstHalf: string, secondHalf: string, appConfigs: typeof AppConfigs) => {
+const getVideoInfoFromResult = (firstHalf: string, secondHalf: string) => {
     const firstHalfVideo = generateVideoName(firstHalf);
     const secondHalfVideo = generateVideoName(secondHalf);
 
