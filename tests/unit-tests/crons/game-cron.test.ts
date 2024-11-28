@@ -141,8 +141,9 @@ describe("GameCron", () => {
 
         it("should call publishVideoStream at the correct time", async () => {
             // arrange
-            gameCron.gameData.remainingTime = definition.durations.streamingVideo;
+            gameCron.gameData.remainingTime = definition.durations.streamingVideo + 1;
             jest.spyOn(gameCron, "publishVideoStream");
+            jest.spyOn(gameCron, "getVideoTimeline").mockResolvedValue();
 
             // act
             await gameCron.proceed();
@@ -153,11 +154,13 @@ describe("GameCron", () => {
 
         it("should publish video stream at the correct time", async () => {
             // arrange
-            gameCron.gameData.remainingTime = definition.durations.streamingVideo;
+            gameCron.gameData.remainingTime = definition.durations.streamingVideo + 1;
             gameCron.gameData.result = {
                 firstHalfVideo: "http://marble-football/watch?v=HH",
                 secondHalfVideo: "http://marble-football/watch?v=AA",
             } as any;
+
+            jest.spyOn(gameCron, "getVideoTimeline").mockResolvedValue();
 
             // act
             await gameCron.proceed();

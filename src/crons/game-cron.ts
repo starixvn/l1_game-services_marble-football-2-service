@@ -138,9 +138,6 @@ export default class GameCron extends Table.Crons.TableGameCron {
 
         if (remainingTime === durations.streamingVideo) {
             await this.getVideoTimeline();
-        }
-
-        if (remainingTime === durations.streamingVideo - 1) {
             this.publishVideoStream();
         }
 
