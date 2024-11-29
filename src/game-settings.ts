@@ -8,7 +8,7 @@ export default {
         wholeRound: 140,
         placingBets: 130,
         lockingBet: 105,
-        streamingVideo: 100,
+        streamingVideo: 103,
     },
     choices: Object.values(BET_CHOICES),
     choicesMapper: { home: 1, away: 2, draw: 3, over: 4, under: 5 },
