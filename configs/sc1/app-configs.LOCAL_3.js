@@ -67,5 +67,5 @@ export default {
         code: "SEAOC",
         teams: ["BRN", "KHM", "IDN", "LAO", "MYS", "PHL", "SGP", "THA", "TLS", "VNM", "JPN", "KOR", "CHN", "TWN", "HKG", "IND"],
     },
-    liveStreamServer: "https://scstream.s3.amazonaws.com/demo/",
+    liveStreamServer: "https://minio.lumigame.com/sc-stream/demo/",
 };
