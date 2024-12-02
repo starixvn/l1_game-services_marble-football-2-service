@@ -94,7 +94,7 @@ const getVideoInfoFromResult = (firstHalf: string, secondHalf: string) => {
 };
 
 export const generateVideoName = (result: string, numberOfVideos = 1) => {
-    const videoIndex = numberOfVideos > 1 ? Math.floor(Math.random() * (numberOfVideos - 1)) : 1;
+    const videoIndex = numberOfVideos > 1 ? Math.floor(Math.random() * (numberOfVideos - 1)) - 1 : 0;
 
     return crypto.createHash("md5").update(`${result}-${videoIndex}`).digest("hex");
 };

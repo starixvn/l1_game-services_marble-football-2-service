@@ -1,9 +1,8 @@
 import { Table } from "sc-game-base";
-import type { TournamentConsumer } from "../consumers";
 import GameData, { MatchConfigType } from "../game-data";
 import { calculateFulltimeOdds } from "../helpers/odds-helper";
 import { halfConfigs } from "./../match-configs";
-import GameDefinition from "../game-definition";
+import GameDefinition, { Duration } from "../game-definition";
 import AppConfigs from "../app-configs";
 
 export default class GameCron extends Table.Crons.TableGameCron {
@@ -11,12 +10,9 @@ export default class GameCron extends Table.Crons.TableGameCron {
     declare definition: GameDefinition;
     declare appConfigs: typeof AppConfigs;
 
-    tournamentConsumer: TournamentConsumer;
-
     constructor(container: any) {
         super(container);
 
-        this.tournamentConsumer = container.tournamentConsumer;
         this.gameData.liveStreamServer = this.appConfigs.liveStreamServer;
     }
 
@@ -43,7 +39,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
             const response = await fetch(url);
 
             if (!response.ok) {
-                this.logService(`Failed to fetch video timeline ${url} with error: ${response.status}`);
+                this.logService.logError(`Failed to fetch video timeline ${url} with error: ${response.status}`);
                 return [];
             }
 
@@ -51,7 +47,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
 
             return data.timeLine;
         } catch (error) {
-            this.logService(`Failed to get video timeline ${url} with error: ${error}`);
+            this.logService.logError(`Failed to get video timeline ${url} with error: ${error}`);
             return [];
         }
     }
@@ -108,6 +104,12 @@ export default class GameCron extends Table.Crons.TableGameCron {
         this.runningRoundInfoPublisher.publishToAllUsers({ videoResult });
     }
 
+    publishTournament() {
+        const tournament = this.gameData.tournament;
+
+        this.runningRoundInfoPublisher.publishToAllUsers({ tournament });
+    }
+
     override async proceed() {
         const { durations } = this.definition;
 
@@ -126,6 +128,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
             this.bot?.reset();
 
             await this.generateRoundData();
+            this.publishTournament();
         }
 
         if (remainingTime === durations.placingBets) {
@@ -145,7 +148,6 @@ export default class GameCron extends Table.Crons.TableGameCron {
             this.gameData.remainingTime = durations.wholeRound;
 
             await this.settleGameRoundConsumer.settleRound();
-            await this.updateTournament();
         }
 
         if (this.isDuringBetTime(remainingTime)) {
@@ -154,16 +156,13 @@ export default class GameCron extends Table.Crons.TableGameCron {
         }
     }
 
-    async updateTournament() {
-        const settlementResult = this.definition.settle(this.gameData.result);
-        const homeWins = settlementResult.draw ? this.gameData.result.homeWinsOnDraw : settlementResult.home;
-
-        await this.tournamentConsumer.updateMatchResult(this.gameData.roundId - 1, this.gameData.result.tournamentId as string, homeWins);
-    }
-
     isDuringBetTime(remainingTime: number) {
         const { placingBets, lockingBet } = this.definition.durations;
 
         return remainingTime < placingBets && remainingTime > lockingBet;
+    }
+
+    override isStartingTime(remainingTime: number, durations: Duration) {
+        return remainingTime === durations.startingRound;
     }
 }

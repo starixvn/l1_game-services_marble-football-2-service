@@ -39,16 +39,16 @@ export default class TournamentConsumer {
         }
     }
 
-    async getCurrentTournamentId(): Promise<string> {
+    async getCurrentTournament(): Promise<ITournament> {
         const runningTournament: ITournament = await this.tournamentRepository.findOne({ ended: false }).lean().exec();
 
         if (runningTournament) {
-            return runningTournament._id.toString();
+            return runningTournament;
         }
 
         const tournament = await this.createNewTournament();
 
-        return tournament._id.toString();
+        return tournament;
     }
 
     private async createNewTournament() {

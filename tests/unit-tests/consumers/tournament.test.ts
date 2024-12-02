@@ -18,7 +18,7 @@ describe(TournamentConsumer.name, () => {
             (tournamentRepository as any).exec.mockReturnValue({ _id: "fake_id" });
 
             // Act
-            await consumer.getCurrentTournamentId();
+            await consumer.getCurrentTournament();
 
             // Assert
             expect(tournamentRepository.findOne).toHaveBeenCalledWith({ ended: false });
@@ -30,7 +30,7 @@ describe(TournamentConsumer.name, () => {
                 (tournamentRepository as any).exec.mockReturnValue({ _id: "6729922bdbdc9fc5fb25d98d" });
 
                 // Act
-                const actual = await consumer.getCurrentTournamentId();
+                const actual = await consumer.getCurrentTournament();
 
                 // Assert
                 expect(actual).toBe("6729922bdbdc9fc5fb25d98d");
@@ -44,7 +44,7 @@ describe(TournamentConsumer.name, () => {
                 (tournamentRepository as any).create.mockReturnValue({ _id: "6729922bdbdc9fc5fb25d98d" });
 
                 // Act
-                await consumer.getCurrentTournamentId();
+                await consumer.getCurrentTournament();
 
                 // Assert
                 expect(tournamentRepository.create).toHaveBeenCalledWith({
@@ -61,7 +61,7 @@ describe(TournamentConsumer.name, () => {
                 (tournamentRepository as any).create.mockReturnValue({ _id: "6729922bdbdc9fc5fb25d98d" });
 
                 // Act
-                const actual = await consumer.getCurrentTournamentId();
+                const actual = await consumer.getCurrentTournament();
 
                 // Assert
                 expect(actual).toBe("6729922bdbdc9fc5fb25d98d");

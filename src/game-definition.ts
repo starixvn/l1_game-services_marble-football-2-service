@@ -20,4 +20,4 @@ export type GameSettings = {
     historyPageSize: number;
 };
 
-export type Duration = BaseDuration & { streamingVideo: number };
+export type Duration = BaseDuration & { streamingVideo: number; startingRound: number };
