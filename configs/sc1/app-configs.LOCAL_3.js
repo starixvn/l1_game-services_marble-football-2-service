@@ -64,8 +64,8 @@ export default {
         endpoint: "http://10.10.50.69:4318/v1/traces",
     },
     tournament: {
-        code: "SEAOC",
-        teams: ["BRN", "KHM", "IDN", "LAO", "MYS", "PHL", "SGP", "THA", "TLS", "VNM", "JPN", "KOR", "CHN", "TWN", "HKG", "IND"],
+        code: "UCL",
+        teams: ["MCI", "RMA", "BAR", "LIV", "ARS", "FCB", "INT", "LEV", "AVL", "ATA", "BVB", "JUV", "PSG", "SCP", "ATM", "MIL"],
     },
     liveStreamServer: "https://minio.lumigame.com/sc-stream/demo/",
 };
