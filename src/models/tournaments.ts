@@ -5,6 +5,7 @@ export type MatchType = {
     id?: number;
     home: string;
     away: string;
+    homeWins?: boolean;
 };
 
 export interface ITournament {
