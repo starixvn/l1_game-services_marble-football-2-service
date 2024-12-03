@@ -11,8 +11,10 @@ export default class InGameConsumer extends TableInGameConsumer {
         const { playerBetCount } = this.gameData;
         const userBetPercentage = this.getUserBetPercentage(playerBetCount);
         const videoResult = this.getCurrentVideoResult();
+        const liveStreamServer = this.gameData.liveStreamServer;
+
         const tournament = this.gameData.tournament;
-        return { ...payload, userBetPercentage, videoResult, tournament };
+        return { ...payload, userBetPercentage, liveStreamServer, videoResult, tournament };
     }
 
     getUserBetPercentage(playerBetCount: Record<string, string[]>) {
@@ -27,7 +29,6 @@ export default class InGameConsumer extends TableInGameConsumer {
             secondHalfTimeline: this.gameData.result.secondHalfTimeline,
             firstHalf: this.gameData.result.firstHalf,
             secondHalf: this.gameData.result.secondHalf,
-            liveStreamServer: this.gameData.liveStreamServer,
         };
     }
 }
