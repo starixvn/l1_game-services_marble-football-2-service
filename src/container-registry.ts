@@ -8,8 +8,10 @@ import {
     UnsettledRoundConsumer,
     SettleGameRoundConsumer,
 } from "./consumers";
+
 import { Bot, GameCron, ProcessBetQueue } from "./crons";
 import { betLogs, bets, results, rounds, tmpBets, tournaments } from "./models";
+import { RunningRoundInfoPublisher } from "./publishers";
 
 export default class ContainerRegistry extends Table.TableContainerRegistry {
     register(appConfigs: any, definition: any, gameData: any): AwilixContainer<any> {
@@ -51,6 +53,14 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
             roundResultConsumer: asClass(RoundResultConsumer).singleton().proxy(),
             unsettledRoundConsumer: asClass(UnsettledRoundConsumer).singleton().proxy(),
             settleGameRoundConsumer: asClass(SettleGameRoundConsumer).singleton().proxy(),
+        });
+    }
+
+    registerPublishers() {
+        super.registerPublishers();
+
+        this.container.register({
+            runningRoundInfoPublisher: asClass(RunningRoundInfoPublisher).singleton(),
         });
     }
 }

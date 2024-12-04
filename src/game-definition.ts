@@ -1,6 +1,6 @@
-import { GameDefinition as BaseGameDefinition } from "sc-game-base/src/core";
+import { TableGameDefinition } from "sc-game-base/src/table";
 import { Duration as BaseDuration } from "sc-game-base/src/core/game-definition";
-export default class GameDefinition extends BaseGameDefinition {
+export default class GameDefinition extends TableGameDefinition {
     declare durations: Duration;
     constructor(gameSettings: GameSettings, generateResult: Function, settle: Function, generateRawResultForHash: Function) {
         super(gameSettings, generateResult, settle, generateRawResultForHash);
