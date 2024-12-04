@@ -37,5 +37,5 @@ export const halfConfig: HalfConfigType = {
 export const matchConfig: MatchConfigType = {
     firstHalf: halfConfig,
     secondHalf: halfConfig,
-    ou: 2.5,
+    ou: 4.5,
 };

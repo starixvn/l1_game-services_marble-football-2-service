@@ -1,6 +1,5 @@
 import { Table } from "sc-game-base";
 import GameData from "../game-data";
-import { calculateFulltimeOdds } from "../helpers/odds-helper";
 import GameDefinition from "../game-definition";
 import AppConfigs from "../app-configs";
 import { TournamentConsumer } from "../consumers";
@@ -50,31 +49,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
         this.gameData.result.secondHalfTimeline = await this.getVideoTimelineForHalf(this.gameData.result.secondHalfVideo);
     }
 
-    calculateOdds() {
-        const fulltimeOdds = calculateFulltimeOdds(this.gameData.matchConfig, this.gameData.gameConfigs?.margin);
-
-        const odds = {
-            home: fulltimeOdds.odds.home,
-            draw: fulltimeOdds.odds.draw,
-            away: fulltimeOdds.odds.away,
-            over: fulltimeOdds.odds.over,
-            under: fulltimeOdds.odds.under,
-            odd: fulltimeOdds.odds.odd,
-            even: fulltimeOdds.odds.even,
-        };
-
-        return {
-            odds,
-            overUnderValue: fulltimeOdds.ou,
-        };
-    }
-
     async generateRoundData() {
-        const { odds, overUnderValue } = this.calculateOdds();
-
-        this.gameData.matchConfig.ou = overUnderValue;
-        this.gameData.gameConfigs.odds = odds;
-
         await this.roundResultConsumer.generateResult();
 
         this.gameData.settlementResultFromAdmin = {};
