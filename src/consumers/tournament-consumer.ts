@@ -1,4 +1,5 @@
 import type appConfigs from "../app-configs";
+import GameData from "../game-data";
 import { shuffle } from "../helpers";
 import generate from "../helpers/tournament/generate";
 import updateNext from "../helpers/tournament/update-next";
@@ -8,14 +9,17 @@ import type { ITournament } from "../models/tournaments";
 export default class TournamentConsumer {
     tournamentRepository: typeof tournaments;
     appConfigs: typeof appConfigs;
+    gameData: GameData;
 
     constructor(container: any) {
         this.tournamentRepository = container.tournamentRepository;
         this.appConfigs = container.appConfigs;
+        this.gameData = container.gameData;
     }
 
-    async updateMatchResult(roundId: number, tournamentId: string, homeWin: boolean) {
-        const tournament: ITournament = await this.tournamentRepository.findById(tournamentId).lean().exec();
+    async updateMatchResult(homeWin: boolean) {
+        const roundId = this.gameData.roundId - 1;
+        const tournament = await this.getCurrentTournament();
 
         if (tournament) {
             const match = tournament.matches[tournament.currentMatch];
@@ -28,27 +32,33 @@ export default class TournamentConsumer {
                 updateNext(tournament.matches, tournament.currentMatch, team);
             }
 
-            await this.tournamentRepository.updateOne(
+            this.gameData.tournament = await this.tournamentRepository.findOneAndUpdate(
                 { _id: tournament._id },
                 {
                     matches: tournament.matches,
                     ended: ended,
                     currentMatch: tournament.currentMatch + 1,
-                }
+                },
+                { new: true }
             );
         }
     }
 
     async getCurrentTournament(): Promise<ITournament> {
+        if (this.gameData.tournament.ended === false) {
+            return this.gameData.tournament;
+        }
+
         const runningTournament: ITournament = await this.tournamentRepository.findOne({ ended: false }).lean().exec();
 
         if (runningTournament) {
+            this.gameData.tournament = runningTournament;
             return runningTournament;
         }
 
-        const tournament = await this.createNewTournament();
+        this.gameData.tournament = await this.createNewTournament();
 
-        return tournament;
+        return this.gameData.tournament;
     }
 
     private async createNewTournament() {

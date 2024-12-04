@@ -2,18 +2,22 @@ import { Table } from "sc-game-base";
 import GameData, { MatchConfigType } from "../game-data";
 import { calculateFulltimeOdds } from "../helpers/odds-helper";
 import { halfConfigs } from "./../match-configs";
-import GameDefinition, { Duration } from "../game-definition";
+import GameDefinition from "../game-definition";
 import AppConfigs from "../app-configs";
+import { TournamentConsumer } from "../consumers";
 
 export default class GameCron extends Table.Crons.TableGameCron {
     declare gameData: GameData;
     declare definition: GameDefinition;
     declare appConfigs: typeof AppConfigs;
 
+    tournamentConsumer: TournamentConsumer;
+
     constructor(container: any) {
         super(container);
 
         this.gameData.liveStreamServer = this.appConfigs.liveStreamServer;
+        this.tournamentConsumer = container.tournamentConsumer;
     }
 
     override resetForNewRound() {
@@ -103,8 +107,8 @@ export default class GameCron extends Table.Crons.TableGameCron {
         this.runningRoundInfoPublisher.publishToAllUsers({ videoResult });
     }
 
-    publishTournament() {
-        const tournament = this.gameData.tournament;
+    async publishTournament() {
+        const tournament = await this.tournamentConsumer.getCurrentTournament();
 
         this.runningRoundInfoPublisher.publishToAllUsers({ tournament });
     }
@@ -122,12 +126,15 @@ export default class GameCron extends Table.Crons.TableGameCron {
 
         const remainingTime = this.gameData.remainingTime;
 
+        if (remainingTime === durations.startingRound) {
+            await this.publishTournament();
+        }
+
         if (this.isStartingTime(remainingTime, durations)) {
             this.resetForNewRound();
             this.bot?.reset();
 
             await this.generateRoundData();
-            this.publishTournament();
         }
 
         if (remainingTime === durations.placingBets) {
@@ -159,9 +166,5 @@ export default class GameCron extends Table.Crons.TableGameCron {
         const { placingBets, lockingBet } = this.definition.durations;
 
         return remainingTime < placingBets && remainingTime > lockingBet;
-    }
-
-    override isStartingTime(remainingTime: number, durations: Duration) {
-        return remainingTime === durations.startingRound;
     }
 }
