@@ -1,7 +1,6 @@
 import { Table } from "sc-game-base";
-import GameData, { MatchConfigType } from "../game-data";
+import GameData from "../game-data";
 import { calculateFulltimeOdds } from "../helpers/odds-helper";
-import { halfConfigs } from "./../match-configs";
 import GameDefinition from "../game-definition";
 import AppConfigs from "../app-configs";
 import { TournamentConsumer } from "../consumers";
@@ -23,17 +22,6 @@ export default class GameCron extends Table.Crons.TableGameCron {
     override resetForNewRound() {
         super.resetForNewRound();
         this.gameData.playerBetCount = {};
-    }
-
-    getMatchConfig(): MatchConfigType {
-        const firstHalf = halfConfigs[0];
-        const secondHalf = halfConfigs[0];
-
-        return {
-            firstHalf,
-            secondHalf,
-            ou: firstHalf.ou + secondHalf.ou,
-        };
     }
 
     async getVideoTimelineForHalf(videoName: string) {
@@ -82,8 +70,6 @@ export default class GameCron extends Table.Crons.TableGameCron {
     }
 
     async generateRoundData() {
-        this.gameData.matchConfig = this.getMatchConfig();
-
         const { odds, overUnderValue } = this.calculateOdds();
 
         this.gameData.matchConfig.ou = overUnderValue;

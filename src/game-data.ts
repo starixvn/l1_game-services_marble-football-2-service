@@ -1,4 +1,4 @@
-import { HalfConfigType } from "./match-configs";
+import { matchConfig, MatchConfigType } from "./match-configs";
 import { TableGameData } from "sc-game-base/src/table";
 import { ResultType } from "./models/rounds";
 import { ITournament } from "./models/tournaments";
@@ -12,7 +12,7 @@ export default class GameData extends TableGameData {
         this.playerBetCount = {};
     }
     playerBetCount: Record<string, string[]> = {};
-    matchConfig: MatchConfigType = {} as MatchConfigType;
+    matchConfig: MatchConfigType = matchConfig;
     liveStreamServer = "";
     tournament = {} as ITournament;
 }
@@ -22,10 +22,4 @@ export type RealPlayer = {
     profile: { name: string; minBet: number; maxBet: number };
     session: any;
     socketClient: any;
-};
-
-export type MatchConfigType = {
-    firstHalf: HalfConfigType;
-    secondHalf: HalfConfigType;
-    ou: number;
 };

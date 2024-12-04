@@ -1,5 +1,4 @@
-import { MatchConfigType } from "../game-data";
-import { HalfConfigType } from "../match-configs";
+import { HalfConfigType, MatchConfigType } from "../match-configs";
 import { ResultType, SettlementResultType } from "../models/rounds";
 import Chance from "chance";
 import { shuffle } from "./shuffle";
