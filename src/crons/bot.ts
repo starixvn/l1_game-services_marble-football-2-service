@@ -4,10 +4,8 @@ import GameData from "../game-data";
 export default class Bot extends TableGameConfigBot {
     declare gameData: GameData;
 
-    updateBalanceAndPublishBetPayload(botId: string, choice: string, amount: number, balance: number) {
-        if (this.gameData.players[botId]) {
-            this.gameData.players[botId].red = balance;
-        }
+    override updateBalanceAndPublishBetPayload(botId: string, choice: string, amount: number, balance: number) {
+        super.updateBalanceAndPublishBetPayload(botId, choice, amount, balance);
         this.updatePlayerBetCount(botId, choice);
     }
 
@@ -18,14 +16,5 @@ export default class Bot extends TableGameConfigBot {
             }
             !this.gameData.playerBetCount[choice].includes(playerId) && this.gameData.playerBetCount[choice].push(playerId);
         }
-    }
-
-    override addToPlayersAndPublish(bot: any) {
-        this.gameData.players[bot.id] = bot;
-    }
-
-    override removeBot(botId: string) {
-        delete this.gameData.players[botId];
-        delete (this.botsInRoom as any)[botId];
     }
 }
