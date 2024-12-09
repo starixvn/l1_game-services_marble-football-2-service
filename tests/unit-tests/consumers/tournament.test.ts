@@ -1,238 +1,439 @@
+import { stub } from "jest-auto-stub";
 import appConfigs from "../../../src/app-configs";
 import { TournamentConsumer } from "../../../src/consumers";
+import GameData from "../../../src/game-data";
 import { tournamentRepository } from "../global-stubs";
 
 describe(TournamentConsumer.name, () => {
     let consumer: TournamentConsumer;
+    const gameData = stub<GameData>();
 
     beforeEach(() => {
         consumer = new TournamentConsumer({
             tournamentRepository: tournamentRepository,
             appConfigs: appConfigs,
+            gameData: gameData,
         });
     });
 
-    describe("getCurrentTournamentId", () => {
-        it("should find the running tournament", async () => {
+    describe("getCurrentTournament", () => {
+        it("should return the current tournament if not ended", async () => {
             // Arrange
-            (tournamentRepository as any).exec.mockReturnValue({ _id: "fake_id" });
+            gameData.tournament = { _id: "1234", ended: false } as any;
 
             // Act
-            await consumer.getCurrentTournament();
+            const result = await consumer.getCurrentTournament();
+
+            // Assert
+            expect(result).toEqual(gameData.tournament);
+        });
+
+        it("should fetch and return a running tournament if none is set in gameData", async () => {
+            // Arrange
+            gameData.tournament = { ended: true } as any;
+
+            const mockLeanExec = jest.fn().mockResolvedValue({
+                _id: "1234",
+                ended: false,
+            });
+
+            (tournamentRepository as any).findOne.mockReturnValue({
+                lean: () => ({ exec: mockLeanExec }),
+            } as any);
+
+            // Act
+            const result = await consumer.getCurrentTournament();
 
             // Assert
             expect(tournamentRepository.findOne).toHaveBeenCalledWith({ ended: false });
+            expect(result).toEqual({ _id: "1234", ended: false });
         });
 
-        describe("when found the running tournament", () => {
-            it("should return its id", async () => {
-                // Arrange
-                (tournamentRepository as any).exec.mockReturnValue({ _id: "6729922bdbdc9fc5fb25d98d" });
+        it("should create and return a new tournament if no running tournament exists", async () => {
+            // Arrange
+            gameData.tournament = { ended: true } as any;
 
-                // Act
-                const actual = await consumer.getCurrentTournament();
+            (tournamentRepository as any).findOne.mockReturnValue({
+                lean: () => ({ exec: () => null }),
+            } as any);
 
-                // Assert
-                expect(actual).toBe("6729922bdbdc9fc5fb25d98d");
+            (tournamentRepository as any).create.mockReturnValue({ _id: "6729922bdbdc9fc5fb25d98d" });
+
+            // Act
+            const result = await consumer.getCurrentTournament();
+
+            // Assert
+            expect(tournamentRepository.create).toHaveBeenCalledWith({
+                code: appConfigs.tournament.code,
+                matches: expect.any(Array),
+                currentMatch: 0,
+                ended: false,
             });
-        });
-
-        describe("when the running tournament is not found", () => {
-            it("should create the new tournament", async () => {
-                // Arrange
-                (tournamentRepository as any).exec.mockReturnValue(null);
-                (tournamentRepository as any).create.mockReturnValue({ _id: "6729922bdbdc9fc5fb25d98d" });
-
-                // Act
-                await consumer.getCurrentTournament();
-
-                // Assert
-                expect(tournamentRepository.create).toHaveBeenCalledWith({
-                    code: appConfigs.tournament.code,
-                    matches: expect.any(Array),
-                    currentMatch: 0,
-                    ended: false,
-                });
-            });
-
-            it("should return the id of the new tournament", async () => {
-                // Arrange
-                (tournamentRepository as any).exec.mockReturnValue(null);
-                (tournamentRepository as any).create.mockReturnValue({ _id: "6729922bdbdc9fc5fb25d98d" });
-
-                // Act
-                const actual = await consumer.getCurrentTournament();
-
-                // Assert
-                expect(actual).toBe("6729922bdbdc9fc5fb25d98d");
-            });
+            expect(result).toEqual({ _id: "6729922bdbdc9fc5fb25d98d" });
         });
     });
 
     describe("updateMatchResult", () => {
-        it("should find the tournament", async () => {
+        it("should update the match result and proceed to the next match", async () => {
             // Arrange
-            (tournamentRepository as any).exec.mockReturnValue(null);
+            const matches = [
+                {
+                    home: "VNM",
+                    away: "SGP",
+                },
+                {
+                    home: "PHL",
+                    away: "TWN",
+                },
+                {
+                    home: "HKG",
+                    away: "THA",
+                },
+                {
+                    home: "IDN",
+                    away: "TLS",
+                },
+                {
+                    home: "JPN",
+                    away: "KOR",
+                },
+                {
+                    home: "CHN",
+                    away: "LAO",
+                },
+                {
+                    home: "BRN",
+                    away: "IND",
+                },
+                {
+                    home: "KHM",
+                    away: "MYS",
+                },
+                {
+                    home: "",
+                    away: "",
+                },
+                {
+                    home: "",
+                    away: "",
+                },
+                {
+                    home: "",
+                    away: "",
+                },
+                {
+                    home: "",
+                    away: "",
+                },
+                {
+                    home: "",
+                    away: "",
+                },
+                {
+                    home: "",
+                    away: "",
+                },
+                {
+                    home: "",
+                    away: "",
+                },
+            ];
+
+            gameData.roundId = 1;
+            gameData.tournament = {
+                _id: "672988e6610ec92d5204aaf4",
+                matches: matches,
+                currentMatch: 0,
+                ended: false,
+            } as any;
+
+            const expectedMatches = [
+                {
+                    home: "VNM",
+                    away: "SGP",
+                    id: 0,
+                    homeWins: true,
+                },
+                {
+                    home: "PHL",
+                    away: "TWN",
+                },
+                {
+                    home: "HKG",
+                    away: "THA",
+                },
+                {
+                    home: "IDN",
+                    away: "TLS",
+                },
+                {
+                    home: "JPN",
+                    away: "KOR",
+                },
+                {
+                    home: "CHN",
+                    away: "LAO",
+                },
+                {
+                    home: "BRN",
+                    away: "IND",
+                },
+                {
+                    home: "KHM",
+                    away: "MYS",
+                },
+                {
+                    home: "VNM",
+                    away: "",
+                },
+                {
+                    home: "",
+                    away: "",
+                },
+                {
+                    home: "",
+                    away: "",
+                },
+                {
+                    home: "",
+                    away: "",
+                },
+                {
+                    home: "",
+                    away: "",
+                },
+                {
+                    home: "",
+                    away: "",
+                },
+                {
+                    home: "",
+                    away: "",
+                },
+            ];
 
             // Act
-            await consumer.updateMatchResult(0, "tournament_id", false);
+            await consumer.updateMatchResult(true);
 
             // Assert
-            expect(tournamentRepository.findById).toHaveBeenCalledWith("tournament_id");
+            expect(tournamentRepository.findOneAndUpdate).toHaveBeenCalledWith(
+                { _id: "672988e6610ec92d5204aaf4" },
+                {
+                    matches: expectedMatches,
+                    currentMatch: 1,
+                    ended: false,
+                },
+                { new: true }
+            );
         });
 
-        describe("when found the tournament", () => {
-            beforeEach(() => {
-                (tournamentRepository as any).exec.mockReturnValue({
-                    _id: "672988e6610ec92d5204aaf4",
-                    matches: [
-                        {
-                            home: "VNM",
-                            away: "SGP",
-                        },
-                        {
-                            home: "PHL",
-                            away: "TWN",
-                        },
-                        {
-                            home: "HKG",
-                            away: "THA",
-                        },
-                        {
-                            home: "IDN",
-                            away: "TLS",
-                        },
-                        {
-                            home: "JPN",
-                            away: "KOR",
-                        },
-                        {
-                            home: "CHN",
-                            away: "LAO",
-                        },
-                        {
-                            home: "BRN",
-                            away: "IND",
-                        },
-                        {
-                            home: "KHM",
-                            away: "MYS",
-                        },
-                        {
-                            home: "",
-                            away: "",
-                        },
-                        {
-                            home: "",
-                            away: "",
-                        },
-                        {
-                            home: "",
-                            away: "",
-                        },
-                        {
-                            home: "",
-                            away: "",
-                        },
-                        {
-                            home: "",
-                            away: "",
-                        },
-                        {
-                            home: "",
-                            away: "",
-                        },
-                        {
-                            home: "",
-                            away: "",
-                        },
-                    ],
-                    currentMatch: 0,
-                    ended: false,
-                    code: "SEAOC",
-                    time: new Date("2024-11-05T02:54:30.011Z"),
-                });
-            });
+        it("should update the tournament as ended if it is the last match", async () => {
+            // Arrange
+            const matches = [
+                {
+                    home: "INT",
+                    away: "MCI",
+                    homeWins: true,
+                    id: 1,
+                },
+                {
+                    home: "BVB",
+                    away: "BAR",
+                    homeWins: false,
+                    id: 2,
+                },
+                {
+                    home: "LIV",
+                    away: "RMA",
+                    homeWins: false,
+                    id: 3,
+                },
+                {
+                    home: "SCP",
+                    away: "AVL",
+                    homeWins: false,
+                    id: 4,
+                },
+                {
+                    home: "PSG",
+                    away: "ARS",
+                    homeWins: true,
+                    id: 5,
+                },
+                {
+                    home: "ATM",
+                    away: "JUV",
+                    homeWins: true,
+                    id: 6,
+                },
+                {
+                    home: "FCB",
+                    away: "MIL",
+                    homeWins: false,
+                    id: 7,
+                },
+                {
+                    home: "LEV",
+                    away: "ATA",
+                    homeWins: false,
+                    id: 8,
+                },
+                {
+                    home: "INT",
+                    away: "BAR",
+                    homeWins: true,
+                    id: 9,
+                },
+                {
+                    home: "RMA",
+                    away: "AVL",
+                    homeWins: true,
+                    id: 10,
+                },
+                {
+                    home: "PSG",
+                    away: "ATM",
+                    homeWins: false,
+                    id: 11,
+                },
+                {
+                    home: "MIL",
+                    away: "ATA",
+                    homeWins: false,
+                    id: 12,
+                },
+                {
+                    home: "INT",
+                    away: "RMA",
+                    homeWins: false,
+                    id: 13,
+                },
+                {
+                    home: "ATM",
+                    away: "ATA",
+                    homeWins: false,
+                    id: 14,
+                },
+                {
+                    home: "RMA",
+                    away: "ATA",
+                },
+            ];
 
-            it("should update the state of tournament", async () => {
-                // Arrange
-                const expectedMatches = [
-                    {
-                        home: "VNM",
-                        away: "SGP",
-                        id: 0,
-                    },
-                    {
-                        home: "PHL",
-                        away: "TWN",
-                    },
-                    {
-                        home: "HKG",
-                        away: "THA",
-                    },
-                    {
-                        home: "IDN",
-                        away: "TLS",
-                    },
-                    {
-                        home: "JPN",
-                        away: "KOR",
-                    },
-                    {
-                        home: "CHN",
-                        away: "LAO",
-                    },
-                    {
-                        home: "BRN",
-                        away: "IND",
-                    },
-                    {
-                        home: "KHM",
-                        away: "MYS",
-                    },
-                    {
-                        home: "SGP",
-                        away: "",
-                    },
-                    {
-                        home: "",
-                        away: "",
-                    },
-                    {
-                        home: "",
-                        away: "",
-                    },
-                    {
-                        home: "",
-                        away: "",
-                    },
-                    {
-                        home: "",
-                        away: "",
-                    },
-                    {
-                        home: "",
-                        away: "",
-                    },
-                    {
-                        home: "",
-                        away: "",
-                    },
-                ];
+            gameData.roundId = 16;
+            gameData.tournament = {
+                _id: "672988e6610ec92d5204aaf4",
+                matches: matches,
+                currentMatch: 14,
+                ended: false,
+            } as any;
 
-                // Act
-                await consumer.updateMatchResult(0, "tournament_id", false);
+            const expectedMatches = [
+                {
+                    home: "INT",
+                    away: "MCI",
+                    homeWins: true,
+                    id: 1,
+                },
+                {
+                    home: "BVB",
+                    away: "BAR",
+                    homeWins: false,
+                    id: 2,
+                },
+                {
+                    home: "LIV",
+                    away: "RMA",
+                    homeWins: false,
+                    id: 3,
+                },
+                {
+                    home: "SCP",
+                    away: "AVL",
+                    homeWins: false,
+                    id: 4,
+                },
+                {
+                    home: "PSG",
+                    away: "ARS",
+                    homeWins: true,
+                    id: 5,
+                },
+                {
+                    home: "ATM",
+                    away: "JUV",
+                    homeWins: true,
+                    id: 6,
+                },
+                {
+                    home: "FCB",
+                    away: "MIL",
+                    homeWins: false,
+                    id: 7,
+                },
+                {
+                    home: "LEV",
+                    away: "ATA",
+                    homeWins: false,
+                    id: 8,
+                },
+                {
+                    home: "INT",
+                    away: "BAR",
+                    homeWins: true,
+                    id: 9,
+                },
+                {
+                    home: "RMA",
+                    away: "AVL",
+                    homeWins: true,
+                    id: 10,
+                },
+                {
+                    home: "PSG",
+                    away: "ATM",
+                    homeWins: false,
+                    id: 11,
+                },
+                {
+                    home: "MIL",
+                    away: "ATA",
+                    homeWins: false,
+                    id: 12,
+                },
+                {
+                    home: "INT",
+                    away: "RMA",
+                    homeWins: false,
+                    id: 13,
+                },
+                {
+                    home: "ATM",
+                    away: "ATA",
+                    homeWins: false,
+                    id: 14,
+                },
+                {
+                    home: "RMA",
+                    away: "ATA",
+                    homeWins: false,
+                    id: 15,
+                },
+            ];
 
-                // Assert
-                expect(tournamentRepository.updateOne).toHaveBeenCalledWith(
-                    { _id: "672988e6610ec92d5204aaf4" },
-                    {
-                        matches: expectedMatches,
-                        ended: false,
-                        currentMatch: 1,
-                    }
-                );
-            });
+            // Act
+            await consumer.updateMatchResult(false);
+
+            // Assert
+            expect(tournamentRepository.findOneAndUpdate).toHaveBeenCalledWith(
+                { _id: "672988e6610ec92d5204aaf4" },
+                {
+                    matches: expectedMatches,
+                    currentMatch: 15,
+                    ended: true,
+                },
+                { new: true }
+            );
         });
     });
 });

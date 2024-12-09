@@ -27,7 +27,7 @@ describe("gameSettings", () => {
     });
 
     it("should have the correct choicesMapper", () => {
-        expect(gameSettings.choicesMapper).toEqual({ home: 1, away: 2, draw: 3, over: 4, under: 5 });
+        expect(gameSettings.choicesMapper).toEqual({ home: 1, away: 2, draw: 3, over: 4, under: 5, odd: 6, even: 7 });
     });
 
     it("should have the correct hedgeBetGroups", () => {

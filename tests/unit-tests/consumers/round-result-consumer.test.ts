@@ -2,6 +2,7 @@ import {
     provablyFairConsumer,
     resultsRepository,
     roundResultPublisher,
+    tournamentConsumer,
     roundResultConsumer as roundResultConsumerStub,
 } from "../global-stubs";
 
@@ -57,7 +58,11 @@ describe("RoundResultConsumer", () => {
             roundResultPublisher,
             resultsRepository,
             provablyFairConsumer,
-            tournamentConsumer: { getCurrentTournamentId: async () => "fake_id" },
+            tournamentConsumer,
+        });
+
+        tournamentConsumer.getCurrentTournament = jest.fn().mockResolvedValue({
+            _id: "fake_id",
         });
     });
 
