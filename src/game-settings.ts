@@ -5,7 +5,7 @@ export default {
     name: "MarbleFootball",
     configName: "marblefootball",
     durations: {
-        wholeRound: 154,
+        wholeRound: 150,
         startingRound: 139,
         placingBets: 134,
         lockingBet: 107,
