@@ -12,19 +12,19 @@ import {
     settleGameConsumer,
     unsettledRoundConsumer,
     logService,
+    tournamentConsumer,
 } from "../global-stubs";
 import GameData from "../../../src/game-data";
 import GameDefinition from "../../../src/game-definition";
-import { TournamentConsumer } from "../../../src/consumers";
 
 describe("GameCron", () => {
     let gameCron: GameCron;
 
     const definition = stub<GameDefinition>();
-    const tournament = stub<TournamentConsumer>();
 
     definition.durations = {
-        wholeRound: 125,
+        wholeRound: 130,
+        startingRound: 125,
         placingBets: 120,
         lockingBet: 93,
         streamingVideo: 90,
@@ -50,7 +50,7 @@ describe("GameCron", () => {
             roundIdConsumer,
             provablyFairConsumer,
             unsettledRoundConsumer,
-            tournamentConsumer: tournament,
+            tournamentConsumer,
         });
 
         gameCron.gameManagementApiClient = {
@@ -173,6 +173,19 @@ describe("GameCron", () => {
                     secondHalfVideo: "http://marble-football/watch?v=AA",
                 },
             });
+        });
+
+        it("should publish tournament at the correct time", async () => {
+            // arrange
+            gameCron.gameData.remainingTime = definition.durations.startingRound + 1;
+
+            (tournamentConsumer.getCurrentTournament as any).mockResolvedValue("fake tournament");
+
+            // act
+            await gameCron.proceed();
+
+            // assert
+            expect(runningRoundInfoPublisher.publishToAllUsers).toHaveBeenCalledWith({ tournament: "fake tournament" });
         });
 
         describe("when the remaining time is less than 0", () => {
