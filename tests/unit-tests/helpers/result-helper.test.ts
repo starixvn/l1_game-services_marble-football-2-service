@@ -5,12 +5,13 @@ import {
     getScoreFromRate,
     generateVideoName,
 } from "../../../src/helpers/result-helper";
-import { MatchConfigType } from "../../../src/game-data";
+import { MatchConfigType } from "../../../src/match-configs";
 import { ResultType } from "../../../src/models/rounds";
 
 jest.mock("chance", () => {
     return function () {
         return {
+            integer: jest.fn().mockReturnValue(1),
             bool: jest.fn().mockReturnValue(true),
             weighted: jest.fn().mockImplementation((arr) => arr[0]),
         };
@@ -56,6 +57,7 @@ describe("Result Helper", () => {
             expect(result.homeWinsOnDraw).toBe(true);
             expect(result.firstHalfVideo).toBeDefined();
             expect(result.secondHalfVideo).toBeDefined();
+            expect(result.penalty).toStrictEqual({ home: 2, away: 1 });
         });
     });
 
@@ -68,6 +70,7 @@ describe("Result Helper", () => {
                 firstHalfVideo: "http://marble-football/watch?v=HH",
                 secondHalfVideo: "http://marble-football/watch?v=AA",
                 homeWinsOnDraw: false,
+                penalty: { home: 0, away: 0 },
             };
 
             const settlementResult = getSettlementResult(roundResult);
@@ -131,7 +134,7 @@ describe("Result Helper", () => {
             const videoName = generateVideoName(result);
 
             // Assert
-            expect(videoName).toBe("1766b6a6cfca5a31f47efc3b756e60e1");
+            expect(videoName).toBe("ab4e46235565c9b63b6c1dae2367a318e6c2605a8645ca575cf0063417d23db3");
         });
     });
 });

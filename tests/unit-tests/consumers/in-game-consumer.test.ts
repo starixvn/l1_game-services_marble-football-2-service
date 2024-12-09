@@ -2,10 +2,9 @@ import { stub } from "jest-auto-stub";
 import { TableInGameConsumer } from "sc-game-base/src/table/event-consumers";
 import GameData from "../../../src/game-data";
 import { InGameConsumer } from "../../../src/consumers";
-import * as helper from "../../../src/helpers";
 import GameDefinition from "../../../src/game-definition";
 import { gameManagementApiClientFactory, publisher, roundQuery } from "../global-stubs";
-import { BET_CHOICES } from "../../../src/constants";
+import * as helper from "../../../src/helpers/bet-percentage";
 
 describe("InGameConsumer test", () => {
     let consumer: InGameConsumer;
@@ -19,31 +18,6 @@ describe("InGameConsumer test", () => {
 
     it("should inherit from TableInGameConsumer", () => {
         expect(consumer instanceof TableInGameConsumer).toBeTruthy();
-    });
-
-    describe("getUserBetPercentage", () => {
-        beforeEach(() => {
-            jest.spyOn(helper.betPercentage, "calculatePlayerBetPercentage").mockReturnValue({
-                home: 66.6,
-                away: 33.3,
-                draw: 0,
-            });
-        });
-
-        it("should call calculatePlayerBetPercentage with correct parameters", () => {
-            // arrange
-            const playerBetCount = { home: ["111", "113"], away: ["112"] };
-
-            // act
-            consumer.getUserBetPercentage(playerBetCount);
-
-            // assert
-            expect(helper.betPercentage.calculatePlayerBetPercentage).toHaveBeenCalledWith(playerBetCount, [
-                BET_CHOICES.home,
-                BET_CHOICES.draw,
-                BET_CHOICES.away,
-            ]);
-        });
     });
 
     describe("getCurrentVideoResult", () => {
@@ -69,7 +43,6 @@ describe("InGameConsumer test", () => {
                 secondHalfVideo: "video2.mp4",
                 firstHalfTimeline: [],
                 secondHalfTimeline: [],
-                liveStreamServer: "server1",
                 firstHalf: "AH",
                 secondHalf: "HA",
             });
@@ -88,16 +61,17 @@ describe("InGameConsumer test", () => {
                 secondHalfVideo: "video2.mp4",
                 firstHalfTimeline: [],
                 secondHalfTimeline: [],
-                liveStreamServer: "server1",
                 firstHalf: "AH",
                 secondHalf: "HA",
             };
 
+            gameData.tournament = {} as any;
+            gameData.liveStreamServer = "server1";
             gameData.playerBetCount = playerBetCount;
 
             jest.spyOn(TableInGameConsumer.prototype, "buildPayload").mockResolvedValue(basePayload);
-            jest.spyOn(consumer, "getUserBetPercentage").mockReturnValue(userBetPercentage);
             jest.spyOn(consumer, "getCurrentVideoResult").mockReturnValue(videoResult);
+            jest.spyOn(helper, "getUserBetPercentage").mockReturnValue(userBetPercentage);
 
             // act
             const result = await consumer.buildPayload(realPlayer);
@@ -107,9 +81,11 @@ describe("InGameConsumer test", () => {
                 ...basePayload,
                 userBetPercentage,
                 videoResult,
+                liveStreamServer: "server1",
+                tournament: {},
             });
 
-            expect(consumer.getUserBetPercentage).toHaveBeenCalledWith(playerBetCount);
+            expect(helper.getUserBetPercentage).toHaveBeenCalledWith(playerBetCount);
 
             expect(consumer.getCurrentVideoResult).toHaveBeenCalled();
         });

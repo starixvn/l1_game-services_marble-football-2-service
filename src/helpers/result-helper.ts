@@ -4,13 +4,14 @@ import Chance from "chance";
 import { shuffle } from "./shuffle";
 import crypto from "crypto";
 
-export const generateResult = (matchConfig: MatchConfigType) => {
+export const generateResult = (matchConfig: MatchConfigType): ResultType => {
     const chance = new Chance();
 
     const firstHalf = generateResultForHalf(matchConfig.firstHalf);
     const secondHalf = generateResultForHalf(matchConfig.secondHalf);
     const videoInfo = getVideoInfoFromResult(firstHalf, secondHalf);
     const homeWinsOnDraw = chance.bool();
+    const penalty = generatePenaltyResult(homeWinsOnDraw);
 
     return {
         firstHalf,
@@ -18,6 +19,7 @@ export const generateResult = (matchConfig: MatchConfigType) => {
         ...videoInfo,
         overUnderValue: matchConfig.ou,
         homeWinsOnDraw,
+        penalty,
     };
 };
 
@@ -25,11 +27,13 @@ export const generateResultFromAdminRawResult = (matchConfig: MatchConfigType, r
     const firstHalf = roundResult.firstHalf || "0";
     const secondHalf = roundResult.secondHalf || "0";
     const videoInfo = getVideoInfoFromResult(firstHalf, secondHalf);
+    const penalty = generatePenaltyResult(roundResult.homeWinsOnDraw);
 
     return {
         firstHalf,
         secondHalf,
         homeWinsOnDraw: roundResult.homeWinsOnDraw,
+        penalty,
         ...videoInfo,
         overUnderValue: matchConfig.ou,
     };
@@ -96,4 +100,14 @@ export const generateVideoName = (result: string, numberOfVideos = 1) => {
     const videoIndex = numberOfVideos > 1 ? Math.floor(Math.random() * (numberOfVideos - 1)) - 1 : 0;
 
     return crypto.createHash("sha256").update(`${result}-${videoIndex}`).digest("hex");
+};
+
+const generatePenaltyResult = (homeWinsOnDraw: boolean) => {
+    const chance = new Chance();
+    const maxLosingPenalty = 4;
+    const losingTeamPenalty = chance.integer({ min: 0, max: maxLosingPenalty });
+    const difference = losingTeamPenalty === maxLosingPenalty ? 1 : chance.integer({ min: 1, max: 2 });
+    const winningTeamPenalty = losingTeamPenalty + difference;
+
+    return homeWinsOnDraw ? { home: winningTeamPenalty, away: losingTeamPenalty } : { home: losingTeamPenalty, away: winningTeamPenalty };
 };

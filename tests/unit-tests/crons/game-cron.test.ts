@@ -11,6 +11,7 @@ import {
     runningRoundInfoPublisher,
     settleGameConsumer,
     unsettledRoundConsumer,
+    logService,
 } from "../global-stubs";
 import GameData from "../../../src/game-data";
 import GameDefinition from "../../../src/game-definition";
@@ -41,7 +42,7 @@ describe("GameCron", () => {
             settleGameRoundConsumer: settleGameConsumer,
             gameStatusPublisher,
             runningRoundInfoPublisher,
-            logService: null as any,
+            logService: logService as any,
             roundResultConsumer,
             resultsRepository: {} as any,
             appConfigs: {},
@@ -198,18 +199,6 @@ describe("GameCron", () => {
                 // assert
                 expect(settleGameConsumer.settleRound).toHaveBeenCalled();
             });
-
-            it("should update tournament", async () => {
-                // arrange
-                gameCron.gameData.remainingTime = -1;
-                (definition.settle as jest.Mock).mockReturnValue({ draw: false });
-
-                // act
-                await gameCron.proceed();
-
-                // assert
-                expect(tournament.updateMatchResult).toHaveBeenCalled();
-            });
         });
 
         it("should run bot and publish running round info during bet time", async () => {
@@ -269,7 +258,6 @@ describe("GameCron", () => {
             };
             global.fetch = jest.fn().mockResolvedValue(mockResponse);
             gameCron.appConfigs = { liveStreamServer: "http://example.com/" } as any;
-            gameCron.logService = jest.fn();
 
             // Act
             const result = await gameCron.getVideoTimelineForHalf(videoName);
@@ -277,7 +265,7 @@ describe("GameCron", () => {
             // Assert
             expect(global.fetch).toHaveBeenCalledWith(new URL("http://example.com/test-video.json"));
             expect(result).toEqual([]);
-            expect(gameCron.logService).toHaveBeenCalledWith(
+            expect(gameCron.logService.logError).toHaveBeenCalledWith(
                 "Failed to fetch video timeline http://example.com/test-video.json with error: 404"
             );
         });
@@ -288,7 +276,6 @@ describe("GameCron", () => {
             const mockError = new Error("Network error");
             global.fetch = jest.fn().mockRejectedValue(mockError);
             gameCron.appConfigs = { liveStreamServer: "http://example.com/" } as any;
-            gameCron.logService = jest.fn();
 
             // Act
             const result = await gameCron.getVideoTimelineForHalf(videoName);
@@ -296,7 +283,7 @@ describe("GameCron", () => {
             // Assert
             expect(global.fetch).toHaveBeenCalledWith(new URL("http://example.com/test-video.json"));
             expect(result).toEqual([]);
-            expect(gameCron.logService).toHaveBeenCalledWith(
+            expect(gameCron.logService.logError).toHaveBeenCalledWith(
                 "Failed to get video timeline http://example.com/test-video.json with error: Error: Network error"
             );
         });
