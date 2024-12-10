@@ -3,18 +3,20 @@ import GameData from "../game-data";
 import { shuffle } from "../helpers";
 import generate from "../helpers/tournament/generate";
 import updateNext from "../helpers/tournament/update-next";
-import type { tournaments } from "../models";
-import type { ITournament } from "../models/tournaments";
+import type { tournaments, rounds } from "../models";
+import type { ITournament, MatchType } from "../models/tournaments";
 
 export default class TournamentConsumer {
     tournamentRepository: typeof tournaments;
     appConfigs: typeof appConfigs;
     gameData: GameData;
+    roundsRepository: typeof rounds;
 
     constructor(container: any) {
         this.tournamentRepository = container.tournamentRepository;
         this.appConfigs = container.appConfigs;
         this.gameData = container.gameData;
+        this.roundsRepository = container.roundsRepository;
     }
 
     async updateMatchResult(homeWin: boolean) {
@@ -23,6 +25,9 @@ export default class TournamentConsumer {
 
         if (tournament) {
             const match = tournament.matches[tournament.currentMatch];
+
+            await this.updateMatchInRound(match, roundId);
+
             match.homeWins = homeWin;
             match.id = roundId;
             const team = homeWin ? match.home : match.away;
@@ -75,5 +80,9 @@ export default class TournamentConsumer {
 
     private async getTournamentConfigs() {
         return this.appConfigs.tournament;
+    }
+
+    private async updateMatchInRound(match: MatchType, roundId: number) {
+        await this.roundsRepository.updateOne({ id: roundId }, { match });
     }
 }

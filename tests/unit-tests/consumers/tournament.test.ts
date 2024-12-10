@@ -2,17 +2,20 @@ import { stub } from "jest-auto-stub";
 import appConfigs from "../../../src/app-configs";
 import { TournamentConsumer } from "../../../src/consumers";
 import GameData from "../../../src/game-data";
-import { tournamentRepository } from "../global-stubs";
+import { roundsRepository, tournamentRepository } from "../global-stubs";
 
 describe(TournamentConsumer.name, () => {
     let consumer: TournamentConsumer;
     const gameData = stub<GameData>();
 
+    roundsRepository.updateOne = jest.fn();
+
     beforeEach(() => {
         consumer = new TournamentConsumer({
-            tournamentRepository: tournamentRepository,
-            appConfigs: appConfigs,
-            gameData: gameData,
+            tournamentRepository,
+            appConfigs,
+            gameData,
+            roundsRepository,
         });
     });
 
@@ -74,6 +77,90 @@ describe(TournamentConsumer.name, () => {
     });
 
     describe("updateMatchResult", () => {
+        it("should update round with match ", async () => {
+            // Arrange
+            const matches = [
+                {
+                    home: "VNM",
+                    away: "SGP",
+                },
+                {
+                    home: "PHL",
+                    away: "TWN",
+                },
+                {
+                    home: "HKG",
+                    away: "THA",
+                },
+                {
+                    home: "IDN",
+                    away: "TLS",
+                },
+                {
+                    home: "JPN",
+                    away: "KOR",
+                },
+                {
+                    home: "CHN",
+                    away: "LAO",
+                },
+                {
+                    home: "BRN",
+                    away: "IND",
+                },
+                {
+                    home: "KHM",
+                    away: "MYS",
+                },
+                {
+                    home: "",
+                    away: "",
+                },
+                {
+                    home: "",
+                    away: "",
+                },
+                {
+                    home: "",
+                    away: "",
+                },
+                {
+                    home: "",
+                    away: "",
+                },
+                {
+                    home: "",
+                    away: "",
+                },
+                {
+                    home: "",
+                    away: "",
+                },
+                {
+                    home: "",
+                    away: "",
+                },
+            ];
+
+            gameData.roundId = 1;
+            gameData.tournament = {
+                _id: "672988e6610ec92d5204aaf4",
+                matches: matches,
+                currentMatch: 0,
+                ended: false,
+            } as any;
+
+            // Act
+            await consumer.updateMatchResult(true);
+
+            // Assert
+            expect(roundsRepository.updateOne).toHaveBeenCalledWith(
+                { id: 0 },
+                {
+                    match: matches[0],
+                }
+            );
+        });
         it("should update the match result and proceed to the next match", async () => {
             // Arrange
             const matches = [
