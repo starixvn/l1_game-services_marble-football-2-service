@@ -39,13 +39,14 @@ const matchSchema = new mongoose.Schema<MatchType>(
 
 export type SettlementResultType = {
     [key in keyof typeof BET_CHOICES]: boolean;
-};
+} & { draw4: boolean };
 
 const settlementResultSchema = new mongoose.Schema<SettlementResultType>(
     {
         home: { type: Boolean },
         away: { type: Boolean },
         draw: { type: Boolean },
+        draw4: { type: Boolean },
         over: { type: Boolean },
         under: { type: Boolean },
         odd: { type: Boolean },

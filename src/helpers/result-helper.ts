@@ -58,6 +58,7 @@ export const getSettlementResult = (roundResult: ResultType): SettlementResultTy
         home: homeGoals > awayGoals,
         away: awayGoals > homeGoals,
         draw: homeGoals === awayGoals,
+        draw4: homeGoals === awayGoals && homeGoals === 4,
         over: isOver,
         under: !isOver,
         odd: isOdd,
