@@ -55,7 +55,7 @@ export default {
     },
     enableMsgpackParser: false,
     gameManagementApiSettings: {
-        BASE: "l1-game-management-service-local3-service:5000",
+        BASE: "http://l1-game-management-service-local3-service:5000",
     },
     disableCors: true,
     otel: {
