@@ -27,7 +27,7 @@ export default class RoundResultConsumer extends RoundResultConsumerBase {
         await super.generateResult();
 
         const tournament = await this.tournamentConsumer.getCurrentTournament();
-        this.gameData.result.tournamentId = tournament._id.toString();
+        this.gameData.result.tournamentId = tournament._id;
         await this.createResultRecord();
     }
 
