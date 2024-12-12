@@ -67,7 +67,7 @@ const appConfigs = {
         code: "UCL",
         teams: ["MCI", "RMA", "BAR", "LIV", "ARS", "FCB", "INT", "LEV", "AVL", "ATA", "BVB", "JUV", "PSG", "SCP", "ATM", "MIL"],
     },
-    liveStreamServer: "https://minio.lumigame.com/sc-stream/demo/",
+    liveStreamServer: "https://d1aof1lwumql9k.cloudfront.net/104_STAGING/",
 };
 
 export default appConfigs;
