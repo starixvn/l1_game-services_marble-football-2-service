@@ -12,6 +12,7 @@ import {
 import { Bot, GameCron, ProcessBetQueue } from "./crons";
 import { betLogs, bets, results, rounds, tmpBets, tournaments } from "./models";
 import { RunningRoundInfoPublisher } from "./publishers";
+import { HistoryQuery } from "./query-apis";
 
 export default class ContainerRegistry extends Table.TableContainerRegistry {
     register(appConfigs: any, definition: any, gameData: any): AwilixContainer<any> {
@@ -61,6 +62,14 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
 
         this.container.register({
             runningRoundInfoPublisher: asClass(RunningRoundInfoPublisher).singleton(),
+        });
+    }
+
+    registerApis() {
+        super.registerApis();
+
+        this.container.register({
+            historyQuery: asClass(HistoryQuery).singleton(),
         });
     }
 }
