@@ -30,30 +30,17 @@ describe("Result Helper", () => {
     describe("generateResult", () => {
         it("should generate a result based on match configuration", () => {
             // Arrange
-            const matchConfig: MatchConfigType = {
-                firstHalf: {
-                    scoreRate: { "1-0": 1, "0-1": 1 },
-                    ou: 1.5,
-                } as any,
-
-                secondHalf: {
-                    scoreRate: { "1-0": 1, "0-1": 1 },
-                } as any,
-
-                ou: 2.5,
-            };
-
             jest.spyOn(require("../../../src/helpers/result-helper"), "getScoreFromRate")
                 .mockReturnValueOnce("1-0")
                 .mockReturnValueOnce("0-0");
 
             // Act
-            const result = generateResult(matchConfig);
+            const result = generateResult({} as any);
 
             // Assert
             expect(result.firstHalf).toBe("H");
             expect(result.secondHalf).toBe("0");
-            expect(result.overUnderValue).toBe(2.5);
+            expect(result.overUnderValue).toBe(4.5);
             expect(result.homeWinsOnDraw).toBe(true);
             expect(result.firstHalfVideo).toBeDefined();
             expect(result.secondHalfVideo).toBeDefined();
@@ -87,41 +74,17 @@ describe("Result Helper", () => {
 
     describe("generateResultFromAdminRawResult", () => {
         it("should generate a result from admin raw result", () => {
-            const matchConfig: MatchConfigType = {
-                firstHalf: {
-                    scoreRate: { "1-0": 1, "0-1": 1 },
-                    ou: 1.5,
-                } as any,
-
-                secondHalf: {
-                    scoreRate: { "1-0": 1, "0-1": 1 },
-                } as any,
-
-                ou: 2.5,
-            };
-
             const roundResult = {
                 firstHalf: "HAAA",
                 secondHalf: "AHHH",
                 homeWinsOnDraw: false,
             } as ResultType;
 
-            const result = generateResultFromAdminRawResult(matchConfig, roundResult);
+            const result = generateResultFromAdminRawResult(roundResult);
 
             expect(result.firstHalf).toBe("HAAA");
             expect(result.secondHalf).toBe("AHHH");
-            expect(result.overUnderValue).toBe(2.5);
-        });
-    });
-
-    describe("getScoreFromRate", () => {
-        it("should return a score based on rate", () => {
-            const scores = ["1-0", "0-1", "2-0"];
-            const rates = [0, 0, 1];
-
-            const score = getScoreFromRate(scores, rates);
-
-            expect(score).toBe("1-0");
+            expect(result.overUnderValue).toBe(4.5);
         });
     });
 

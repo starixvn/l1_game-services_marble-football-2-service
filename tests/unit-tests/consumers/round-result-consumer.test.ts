@@ -42,11 +42,6 @@ describe("RoundResultConsumer", () => {
     let roundResultConsumer: RoundResultConsumer;
 
     const gameData = stub<GameData>({
-        matchConfig: {
-            firstHalf: {},
-            secondHalf: {},
-            ou: 5,
-        },
         result: {},
     });
     const definition = stub<GameDefinition>();
@@ -72,11 +67,14 @@ describe("RoundResultConsumer", () => {
 
     describe("getDataForGenerateResult", () => {
         it("should return matchConfig from gameData", () => {
+            // arrange
+            gameData.gameConfigs.randomMode = 1;
+
             // act
-            const result = roundResultConsumer.getDataForGenerateResult();
+            const data = roundResultConsumer.getDataForGenerateResult();
 
             // assert
-            expect(result).toBe(gameData.matchConfig);
+            expect(data).toEqual({ randomMode: 1 });
         });
     });
 
@@ -115,9 +113,6 @@ describe("RoundResultConsumer", () => {
         describe("when roundId is the same", () => {
             beforeEach(() => {
                 // Arrange
-                gameData.matchConfig = {
-                    matchConfig: "match config data",
-                } as any;
                 gameData.roundId = 1;
                 gameData.settlementResultFromAdmin = {
                     roundId: 1,
@@ -141,10 +136,7 @@ describe("RoundResultConsumer", () => {
                 roundResultConsumer.generateResultFromAdmin();
 
                 // Assert
-                expect(ResultHelper.generateResultFromAdminRawResult).toHaveBeenCalledWith(
-                    gameData.matchConfig,
-                    gameData.settlementResultFromAdmin.result
-                );
+                expect(ResultHelper.generateResultFromAdminRawResult).toHaveBeenCalledWith(gameData.settlementResultFromAdmin.result);
             });
         });
 
