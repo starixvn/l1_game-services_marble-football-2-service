@@ -18,12 +18,12 @@ export default class InGameConsumer extends TableInGameConsumer {
 
     getCurrentVideoResult() {
         return {
-            firstHalfVideo: this.gameData.result.firstHalfVideo,
-            secondHalfVideo: this.gameData.result.secondHalfVideo,
-            firstHalfTimeline: this.gameData.result.firstHalfTimeline,
-            secondHalfTimeline: this.gameData.result.secondHalfTimeline,
-            firstHalf: this.gameData.result.firstHalf,
-            secondHalf: this.gameData.result.secondHalf,
+            firstHalfVideo: this.gameData.result?.firstHalfVideo,
+            secondHalfVideo: this.gameData.result?.secondHalfVideo,
+            firstHalfTimeline: this.gameData.result?.firstHalfTimeline,
+            secondHalfTimeline: this.gameData.result?.secondHalfTimeline,
+            firstHalf: this.gameData.result?.firstHalf,
+            secondHalf: this.gameData.result?.secondHalf,
         };
     }
 }

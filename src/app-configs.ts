@@ -68,6 +68,11 @@ const appConfigs = {
         teams: ["MCI", "RMA", "BAR", "LIV", "ARS", "FCB", "INT", "LEV", "AVL", "ATA", "BVB", "JUV", "PSG", "SCP", "ATM", "MIL"],
     },
     liveStreamServer: "https://minio.lumigame.com/sc-stream/demo/",
+    gameResultSettings: {
+        baseUrl: "http://l1-game-result-local-service:5000",
+        id: "Game Service",
+        key: "58148de3-b895-4f6b-82de-a35eed1b4b28",
+    },
 };
 
 export default appConfigs;
