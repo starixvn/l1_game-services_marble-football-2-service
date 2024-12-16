@@ -20,7 +20,8 @@ export default class RoundResultConsumer extends RoundResultConsumerBase {
     }
 
     override getDataForGenerateResult() {
-        return this.gameData.matchConfig;
+        const { randomMode } = this.gameData.gameConfigs;
+        return { randomMode };
     }
 
     override async generateResult() {
@@ -35,7 +36,7 @@ export default class RoundResultConsumer extends RoundResultConsumerBase {
         const { roundId, settlementResultFromAdmin: resultFromAdmin } = this.gameData;
 
         if (roundId === resultFromAdmin.roundId) {
-            this.gameData.result = resultHelper.generateResultFromAdminRawResult(this.gameData.matchConfig, resultFromAdmin.result);
+            this.gameData.result = resultHelper.generateResultFromAdminRawResult(resultFromAdmin.result);
             return true;
         }
 

@@ -12,7 +12,6 @@ export default class GameData extends TableGameData {
         this.playerBetCount = {};
     }
     playerBetCount: Record<string, string[]> = {};
-    matchConfig: MatchConfigType = matchConfig;
     liveStreamServer = "";
     tournament = {} as ITournament;
 }

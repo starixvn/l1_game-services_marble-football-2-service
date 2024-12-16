@@ -1,14 +1,22 @@
-import { HalfConfigType, MatchConfigType } from "../match-configs";
+import { halfConfig, HalfConfigType, matchConfig } from "../match-configs";
 import { ResultType, SettlementResultType } from "../models/rounds";
 import Chance from "chance";
 import { shuffle } from "./shuffle";
 import crypto from "crypto";
+import { POOL_SIZE } from "../constants";
+import { randomHelper } from ".";
 
-export const generateResult = (matchConfig: MatchConfigType): ResultType => {
+type DataResultType = {
+    randomMode: number;
+    pool?: string[];
+};
+export const generateResult = (data: DataResultType): ResultType => {
     const chance = new Chance();
+    const pool = data.pool || createScorePool(halfConfig, POOL_SIZE);
+    const randomMode = data.randomMode || 1;
 
-    const firstHalf = generateResultForHalf(matchConfig.firstHalf);
-    const secondHalf = generateResultForHalf(matchConfig.secondHalf);
+    const firstHalf = generateResultForHalf({ randomMode, pool });
+    const secondHalf = generateResultForHalf({ randomMode, pool });
     const videoInfo = getVideoInfoFromResult(firstHalf, secondHalf);
     const homeWinsOnDraw = chance.bool();
     const penalty = generatePenaltyResult(homeWinsOnDraw);
@@ -23,7 +31,7 @@ export const generateResult = (matchConfig: MatchConfigType): ResultType => {
     };
 };
 
-export const generateResultFromAdminRawResult = (matchConfig: MatchConfigType, roundResult: ResultType): ResultType => {
+export const generateResultFromAdminRawResult = (roundResult: ResultType): ResultType => {
     const firstHalf = roundResult.firstHalf || "0";
     const secondHalf = roundResult.secondHalf || "0";
     const videoInfo = getVideoInfoFromResult(firstHalf, secondHalf);
@@ -68,11 +76,8 @@ export const getSettlementResult = (roundResult: ResultType): SettlementResultTy
 
 export const generateRawResultForHash = () => {};
 
-const generateResultForHalf = (halfConfig: HalfConfigType) => {
-    const scores = Object.keys(halfConfig.scoreRate);
-    const rates = Object.values(halfConfig.scoreRate);
-
-    const scoreResult = getScoreFromRate(scores, rates);
+const generateResultForHalf = (data: DataResultType) => {
+    const scoreResult = getScoreFromRate(data);
 
     const [homeGoals, awayGoals] = scoreResult.split("-").map(Number);
     const sequence = Array(homeGoals).fill("H").concat(Array(awayGoals).fill("A"));
@@ -82,9 +87,11 @@ const generateResultForHalf = (halfConfig: HalfConfigType) => {
     return result || "0";
 };
 
-export const getScoreFromRate = (scores: string[], rates: number[]) => {
-    const chance = new Chance();
-    return chance.weighted(scores, rates);
+export const getScoreFromRate = (data: DataResultType) => {
+    const pool = data.pool || createScorePool(halfConfig, POOL_SIZE);
+
+    const index = randomHelper.getRandomIndexFromArray(data.randomMode, POOL_SIZE);
+    return pool[index];
 };
 
 const getVideoInfoFromResult = (firstHalf: string, secondHalf: string) => {
@@ -113,3 +120,16 @@ const generatePenaltyResult = (homeWinsOnDraw: boolean) => {
 
     return homeWinsOnDraw ? { home: winningTeamPenalty, away: losingTeamPenalty } : { home: losingTeamPenalty, away: winningTeamPenalty };
 };
+
+export function createScorePool(config: HalfConfigType, poolSize: number): string[] {
+    const pool: string[] = [];
+
+    for (const [score, rate] of Object.entries(config.scoreRate)) {
+        const count = Math.round(rate * poolSize);
+        for (let i = 0; i < count; i++) {
+            pool.push(score);
+        }
+    }
+
+    return shuffle(shuffle(pool));
+}

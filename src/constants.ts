@@ -11,3 +11,5 @@ export const BET_CHOICES = {
 export const DEFAULT_MARGIN = 0.02;
 
 export const IS_DEV_ENV = process.env.NODE_ENV === "development";
+
+export const POOL_SIZE = 10_000;
