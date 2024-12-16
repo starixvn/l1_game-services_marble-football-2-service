@@ -1,4 +1,3 @@
-import { matchConfig, MatchConfigType } from "./match-configs";
 import { TableGameData } from "sc-game-base/src/table";
 import { ResultType } from "./models/rounds";
 import { ITournament } from "./models/tournaments";
