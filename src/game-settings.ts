@@ -19,7 +19,7 @@ export default {
         [BET_CHOICES.odd, BET_CHOICES.even],
     ],
     provablyFair: false,
-    historyPageSize: 100,
+    historyPageSize: 8,
     defaultBetTracks: {},
     botSettings: {
         ratio: { mainOpts: 60, subOpts: 40 },
