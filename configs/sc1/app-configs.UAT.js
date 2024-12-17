@@ -68,7 +68,7 @@ export default {
     },
     liveStreamServer: "https://d1aof1lwumql9k.cloudfront.net/104_STAGING/",
     gameResultSettings: {
-        baseUrl: "http://l1_game_result_uat:5000",
+        baseUrl: "http://l1-game-result-uat-service:5000",
         id: "Game Service",
         key: "906db6ee-b64b-4173-8c82-410f8509764d",
     },
