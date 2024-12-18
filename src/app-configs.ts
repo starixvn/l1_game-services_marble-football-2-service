@@ -69,7 +69,7 @@ const appConfigs = {
     },
     liveStreamServer: "https://minio.lumigame.com/sc-stream/demo/",
     gameResultSettings: {
-        baseUrl: "http://l1-game-result-local-service:5000",
+        baseUrl: "https://l1-result3.lumigame.com",
         id: "Game Service",
         key: "58148de3-b895-4f6b-82de-a35eed1b4b28",
     },

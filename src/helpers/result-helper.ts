@@ -3,7 +3,7 @@ import { ResultType, SettlementResultType } from "../models/rounds";
 import Chance from "chance";
 import { shuffle } from "./shuffle";
 import crypto from "crypto";
-import { POOL_SIZE } from "../constants";
+import { NUMBER_OF_VIDEOS, POOL_SIZE } from "../constants";
 import { randomHelper } from ".";
 
 type DataResultType = {
@@ -104,8 +104,9 @@ const getVideoInfoFromResult = (firstHalf: string, secondHalf: string) => {
     };
 };
 
-export const generateVideoName = (result: string, numberOfVideos = 1) => {
+export const generateVideoName = (result: string) => {
     const chance = new Chance();
+    const numberOfVideos = NUMBER_OF_VIDEOS[result] || 1;
     const videoIndex = chance.integer({ min: 1, max: numberOfVideos }) - 1;
 
     return crypto.createHash("sha256").update(`${result}-${videoIndex}`).digest("hex");
