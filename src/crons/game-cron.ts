@@ -18,6 +18,12 @@ export default class GameCron extends Table.Crons.TableGameCron {
         this.tournamentConsumer = container.tournamentConsumer;
     }
 
+    async queryLastResult() {
+        await super.queryLastResult();
+        const lastTournament = await this.tournamentConsumer.getLastTournament();
+        this.gameData.publishedTournament = lastTournament;
+    }
+
     override resetForNewRound() {
         super.resetForNewRound();
         this.gameData.playerBetCount = {};

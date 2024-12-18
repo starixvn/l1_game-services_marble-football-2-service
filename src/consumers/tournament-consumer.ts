@@ -66,6 +66,12 @@ export default class TournamentConsumer {
         return this.gameData.tournament;
     }
 
+    async getLastTournament(): Promise<ITournament> {
+        const lastTournament: ITournament = await this.tournamentRepository.findOne().sort({ time: -1 }).lean().exec();
+
+        return lastTournament;
+    }
+
     private async createNewTournament() {
         const configs = await this.getTournamentConfigs();
         const teams = shuffle(configs.teams);
