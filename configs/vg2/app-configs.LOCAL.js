@@ -2,8 +2,8 @@ export default {
     hostingPort: 5000,
     apiSettings: {
         enabledApi: true,
-        apiUrl: "http://l2_game_api_local:5000",
-        authUrl: "http://l2_auth_api_local:5000",
+        apiUrl: "http://l2-game-api-local-service:5000",
+        authUrl: "http://l2-auth-api-local-service:5000",
         client: {
             id: "game-server",
             secret: "gameserver@20luminet&",
@@ -24,7 +24,7 @@ export default {
     },
     enabledLogs: true,
     database: {
-        url: "mongodb://lmn_backend:LmnBackend@10.10.50.12:39200,10.10.50.13:39200,10.10.50.14:39200/",
+        url: "mongodb://lmn_backend:LmnBackend@10.10.50.12:39200,10.10.50.13:39200,10.10.50.14:39200/?replicaSet=L2Local&appName=marblefootball",
         options: {
             dbName: "minigame",
             useNewUrlParser: true,
@@ -38,7 +38,7 @@ export default {
         env: "LOCAL",
     },
     authenticateSettings: {
-        url: "http://l2_auth_api_local:5000",
+        url: "http://l2-auth-api-local-service:5000",
         id: "game-services",
         secret: "gameservices@20luminet&",
         requestTimeout: 10000,
@@ -46,7 +46,7 @@ export default {
         audiences: ["api", "admin-api"],
     },
     userServiceSettings: {
-        url: "http://l2_user_service_local:5000",
+        url: "http://l2-user-service-local-service:5000",
     },
     adminSecretKey: "asWDEerfOIdgsdqRTFabvmgh",
     metrics: {
@@ -55,7 +55,7 @@ export default {
     },
     enableMsgpackParser: false,
     gameManagementApiSettings: {
-        BASE: "http://l2_game_management_service_local:5000",
+        BASE: "http://l2-game-management-service-local-service:5000",
     },
     disableCors: true,
     otel: {
@@ -64,7 +64,13 @@ export default {
         endpoint: "http://10.10.50.69:4318/v1/traces",
     },
     tournament: {
-        code: "SEAOC",
-        teams: ["BRN", "KHM", "IDN", "LAO", "MYS", "PHL", "SGP", "THA", "TLS", "VNM", "JPN", "KOR", "CHN", "TWN", "HKG", "IND"],
+        code: "UCL",
+        teams: ["MCI", "RMA", "BAR", "LIV", "ARS", "FCB", "INT", "LEV", "AVL", "ATA", "BVB", "JUV", "PSG", "SCP", "ATM", "MIL"],
+    },
+    liveStreamServer: "https://d1aof1lwumql9k.cloudfront.net/104_STAGING/",
+    gameResultSettings: {
+        baseUrl: "http://l2-game-result-local-service:5000",
+        id: "Game Service",
+        key: "b396d3e4-c81d-4c5c-8100-94a8b330f12a",
     },
 };

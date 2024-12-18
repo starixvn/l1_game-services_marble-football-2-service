@@ -24,7 +24,7 @@ export default {
     },
     enabledLogs: true,
     database: {
-        url: "mongodb://lmn_backend:LmnBackend%40517@10.99.99.53:39130,10.99.99.54:39130,10.99.99.188:39130,10.99.99.187:39130/",
+        url: "mongodb://lmn_backend:LmnBackend%40517@10.99.99.53:39130,10.99.99.54:39130,10.99.99.188:39130,10.99.99.187:39130/?replicaSet=SabaSIT&appName=marblefootball",
         options: {
             dbName: "minigame",
             useNewUrlParser: true,
@@ -68,7 +68,7 @@ export default {
     },
     liveStreamServer: "https://d1aof1lwumql9k.cloudfront.net/104_STAGING/",
     gameResultSettings: {
-        baseUrl: "http://l1-game-result-sit-service:5000",
+        baseUrl: "http://l1_game_result_sit:5000",
         id: "Game Service",
         key: "dded3dfe-261e-47f0-a46e-076b367c5a09",
     },
