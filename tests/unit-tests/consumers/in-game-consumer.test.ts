@@ -65,7 +65,7 @@ describe("InGameConsumer test", () => {
                 secondHalf: "HA",
             };
 
-            gameData.tournament = {} as any;
+            gameData.publishedTournament = {} as any;
             gameData.liveStreamServer = "server1";
             gameData.playerBetCount = playerBetCount;
 

@@ -13,6 +13,7 @@ export default class GameData extends TableGameData {
     playerBetCount: Record<string, string[]> = {};
     liveStreamServer = "";
     tournament = {} as ITournament;
+    publishedTournament = {} as ITournament;
 }
 
 export type RealPlayer = {

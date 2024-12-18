@@ -71,6 +71,8 @@ export default class GameCron extends Table.Crons.TableGameCron {
     async publishTournament() {
         const tournament = await this.tournamentConsumer.getCurrentTournament();
 
+        this.gameData.publishedTournament = { ...tournament };
+
         this.runningRoundInfoPublisher.publishToAllUsers({ tournament });
     }
 

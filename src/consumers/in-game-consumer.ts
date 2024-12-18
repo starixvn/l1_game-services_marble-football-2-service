@@ -12,7 +12,7 @@ export default class InGameConsumer extends TableInGameConsumer {
         const videoResult = this.getCurrentVideoResult();
         const liveStreamServer = this.gameData.liveStreamServer;
 
-        const tournament = this.gameData.tournament;
+        const tournament = this.gameData.publishedTournament;
         return { ...payload, userBetPercentage, liveStreamServer, videoResult, tournament };
     }
 
