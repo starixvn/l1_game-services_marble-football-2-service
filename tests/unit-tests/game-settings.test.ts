@@ -43,7 +43,7 @@ describe("gameSettings", () => {
     });
 
     it("should have the correct historyPageSize", () => {
-        expect(gameSettings.historyPageSize).toBe(100);
+        expect(gameSettings.historyPageSize).toBe(8);
     });
 
     it("should have the correct defaultBetTracks", () => {
