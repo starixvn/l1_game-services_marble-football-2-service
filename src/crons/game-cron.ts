@@ -7,7 +7,7 @@ import { HttpsProxyAgent } from "https-proxy-agent";
 import axios from "axios";
 import { retry } from "../helpers";
 import { generateVideoName } from "../helpers/result-helper";
-import defaultVideoTimelines from "../timelines/video-timelines.json";
+import defaultVideoTimelines from "../timelines/video-timelines.json" assert { type: "json" };
 
 export default class GameCron extends Table.Crons.TableGameCron {
     declare gameData: GameData;
@@ -84,7 +84,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
 
         const videoTimeline = (defaultVideoTimelines as Record<string, number[]>)[`${videoName}_${result}`];
 
-        this.logService.logInfo(`get default video timeline for ${videoName}_${result}: ${videoTimeline}`);
+        this.logService.logWarning(`Get default video timeline for ${videoName}_${result}: ${videoTimeline}`);
 
         return videoTimeline;
     }
