@@ -104,10 +104,10 @@ const getVideoInfoFromResult = (firstHalf: string, secondHalf: string) => {
     };
 };
 
-export const generateVideoName = (result: string) => {
+export const generateVideoName = (result: string, videoDefault = false) => {
     const chance = new Chance();
     const numberOfVideos = NUMBER_OF_VIDEOS[result] || 1;
-    const videoIndex = chance.integer({ min: 1, max: numberOfVideos }) - 1;
+    const videoIndex = videoDefault ? 0 : chance.integer({ min: 1, max: numberOfVideos }) - 1;
 
     return crypto.createHash("sha256").update(`${result}-${videoIndex}`).digest("hex");
 };

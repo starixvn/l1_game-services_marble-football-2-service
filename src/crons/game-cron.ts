@@ -3,6 +3,11 @@ import GameData from "../game-data";
 import GameDefinition from "../game-definition";
 import AppConfigs from "../app-configs";
 import { TournamentConsumer } from "../consumers";
+import { HttpsProxyAgent } from "https-proxy-agent";
+import axios from "axios";
+import { retry } from "../helpers";
+import { generateVideoName } from "../helpers/result-helper";
+import defaultVideoTimelines from "../timelines/video-timelines.json";
 
 export default class GameCron extends Table.Crons.TableGameCron {
     declare gameData: GameData;
@@ -32,27 +37,56 @@ export default class GameCron extends Table.Crons.TableGameCron {
     async getVideoTimelineForHalf(videoName: string) {
         const url = new URL(`${videoName}.json`, this.appConfigs.liveStreamServer);
 
+        const agent = this.appConfigs.proxyServer.enabled ? new HttpsProxyAgent(this.appConfigs.proxyServer.url) : undefined;
+
         try {
-            const response = await fetch(url);
+            const response = await axios.get(url.toString(), { httpsAgent: agent });
 
-            if (!response.ok) {
-                this.logService.logError(`Failed to fetch video timeline ${url} with error: ${response.status}`);
-                return [];
-            }
-
-            const data = await response.json();
-
-            return data.timeLine;
+            return response.data.timeLine;
         } catch (error) {
-            this.logService.logError(`Failed to get video timeline ${url} with error: ${error}`);
-            return [];
+            this.logService.logError(`In match ${this.gameData.roundId}, failed to get video timeline ${url} with error: ${error}`);
+            throw error;
         }
     }
 
     async getVideoTimeline() {
-        this.gameData.result.firstHalfTimeline = await this.getVideoTimelineForHalf(this.gameData.result.firstHalfVideo);
+        const delay = 100;
+        const retries = 3;
 
-        this.gameData.result.secondHalfTimeline = await this.getVideoTimelineForHalf(this.gameData.result.secondHalfVideo);
+        try {
+            const [firstHalfTimeline, secondHalfTimeline] = await Promise.all([
+                retry(() => this.getVideoTimelineForHalf(this.gameData.result.firstHalfVideo), retries, delay).catch((error) => {
+                    this.logService.logError(`In match ${this.gameData.roundId}, failed to fetch first half timeline: ${error}`);
+                    return this.getDefaultVideoTimeline(this.gameData.result.firstHalf, true);
+                }),
+                retry(() => this.getVideoTimelineForHalf(this.gameData.result.secondHalfVideo), retries, delay).catch((error) => {
+                    this.logService.logError(`In match ${this.gameData.roundId}, failed to fetch second half timeline: ${error}`);
+                    return this.getDefaultVideoTimeline(this.gameData.result.secondHalf, false);
+                }),
+            ]);
+
+            this.gameData.result.firstHalfTimeline = firstHalfTimeline;
+            this.gameData.result.secondHalfTimeline = secondHalfTimeline;
+        } catch (error) {
+            this.logService.logError(`Unexpected error fetching video timelines: ${error}`);
+            this.gameData.result.firstHalfTimeline = this.getDefaultVideoTimeline(this.gameData.result.firstHalf, true);
+            this.gameData.result.secondHalfTimeline = this.getDefaultVideoTimeline(this.gameData.result.secondHalf, false);
+        }
+    }
+
+    getDefaultVideoTimeline(result: string, isFirstHalf: boolean) {
+        const videoName = generateVideoName(result, true);
+        if (isFirstHalf) {
+            this.gameData.result.firstHalfVideo = videoName;
+        } else {
+            this.gameData.result.secondHalfVideo = videoName;
+        }
+
+        const videoTimeline = (defaultVideoTimelines as Record<string, number[]>)[`${videoName}_${result}`];
+
+        this.logService.logInfo(`get default video timeline for ${videoName}_${result}: ${videoTimeline}`);
+
+        return videoTimeline;
     }
 
     async generateRoundData() {

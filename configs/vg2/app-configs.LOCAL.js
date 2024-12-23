@@ -73,4 +73,8 @@ export default {
         id: "Game Service",
         key: "b396d3e4-c81d-4c5c-8100-94a8b330f12a",
     },
+    proxyServer: {
+        enabled: false,
+        url: "",
+    },
 };

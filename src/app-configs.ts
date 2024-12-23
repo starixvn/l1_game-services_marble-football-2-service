@@ -33,8 +33,8 @@ const appConfigs = {
         },
     },
     sentry: {
-        sentryUrl: "https://13f39b8359404ed5aec23655e64ccf78@sentry.lumigame.com/2",
-        logIdentifier: "MarbleFootBall",
+        sentryUrl: "https://3711f3082699411a8716a3221ca1fd9e@sentry.lumigame.com/89",
+        logIdentifier: "MarbleFootBall-Dev",
         env: "DEV",
     },
     authenticateSettings: {
@@ -72,6 +72,10 @@ const appConfigs = {
         baseUrl: "https://l1-result3.lumigame.com",
         id: "Game Service",
         key: "58148de3-b895-4f6b-82de-a35eed1b4b28",
+    },
+    proxyServer: {
+        enabled: false,
+        url: "",
     },
 };
 

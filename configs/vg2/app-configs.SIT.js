@@ -72,4 +72,8 @@ export default {
         id: "Game Service",
         key: "422541af-80aa-4524-97c8-62f643ac923e",
     },
+    proxyServer: {
+        enabled: true,
+        url: "http://lisasqd.nebula.prod:8801",
+    },
 };

@@ -17,7 +17,8 @@
         "integration-test": "npm run build && jest --config ./jest.integration-test.config.cjs --testPathPattern=tests/integration-tests/ --detectOpenHandles --forceExit",
         "dev": "cross-env NODE_ENV=development tsx watch ./src/app.ts",
         "dev-build": "nodemon --experimental-loader=extensionless --watch ./build ./build/app.js",
-        "reg": "npm set registry http://npm.lumigame.com"
+        "reg": "npm set registry http://npm.lumigame.com",
+        "fetch-video-timelines": "tsx src/timelines/fetch-default-video-timeline.ts"
     },
     "jestSonar": {
         "reportPath": "reports",
@@ -30,6 +31,7 @@
         "chance": "^1.1.11",
         "d3-array": "^3.2.4",
         "extensionless": "^1.9.6",
+        "https-proxy-agent": "^7.0.6",
         "lodash.shuffle": "^4.2.0",
         "mongoose": "^5.9.25",
         "random-js": "^2.1.0",
