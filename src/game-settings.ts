@@ -9,7 +9,7 @@ export default {
         startingRound: 140,
         placingBets: 135,
         lockingBet: 108,
-        streamingVideo: 105,
+        streamingVideo: 107,
     },
     choices: Object.values(BET_CHOICES),
     choicesMapper: { home: 1, away: 2, draw: 3, over: 4, under: 5, odd: 6, even: 7 },
