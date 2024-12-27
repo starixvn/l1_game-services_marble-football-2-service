@@ -1,4 +1,5 @@
 import type appConfigs from "../app-configs";
+import { TOURNAMENT_CODES } from "../constants";
 import GameData from "../game-data";
 import { shuffle } from "../helpers";
 import generate from "../helpers/tournament/generate";
@@ -85,7 +86,7 @@ export default class TournamentConsumer {
     }
 
     private async getTournamentConfigs() {
-        return this.appConfigs.tournament;
+        return TOURNAMENT_CODES;
     }
 
     private async updateMatchInRound(match: MatchType, roundId: number) {

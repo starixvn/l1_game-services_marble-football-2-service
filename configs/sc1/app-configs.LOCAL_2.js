@@ -63,10 +63,7 @@ export default {
         enabled: true,
         endpoint: "http://10.10.50.69:4318/v1/traces",
     },
-    tournament: {
-        code: "UCL",
-        teams: ["MCI", "RMA", "BAR", "LIV", "ARS", "FCB", "INT", "LEV", "AVL", "ATA", "BVB", "JUV", "PSG", "SCP", "ATM", "MIL"],
-    },
+
     liveStreamServer: "https://d1aof1lwumql9k.cloudfront.net/104_STAGING/",
     gameResultSettings: {
         baseUrl: "http://l1-game-result-local2-service:5000",

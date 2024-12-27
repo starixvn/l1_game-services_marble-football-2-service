@@ -47,3 +47,8 @@ export const NUMBER_OF_VIDEOS: Record<string, number> = {
     H: 27,
     "0": 27,
 };
+
+export const TOURNAMENT_CODES = {
+    code: "UCL",
+    teams: ["MCI", "RMA", "BAR", "LIV", "ARS", "FCB", "INT", "LEV", "AVL", "ATA", "BVB", "JUV", "PSG", "SLB", "ATM", "MIL"],
+};

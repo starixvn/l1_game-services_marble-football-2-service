@@ -16,6 +16,17 @@ import {
 } from "../global-stubs";
 import GameData from "../../../src/game-data";
 import GameDefinition from "../../../src/game-definition";
+import axios from "axios";
+import { HttpsProxyAgent } from "https-proxy-agent";
+jest.mock("../../../src/timelines/video-timelines", () => ({
+    default: {
+        video1_result1: [1, 2, 3],
+        video2_result2: [4, 5, 6],
+    },
+}));
+
+// Add axios mock
+jest.mock("axios");
 
 describe("GameCron", () => {
     let gameCron: GameCron;
@@ -62,6 +73,7 @@ describe("GameCron", () => {
 
     afterEach(() => {
         jest.clearAllMocks();
+        (axios.get as jest.Mock).mockReset();
     });
 
     describe("proceed", () => {
@@ -159,6 +171,8 @@ describe("GameCron", () => {
             gameCron.gameData.result = {
                 firstHalfVideo: "http://marble-football/watch?v=HH",
                 secondHalfVideo: "http://marble-football/watch?v=AA",
+                firstHalfTimeline: [1, 2, 3],
+                secondHalfTimeline: [4, 5, 6],
             } as any;
 
             jest.spyOn(gameCron, "getVideoTimeline").mockResolvedValue();
@@ -171,6 +185,8 @@ describe("GameCron", () => {
                 videoResult: {
                     firstHalfVideo: "http://marble-football/watch?v=HH",
                     secondHalfVideo: "http://marble-football/watch?v=AA",
+                    firstHalfTimeline: [1, 2, 3],
+                    secondHalfTimeline: [4, 5, 6],
                 },
             });
         });
@@ -262,65 +278,70 @@ describe("GameCron", () => {
     });
 
     describe("getVideoTimelineForHalf", () => {
-        it("should return an empty array when the fetch response is not ok", async () => {
+        beforeEach(() => {
+            jest.clearAllMocks();
+        });
+
+        it("should fetch timeline with proxy when enabled", async () => {
             // Arrange
             const videoName = "test-video";
-            const mockResponse = {
-                ok: false,
-                status: 404,
-            };
-            global.fetch = jest.fn().mockResolvedValue(mockResponse);
-            gameCron.appConfigs = { liveStreamServer: "http://example.com/" } as any;
+            const mockTimeline = [1, 2, 3];
+            gameCron.appConfigs = {
+                liveStreamServer: "http://example.com/",
+                proxyServer: {
+                    enabled: true,
+                    url: "http://proxy.com",
+                },
+            } as any;
+
+            (axios.get as jest.Mock).mockResolvedValue({ data: { timeLine: mockTimeline } });
 
             // Act
             const result = await gameCron.getVideoTimelineForHalf(videoName);
 
             // Assert
-            expect(global.fetch).toHaveBeenCalledWith(new URL("http://example.com/test-video.json"));
-            expect(result).toEqual([]);
-            expect(gameCron.logService.logError).toHaveBeenCalledWith(
-                "Failed to fetch video timeline http://example.com/test-video.json with error: 404"
-            );
+            expect(axios.get).toHaveBeenCalledWith("http://example.com/test-video.json", { httpsAgent: expect.any(HttpsProxyAgent) });
+            expect(result).toEqual(mockTimeline);
         });
 
-        it("should handle and log errors when the fetch operation fails", async () => {
+        it("should fetch timeline without proxy when disabled", async () => {
+            // Arrange
+            const videoName = "test-video";
+            const mockTimeline = [1, 2, 3];
+            gameCron.appConfigs = {
+                liveStreamServer: "http://example.com/",
+                proxyServer: {
+                    enabled: false,
+                },
+            } as any;
+
+            (axios.get as jest.Mock).mockResolvedValue({ data: { timeLine: mockTimeline } });
+
+            // Act
+            const result = await gameCron.getVideoTimelineForHalf(videoName);
+
+            // Assert
+            expect(axios.get).toHaveBeenCalledWith("http://example.com/test-video.json", { httpsAgent: undefined });
+            expect(result).toEqual(mockTimeline);
+        });
+
+        it("should handle and log errors when the request fails", async () => {
             // Arrange
             const videoName = "test-video";
             const mockError = new Error("Network error");
-            global.fetch = jest.fn().mockRejectedValue(mockError);
-            gameCron.appConfigs = { liveStreamServer: "http://example.com/" } as any;
+            gameCron.appConfigs = {
+                liveStreamServer: "http://example.com/",
+                proxyServer: { enabled: false },
+            } as any;
+            gameCron.gameData.roundId = 123;
 
-            // Act
-            const result = await gameCron.getVideoTimelineForHalf(videoName);
+            (axios.get as jest.Mock).mockRejectedValue(mockError);
 
-            // Assert
-            expect(global.fetch).toHaveBeenCalledWith(new URL("http://example.com/test-video.json"));
-            expect(result).toEqual([]);
-            expect(gameCron.logService.logError).toHaveBeenCalledWith(
-                "Failed to get video timeline http://example.com/test-video.json with error: Error: Network error"
+            // Act & Assert
+            await expect(gameCron.getVideoTimelineForHalf(videoName)).rejects.toThrow(mockError);
+            expect(logService.logError).toHaveBeenCalledWith(
+                "In match 123, failed to get video timeline http://example.com/test-video.json with error: Error: Network error"
             );
-        });
-
-        it("should return the correct timeline data when the fetch is successful", async () => {
-            // Arrange
-            const videoName = "test-video";
-            const mockTimeline = [
-                { time: 0, event: "start" },
-                { time: 10, event: "goal" },
-            ];
-            const mockResponse = {
-                ok: true,
-                json: jest.fn().mockResolvedValue({ timeLine: mockTimeline }),
-            };
-            global.fetch = jest.fn().mockResolvedValue(mockResponse);
-            gameCron.appConfigs = { liveStreamServer: "http://example.com/" } as any;
-
-            // Act
-            const result = await gameCron.getVideoTimelineForHalf(videoName);
-
-            // Assert
-            expect(global.fetch).toHaveBeenCalledWith(new URL("http://example.com/test-video.json"));
-            expect(result).toEqual(mockTimeline);
         });
     });
 

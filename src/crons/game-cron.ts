@@ -7,7 +7,7 @@ import { HttpsProxyAgent } from "https-proxy-agent";
 import axios from "axios";
 import { retry } from "../helpers";
 import { generateVideoName } from "../helpers/result-helper";
-import defaultVideoTimelines from "../timelines/video-timelines.json" assert { type: "json" };
+import defaultVideoTimelines from "../timelines/video-timelines";
 
 export default class GameCron extends Table.Crons.TableGameCron {
     declare gameData: GameData;
