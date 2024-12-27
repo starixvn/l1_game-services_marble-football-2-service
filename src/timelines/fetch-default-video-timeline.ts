@@ -5,8 +5,8 @@ import fs from "fs";
 import path from "path";
 
 function saveFiles(filename: string, data: string) {
-    const __dirname = path.dirname(filename);
-    const filePath = path.join(__dirname, "src", "timelines", filename);
+    const dirname = path.dirname(filename);
+    const filePath = path.join(dirname, "src", "timelines", filename);
 
     fs.writeFile(filePath, data, (err) => {
         if (err) {
