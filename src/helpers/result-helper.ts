@@ -96,7 +96,7 @@ export const getScoreFromRate = (data: DataResultType) => {
 
 const getVideoInfoFromResult = (firstHalf: string, secondHalf: string) => {
     const firstHalfVideo = generateVideoName(firstHalf);
-    const secondHalfVideo = generateVideoName(secondHalf);
+    const secondHalfVideo = generateVideoName(secondHalf, false, firstHalfVideo);
 
     return {
         firstHalfVideo,
@@ -104,12 +104,18 @@ const getVideoInfoFromResult = (firstHalf: string, secondHalf: string) => {
     };
 };
 
-export const generateVideoName = (result: string, videoDefault = false) => {
+export const generateVideoName = (result: string, videoDefault = false, ignoredVideo = "") => {
     const chance = new Chance();
     const numberOfVideos = NUMBER_OF_VIDEOS[result] || 1;
-    const videoIndex = videoDefault ? 0 : chance.integer({ min: 1, max: numberOfVideos }) - 1;
+    let videoIndex = videoDefault ? 0 : chance.integer({ min: 1, max: numberOfVideos }) - 1;
+    let videoName = crypto.createHash("sha256").update(`${result}-${videoIndex}`).digest("hex");
 
-    return crypto.createHash("sha256").update(`${result}-${videoIndex}`).digest("hex");
+    if (videoName === ignoredVideo && !videoDefault) {
+        videoIndex = (videoIndex + 1) % numberOfVideos;
+        videoName = crypto.createHash("sha256").update(`${result}-${videoIndex}`).digest("hex");
+    }
+
+    return videoName;
 };
 
 const generatePenaltyResult = (homeWinsOnDraw: boolean) => {

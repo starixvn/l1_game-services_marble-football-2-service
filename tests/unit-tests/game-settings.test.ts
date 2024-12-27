@@ -52,9 +52,10 @@ describe("gameSettings", () => {
 
     it("should have the correct botSettings", () => {
         expect(gameSettings.botSettings).toEqual({
-            ratio: { mainOpts: 60, subOpts: 40 },
+            ratio: { mainOpts: 80, subOpts: 15, rareOpts: 5 },
             mainOpts: [BET_CHOICES.home, BET_CHOICES.away],
-            subOpts: [BET_CHOICES.draw, BET_CHOICES.over, BET_CHOICES.under, BET_CHOICES.odd, BET_CHOICES.even],
+            subOpts: [BET_CHOICES.over, BET_CHOICES.under, BET_CHOICES.odd, BET_CHOICES.even],
+            rareOpts: [BET_CHOICES.draw],
         });
     });
 });
