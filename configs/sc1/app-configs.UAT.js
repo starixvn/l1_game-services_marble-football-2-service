@@ -63,7 +63,7 @@ export default {
         endpoint: "http://10.2.190.51:4318/v1/traces",
     },
 
-    liveStreamServer: "https://d1aof1lwumql9k.cloudfront.net/104_STAGING/",
+    liveStreamServer: "https://d10r8t0fxmjzn1.cloudfront.net/104/",
     gameResultSettings: {
         baseUrl: "http://l1_game_result_uat:5000",
         id: "Game Service",

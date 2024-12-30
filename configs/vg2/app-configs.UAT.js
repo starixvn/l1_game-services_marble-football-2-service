@@ -66,7 +66,7 @@ export default {
         code: "UCL",
         teams: ["MCI", "RMA", "BAR", "LIV", "ARS", "FCB", "INT", "LEV", "AVL", "ATA", "BVB", "JUV", "PSG", "SCP", "ATM", "MIL"],
     },
-    liveStreamServer: "https://d1aof1lwumql9k.cloudfront.net/104_STAGING/",
+    liveStreamServer: "https://d10r8t0fxmjzn1.cloudfront.net/104/",
     gameResultSettings: {
         baseUrl: "http://l2_game_result_uat:5000",
         id: "Game Service",
