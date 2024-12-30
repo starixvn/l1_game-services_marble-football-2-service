@@ -22,9 +22,8 @@ export default {
     historyPageSize: 8,
     defaultBetTracks: {},
     botSettings: {
-        ratio: { mainOpts: 80, subOpts: 15, rareOpts: 5 },
+        ratio: { mainOpts: 80, subOpts: 20 },
         mainOpts: [BET_CHOICES.home, BET_CHOICES.away],
-        subOpts: [BET_CHOICES.over, BET_CHOICES.under, BET_CHOICES.odd, BET_CHOICES.even],
-        rareOpts: [BET_CHOICES.draw],
+        subOpts: [BET_CHOICES.over, BET_CHOICES.under, BET_CHOICES.odd, BET_CHOICES.even, BET_CHOICES.draw],
     },
 };
