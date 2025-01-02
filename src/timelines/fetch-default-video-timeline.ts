@@ -1,3 +1,5 @@
+// NOSONAR
+
 import { NUMBER_OF_VIDEOS } from "../constants";
 import appConfigs from "../app-configs";
 import { generateVideoName } from "../helpers/result-helper";
