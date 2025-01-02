@@ -77,7 +77,7 @@ export const getSettlementResult = (roundResult: ResultType): SettlementResultTy
 export const generateRawResultForHash = () => {};
 
 const generateResultForHalf = (data: DataResultType) => {
-    const scoreResult = getScoreFromRate(data);
+    const scoreResult = getScoreFromPool(data);
 
     const [homeGoals, awayGoals] = scoreResult.split("-").map(Number);
     const sequence = Array(homeGoals).fill("H").concat(Array(awayGoals).fill("A"));
@@ -87,7 +87,7 @@ const generateResultForHalf = (data: DataResultType) => {
     return result || "0";
 };
 
-export const getScoreFromRate = (data: DataResultType) => {
+const getScoreFromPool = (data: DataResultType) => {
     const pool = data.pool || createScorePool(halfConfig, POOL_SIZE);
 
     const index = randomHelper.getRandomIndexFromArray(data.randomMode, POOL_SIZE);

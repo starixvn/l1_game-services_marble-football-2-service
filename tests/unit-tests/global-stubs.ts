@@ -59,6 +59,7 @@ const tournamentRepository = {
     findOne: jest.fn().mockReturnThis(),
     findOneAndUpdate: jest.fn().mockReturnThis(),
     updateOne: jest.fn(),
+    sort: jest.fn().mockReturnThis(),
     create: jest.fn(),
     exec: jest.fn(),
     lean: jest.fn().mockReturnThis(),
@@ -89,6 +90,7 @@ const baseMetrics: BaseMetrics = stub<BaseMetrics>();
 const logService: typeof logger = {
     logError: jest.fn(),
     logInfo: jest.fn(),
+    logWarning: jest.fn(),
 } as unknown as typeof logger;
 
 export {

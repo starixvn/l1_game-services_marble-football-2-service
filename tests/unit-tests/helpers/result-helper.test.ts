@@ -1,12 +1,7 @@
-import {
-    generateResult,
-    generateResultFromAdminRawResult,
-    getSettlementResult,
-    getScoreFromRate,
-    generateVideoName,
-} from "../../../src/helpers/result-helper";
-import { MatchConfigType } from "../../../src/match-configs";
+import { resultHelper } from "../../../src/helpers";
+import { HalfConfigType } from "../../../src/match-configs";
 import { ResultType } from "../../../src/models/rounds";
+import crypto from "crypto";
 
 jest.mock("chance", () => {
     return function () {
@@ -22,6 +17,18 @@ jest.mock("../../../src/helpers/shuffle", () => ({
     shuffle: jest.fn((array) => array),
 }));
 
+jest.mock("../../../src/helpers/random-helper", () => ({
+    getRandomIndexFromArray: jest.fn().mockReturnValue(0),
+}));
+
+jest.mock("../../../src/constants", () => ({
+    NUMBER_OF_VIDEOS: {
+        HAA: 1,
+        AHH: 2,
+    },
+    POOL_SIZE: 10_000,
+}));
+
 describe("Result Helper", () => {
     afterEach(() => {
         jest.clearAllMocks();
@@ -29,22 +36,28 @@ describe("Result Helper", () => {
 
     describe("generateResult", () => {
         it("should generate a result based on match configuration", () => {
-            // Arrange
-            jest.spyOn(require("../../../src/helpers/result-helper"), "getScoreFromRate")
-                .mockReturnValueOnce("1-0")
-                .mockReturnValueOnce("0-0");
-
             // Act
-            const result = generateResult({} as any);
+            const result = resultHelper.generateResult({ randomMode: 1 });
 
             // Assert
-            expect(result.firstHalf).toBe("H");
-            expect(result.secondHalf).toBe("0");
+            expect(result.firstHalf).toBeDefined();
+            expect(result.secondHalf).toBeDefined();
             expect(result.overUnderValue).toBe(4.5);
             expect(result.homeWinsOnDraw).toBe(true);
             expect(result.firstHalfVideo).toBeDefined();
             expect(result.secondHalfVideo).toBeDefined();
             expect(result.penalty).toStrictEqual({ home: 2, away: 1 });
+        });
+
+        it("should use provided pool if available", () => {
+            // Arrange
+            const pool = ["1-0"];
+
+            // Act
+            const result = resultHelper.generateResult({ randomMode: 1, pool });
+            // Assert
+            expect(result.firstHalf).toBe("H");
+            expect(result.secondHalf).toBe("H");
         });
     });
 
@@ -60,7 +73,7 @@ describe("Result Helper", () => {
                 penalty: { home: 0, away: 0 },
             };
 
-            const settlementResult = getSettlementResult(roundResult);
+            const settlementResult = resultHelper.getSettlementResult(roundResult);
 
             expect(settlementResult.home).toBe(false);
             expect(settlementResult.away).toBe(false);
@@ -69,6 +82,7 @@ describe("Result Helper", () => {
             expect(settlementResult.under).toBe(false);
             expect(settlementResult.odd).toBe(false);
             expect(settlementResult.even).toBe(true);
+            expect(settlementResult.draw4).toBe(false);
         });
     });
 
@@ -80,24 +94,65 @@ describe("Result Helper", () => {
                 homeWinsOnDraw: false,
             } as ResultType;
 
-            const result = generateResultFromAdminRawResult(roundResult);
+            const result = resultHelper.generateResultFromAdminRawResult(roundResult);
 
             expect(result.firstHalf).toBe("HAAA");
             expect(result.secondHalf).toBe("AHHH");
             expect(result.overUnderValue).toBe(4.5);
+            expect(result.homeWinsOnDraw).toBe(false);
+            expect(result.firstHalfVideo).toBeDefined();
+            expect(result.secondHalfVideo).toBeDefined();
+            expect(result.penalty).toBeDefined();
+        });
+
+        it("should handle empty results", () => {
+            const roundResult = {
+                homeWinsOnDraw: true,
+            } as ResultType;
+
+            const result = resultHelper.generateResultFromAdminRawResult(roundResult);
+
+            expect(result.firstHalf).toBe("0");
+            expect(result.secondHalf).toBe("0");
         });
     });
 
     describe("generateVideoName", () => {
         it("should generate a video name based on result", () => {
-            // Arrange
             const result = "HAA";
+            const videoName = resultHelper.generateVideoName(result);
+            const expectedVideoName = crypto.createHash("sha256").update(`${result}-0`).digest("hex");
+            expect(videoName).toBe(expectedVideoName);
+        });
 
-            // Act
-            const videoName = generateVideoName(result);
+        it("should generate different video name when ignored video matches and number of videos is bigger than 1", () => {
+            const result = "AHH";
+            const ignoredVideo = resultHelper.generateVideoName(result);
+            const newVideo = resultHelper.generateVideoName(result, false, ignoredVideo);
+            expect(newVideo).not.toBe(ignoredVideo);
+        });
 
-            // Assert
-            expect(videoName).toBe("ab4e46235565c9b63b6c1dae2367a318e6c2605a8645ca575cf0063417d23db3");
+        it("should generate same video name when ignored video matches but number of videos is 1", () => {
+            const result = "HAA";
+            const ignoredVideo = resultHelper.generateVideoName(result);
+            const newVideo = resultHelper.generateVideoName(result, false, ignoredVideo);
+            expect(newVideo).toBe(ignoredVideo);
+        });
+    });
+
+    describe("createScorePool", () => {
+        it("should create a pool of scores based on config", () => {
+            const config: HalfConfigType = {
+                scoreRate: {
+                    "1-0": 0.5,
+                    "0-1": 0.5,
+                },
+            };
+
+            const pool = resultHelper.createScorePool(config, 100);
+            expect(pool).toHaveLength(100);
+            expect(pool.filter((score) => score === "1-0").length).toBe(50);
+            expect(pool.filter((score) => score === "0-1").length).toBe(50);
         });
     });
 });

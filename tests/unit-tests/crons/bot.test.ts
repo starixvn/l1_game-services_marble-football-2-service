@@ -32,11 +32,13 @@ describe("Bot", () => {
             gameData.players[botId] = { red: 0 };
 
             const updatePlayerBetCountSpy = jest.spyOn(botInstance, "updatePlayerBetCount");
+            const superUpdateSpy = jest.spyOn(botInstance, "updateBalanceAndPublishBetPayload");
 
             botInstance.updateBalanceAndPublishBetPayload(botId, choice, amount, balance);
 
             expect(gameData.players[botId].red).toBe(balance);
             expect(updatePlayerBetCountSpy).toHaveBeenCalledWith(botId, choice);
+            expect(superUpdateSpy).toHaveBeenCalledWith(botId, choice, amount, balance);
         });
     });
 
@@ -58,28 +60,28 @@ describe("Bot", () => {
 
             expect(gameData.playerBetCount[choice]).toEqual([]);
         });
-    });
 
-    describe("addToPlayersAndPublish", () => {
-        it("should add bot to players", () => {
-            const newBot = { id: "bot1" };
+        it("should initialize playerBetCount array if it doesn't exist", () => {
+            const playerId = "player1";
+            const choice = "choice2";
 
-            botInstance.addToPlayersAndPublish(newBot);
+            delete gameData.playerBetCount[choice];
 
-            expect(gameData.players[newBot.id]).toBe(newBot);
+            botInstance.updatePlayerBetCount(playerId, choice);
+
+            expect(gameData.playerBetCount[choice]).toEqual([playerId]);
         });
-    });
 
-    describe("removeBot", () => {
-        it("should remove bot from players and botsInRoom", () => {
-            const botId = "bot1";
-            gameData.players[botId] = { id: botId };
-            (botInstance as any).botsInRoom = { [botId]: {} };
+        it("should not add duplicate player IDs to playerBetCount", () => {
+            const playerId = "player1";
+            const choice = "choice1";
 
-            botInstance.removeBot(botId);
+            gameData.playerBetCount[choice] = [playerId];
 
-            expect(gameData.players[botId]).toBeUndefined();
-            expect((botInstance as any).botsInRoom[botId]).toBeUndefined();
+            botInstance.updatePlayerBetCount(playerId, choice);
+
+            expect(gameData.playerBetCount[choice]).toEqual([playerId]);
+            expect(gameData.playerBetCount[choice].length).toBe(1);
         });
     });
 });

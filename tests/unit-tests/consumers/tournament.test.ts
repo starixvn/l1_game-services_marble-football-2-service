@@ -524,4 +524,24 @@ describe(TournamentConsumer.name, () => {
             );
         });
     });
+
+    describe("getLastTournament", () => {
+        it("should return the last tournament", async () => {
+            // Arrange
+            const tournament = { _id: "1234", ended: true } as any;
+            const mockLeanExec = jest.fn().mockResolvedValue(tournament);
+
+            (tournamentRepository as any).findOne.mockReturnValue({
+                sort: () => ({
+                    lean: () => ({ exec: mockLeanExec }),
+                }),
+            });
+
+            // Act
+            const result = await consumer.getLastTournament();
+
+            // Assert
+            expect(result).toEqual(tournament);
+        });
+    });
 });
