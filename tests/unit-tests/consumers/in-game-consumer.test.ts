@@ -9,6 +9,13 @@ import * as helper from "../../../src/helpers/bet-percentage";
 describe("InGameConsumer test", () => {
     let consumer: InGameConsumer;
     const definition = stub<GameDefinition>();
+    definition.durations = {
+        wholeRound: 151,
+        startingRound: 141,
+        placingBets: 136,
+        lockingBet: 109,
+        streamingVideo: 108,
+    };
     const gameData = stub<GameData>();
     const getBalance = jest.fn();
 
@@ -21,30 +28,60 @@ describe("InGameConsumer test", () => {
     });
 
     describe("getCurrentVideoResult", () => {
-        it("should return video results from gameData", () => {
-            // arrange
-            gameData.result = {
-                firstHalfVideo: "video1.mp4",
-                secondHalfVideo: "video2.mp4",
-                firstHalfTimeline: [],
-                secondHalfTimeline: [],
-                firstHalf: "AH",
-                secondHalf: "HA",
-            } as any;
+        const fullVideoResult = {
+            firstHalfVideo: "video1.mp4",
+            secondHalfVideo: "video2.mp4",
+            firstHalfTimeline: [1, 2, 3],
+            secondHalfTimeline: [4, 5, 6],
+            firstHalf: "AH",
+            secondHalf: "HA",
+        };
 
-            gameData.liveStreamServer = "server1";
+        const timelineResult = {
+            firstHalfTimeline: [1, 2, 3],
+            secondHalfTimeline: [4, 5, 6],
+            firstHalf: "AH",
+            secondHalf: "HA",
+        };
 
-            // act
-            const result = consumer.getCurrentVideoResult();
+        beforeEach(() => {
+            gameData.result = fullVideoResult as any;
+        });
 
-            // assert
-            expect(result).toEqual({
-                firstHalfVideo: "video1.mp4",
-                secondHalfVideo: "video2.mp4",
-                firstHalfTimeline: [],
-                secondHalfTimeline: [],
-                firstHalf: "AH",
-                secondHalf: "HA",
+        const testCases = [
+            {
+                phase: "streaming video",
+                timeRange: { start: 0, end: definition.durations.streamingVideo - 1 },
+                resultDescription: "full video result",
+                expectedResult: fullVideoResult,
+            },
+            {
+                phase: "showing result",
+                timeRange: { start: definition.durations.startingRound + 1, end: definition.durations.wholeRound },
+                resultDescription: "timeline result",
+                expectedResult: timelineResult,
+            },
+            {
+                phase: "starting",
+                timeRange: { start: definition.durations.placingBets + 1, end: definition.durations.startingRound },
+                resultDescription: "empty result",
+                expectedResult: {},
+            },
+            {
+                phase: "placing bets",
+                timeRange: { start: definition.durations.streamingVideo, end: definition.durations.placingBets },
+                resultDescription: "empty result",
+                expectedResult: {},
+            },
+        ];
+
+        testCases.forEach(({ phase, timeRange, resultDescription, expectedResult }) => {
+            describe(`during ${phase} phase with start time ${timeRange.start} and end time ${timeRange.end}`, () => {
+                const timeToTests = Array.from({ length: timeRange.end - timeRange.start + 1 }, (_, i) => timeRange.start + i);
+                it.each(timeToTests)(`should return ${resultDescription} when remaining time is %s`, (time) => {
+                    gameData.remainingTime = time;
+                    expect(consumer.getCurrentVideoResult()).toEqual(expectedResult);
+                });
             });
         });
     });
