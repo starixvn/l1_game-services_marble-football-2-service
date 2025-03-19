@@ -64,15 +64,32 @@ export const getSettlementResult = (roundResult: ResultType): SettlementResultTy
     const isOver = homeGoals + awayGoals > roundResult.overUnderValue;
     const isOdd = (homeGoals + awayGoals) % 2 === 1;
 
+    const home = homeGoals > awayGoals;
+    const away = awayGoals > homeGoals;
+    const draw = homeGoals === awayGoals;
+    const draw4 = homeGoals === awayGoals && homeGoals === 4;
+    const over = isOver;
+    const under = !isOver;
+    const odd = isOdd;
+    const even =!isOdd;
+
     return {
-        home: homeGoals > awayGoals,
-        away: awayGoals > homeGoals,
-        draw: homeGoals === awayGoals,
-        draw4: homeGoals === awayGoals && homeGoals === 4,
-        over: isOver,
-        under: !isOver,
-        odd: isOdd,
-        even: !isOdd,
+        firstHalfHome: home,
+        firstHalfAway: away,
+        firstHalfDraw: draw,
+        firstHalfDraw4: draw4,
+        firstHalfOver: over,
+        firstHalfUnder: under,
+        firstHalfOdd: odd,
+        firstHalfEven: even,
+        secondHalfHome: home,
+        secondHalfAway: away,
+        secondHalfDraw: draw,
+        secondHalfDraw4: draw4,
+        secondHalfEven: even,
+        secondHalfOdd: odd,
+        secondHalfOver: over,
+        secondHalfUnder: under
     };
 };
 
