@@ -33,8 +33,12 @@ export default class SettleGameRoundConsumer extends Table.EventConsumers.TableS
                 const betAmount = bet[choice] ?? 0;
                 let originalOdds = (odds as any)[choice] || 1;
 
-                if (choice === BET_CHOICES.draw && settlementResult.draw4) {
-                    originalOdds = odds.draw4;
+                if (choice === BET_CHOICES.firstHalfDraw && settlementResult.firstHalfDraw4) {
+                    originalOdds = odds.firstHalfDraw4;
+                }
+
+                if (choice === BET_CHOICES.secondHalfDraw && settlementResult.secondHalfDraw4) {
+                    originalOdds = odds.secondHalfDraw4;
                 }
 
                 const effectiveOdds = bet.freeBet ? originalOdds - 1 : originalOdds;

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { BET_CHOICES, MODEL_NAME_PREFIX } from "../constants";
+import { BET_CHOICES, MODEL_NAME_PREFIX, ODDS_TYPE } from "../constants";
 import { MatchType } from "./tournaments";
 
 export type ResultType = {
@@ -38,20 +38,16 @@ const matchSchema = new mongoose.Schema<MatchType>(
 );
 
 export type SettlementResultType = {
-    [key in keyof typeof BET_CHOICES]: boolean;
-} & { draw4: boolean };
+    [key in keyof typeof ODDS_TYPE]: boolean;
+};
+
+const dynamicResultSchema = Object.values(ODDS_TYPE).reduce((schema, item) => ({
+    ...schema,
+    [item]: { type: Boolean }
+}), {})
 
 const settlementResultSchema = new mongoose.Schema<SettlementResultType>(
-    {
-        home: { type: Boolean },
-        away: { type: Boolean },
-        draw: { type: Boolean },
-        draw4: { type: Boolean },
-        over: { type: Boolean },
-        under: { type: Boolean },
-        odd: { type: Boolean },
-        even: { type: Boolean },
-    },
+    dynamicResultSchema,
     { _id: false },
 );
 

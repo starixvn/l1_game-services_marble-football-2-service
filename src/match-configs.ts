@@ -1,8 +1,8 @@
-import { BET_CHOICES } from "./constants";
+import { BET_CHOICES, ODDS_TYPE } from "./constants";
 
 export type OddsType = {
-    [key in keyof typeof BET_CHOICES]: number;
-} & { draw4: number };
+    [key in keyof typeof ODDS_TYPE]: number;
+};
 
 export type HalfConfigType = {
     scoreRate: Record<string, number>;
