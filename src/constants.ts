@@ -12,6 +12,10 @@ export const DEFAULT_MARGIN = 0.02;
 
 export const IS_DEV_ENV = process.env.NODE_ENV === "development";
 
+export const GAME_NAME = "marblefootbal_2";
+
+export const MODEL_NAME_PREFIX = IS_DEV_ENV ? `${GAME_NAME}_dev` : `${GAME_NAME}`;
+
 export const POOL_SIZE = 10_000;
 
 export const DEFAULT_NUMBER_OF_VIDEOS: Record<string, number> = {

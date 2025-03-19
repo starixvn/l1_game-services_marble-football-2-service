@@ -36,7 +36,7 @@ export default class HistoryQuery extends Core.QueryApis.HistoryQuery {
                         settlementResult: round.settlementResult,
                         betLogDetails: this.convertBetLogs(betLogDetails),
                     };
-                })
+                }),
             );
         }
 

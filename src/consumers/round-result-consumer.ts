@@ -14,17 +14,20 @@ export default class RoundResultConsumer extends RoundResultConsumerBase {
             container.definition,
             container.roundResultPublisher,
             container.resultsRepository,
-            container.provablyFairConsumer
+            container.provablyFairConsumer,
         );
 
         this.tournamentConsumer = container.tournamentConsumer;
     }
 
     getNumberOfVideos = () => {
-        const numberOfVideos = this.gameData.gameConfigs.videoStreamConfig?.videoInfos.reduce((acc, video) => {
-            acc[video.videoName] = video.numberOfVideos;
-            return acc;
-        }, {} as Record<string, number>);
+        const numberOfVideos = this.gameData.gameConfigs.videoStreamConfig?.videoInfos.reduce(
+            (acc, video) => {
+                acc[video.videoName] = video.numberOfVideos;
+                return acc;
+            },
+            {} as Record<string, number>,
+        );
 
         return numberOfVideos || DEFAULT_NUMBER_OF_VIDEOS;
     };

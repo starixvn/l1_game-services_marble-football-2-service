@@ -381,7 +381,7 @@ describe("GameCron", () => {
             // Act & Assert
             await expect(gameCron.getVideoTimelineForHalf(videoName)).rejects.toThrow(mockError);
             expect(logService.logError).toHaveBeenCalledWith(
-                "In match 123, failed to get video timeline http://example.com/test-video.json with error: Error: Network error"
+                "In match 123, failed to get video timeline http://example.com/test-video.json with error: Error: Network error",
             );
         });
     });

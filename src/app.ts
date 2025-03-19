@@ -11,7 +11,7 @@ const run = async () => {
         gameSettings as any,
         resultHelper.generateResult,
         resultHelper.getSettlementResult,
-        resultHelper.generateRawResultForHash
+        resultHelper.generateRawResultForHash,
     );
 
     const gameData = new GameData(gameSettings.durations.wholeRound);

@@ -30,7 +30,7 @@ describe("Bet Logs", () => {
 
             // Assert
             expect(error.message).toBe(
-                `marblefootball_betlogs validation failed: operatorId: Path \`operatorId\` is required., rate: Path \`rate\` is required., currency: Path \`currency\` is required., name: Path \`name\` is required., uid: Path \`uid\` is required.`
+                `marblefootball_betlogs validation failed: operatorId: Path \`operatorId\` is required., rate: Path \`rate\` is required., currency: Path \`currency\` is required., name: Path \`name\` is required., uid: Path \`uid\` is required.`,
             );
         });
     });

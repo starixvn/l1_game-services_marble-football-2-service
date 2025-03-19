@@ -38,7 +38,7 @@ describe("Bets", () => {
 
             // Assert
             expect(error.message).toBe(
-                `marblefootball_bets validation failed: rate: Path \`rate\` is required., name: Path \`name\` is required., uid: Path \`uid\` is required., roundId: Path \`roundId\` is required.`
+                `marblefootball_bets validation failed: rate: Path \`rate\` is required., name: Path \`name\` is required., uid: Path \`uid\` is required., roundId: Path \`roundId\` is required.`,
             );
         });
     });

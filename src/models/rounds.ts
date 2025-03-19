@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { BET_CHOICES, IS_DEV_ENV } from "../constants";
+import { BET_CHOICES, MODEL_NAME_PREFIX } from "../constants";
 import { MatchType } from "./tournaments";
 
 export type ResultType = {
@@ -26,7 +26,7 @@ const resultSchema = new mongoose.Schema<ResultType>(
         homeWinsOnDraw: { type: Boolean },
         penalty: { type: Object },
     },
-    { _id: false }
+    { _id: false },
 );
 
 const matchSchema = new mongoose.Schema<MatchType>(
@@ -34,7 +34,7 @@ const matchSchema = new mongoose.Schema<MatchType>(
         home: { type: String },
         away: { type: String },
     },
-    { _id: false }
+    { _id: false },
 );
 
 export type SettlementResultType = {
@@ -52,7 +52,7 @@ const settlementResultSchema = new mongoose.Schema<SettlementResultType>(
         odd: { type: Boolean },
         even: { type: Boolean },
     },
-    { _id: false }
+    { _id: false },
 );
 
 export interface IRound {
@@ -73,7 +73,7 @@ const RoundSchema = new mongoose.Schema<IRound>({
     exchangeRateId: { type: Number, required: true },
 });
 
-const modelName = IS_DEV_ENV ? "marblefootball_dev_rounds" : "marblefootball_rounds";
+const modelName = `${MODEL_NAME_PREFIX}_rounds`;
 const Round = mongoose.model(modelName, RoundSchema);
 
 export default Round;

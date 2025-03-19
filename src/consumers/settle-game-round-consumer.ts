@@ -58,7 +58,7 @@ export default class SettleGameRoundConsumer extends Table.EventConsumers.TableS
                 netWin: 0,
                 totalLost: 0,
                 winningByChoices: {},
-            }
+            },
         );
 
         betResult.totalWin = parseFloat(betResult.totalWin.toFixed(2));

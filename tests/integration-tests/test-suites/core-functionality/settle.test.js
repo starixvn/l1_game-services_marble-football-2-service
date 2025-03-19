@@ -32,9 +32,12 @@ describe("when settle", () => {
         it("should return settled status data", async () => {
             // Arrange
             const inGameData = await client.handleGameEvent((data) => data.remainingTime);
-            setTimeout(() => {
-                client.emit(eventTypes.bet, { betChoices: { big: 20.9, specific1: 30.2 }, clientSeed: "1234" });
-            }, getTimeOutToPlacingBetTime(inGameData.remainingTime, gameSettings.durations) * 1000);
+            setTimeout(
+                () => {
+                    client.emit(eventTypes.bet, { betChoices: { big: 20.9, specific1: 30.2 }, clientSeed: "1234" });
+                },
+                getTimeOutToPlacingBetTime(inGameData.remainingTime, gameSettings.durations) * 1000,
+            );
 
             // Act
             const result = await client.handleGameEvent((data) => data.status);

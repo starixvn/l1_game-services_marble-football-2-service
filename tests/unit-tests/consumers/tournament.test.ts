@@ -159,7 +159,7 @@ describe(TournamentConsumer.name, () => {
                 { id: 0 },
                 {
                     match: matches[0],
-                }
+                },
             );
         });
         it("should update the match result and proceed to the next match", async () => {
@@ -311,7 +311,7 @@ describe(TournamentConsumer.name, () => {
                     currentMatch: 1,
                     ended: false,
                 },
-                { new: true }
+                { new: true },
             );
         });
 
@@ -520,7 +520,7 @@ describe(TournamentConsumer.name, () => {
                     currentMatch: 15,
                     ended: true,
                 },
-                { new: true }
+                { new: true },
             );
         });
     });

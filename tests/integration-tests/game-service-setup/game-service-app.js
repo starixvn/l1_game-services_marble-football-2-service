@@ -14,7 +14,7 @@ export const run = async () => {
         gameSettings,
         resultHelper.generateResult,
         resultHelper.getSettlementResult,
-        resultHelper.generateRawResultForHash
+        resultHelper.generateRawResultForHash,
     );
 
     const gameData = new GameData(gameSettings.durations.wholeRound);

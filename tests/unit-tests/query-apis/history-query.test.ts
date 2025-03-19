@@ -89,7 +89,7 @@ describe(HistoryQuery.name, () => {
                 expect(historyQuery.betsRepository.find).toHaveBeenCalledWith(
                     { uid: mockPlayer.UID, paid: true },
                     { projection: true },
-                    { sort: { _id: -1 }, skip: 10, limit: 10 }
+                    { sort: { _id: -1 }, skip: 10, limit: 10 },
                 );
             });
 

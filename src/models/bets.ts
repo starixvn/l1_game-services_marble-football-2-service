@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
-import { IS_DEV_ENV } from "../constants";
+import { MODEL_NAME_PREFIX } from "../constants";
 
-const modelName = IS_DEV_ENV ? "marblefootball_dev_bets" : "marblefootball_bets";
-const tmpModelName = IS_DEV_ENV ? "marblefootball_dev_tmpbets" : "marblefootball_tmpbets";
+const modelName = `${MODEL_NAME_PREFIX}_bets`;
+const tmpModelName = `${MODEL_NAME_PREFIX}_tmpbets`;
 
 const bet = {
     roundId: { type: Number, required: true },
@@ -35,7 +35,7 @@ const bets = mongoose.model(
         ...bet,
         currency: { type: String },
         rate: { type: Number, required: true },
-    })
+    }),
 );
 
 const tmpBets = mongoose.model(tmpModelName, new mongoose.Schema(bet));

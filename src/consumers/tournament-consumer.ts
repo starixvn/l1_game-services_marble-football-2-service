@@ -45,7 +45,7 @@ export default class TournamentConsumer {
                     ended: ended,
                     currentMatch: tournament.currentMatch + 1,
                 },
-                { new: true }
+                { new: true },
             );
         }
     }

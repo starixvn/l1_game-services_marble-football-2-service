@@ -20,7 +20,7 @@ describe(generateTournament.name, () => {
 
                 // Assert
                 expect(caller).toThrow();
-            }
+            },
         );
     });
 

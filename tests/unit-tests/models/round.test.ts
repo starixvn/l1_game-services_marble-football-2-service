@@ -36,7 +36,7 @@ describe("Round", () => {
 
             // Assert
             expect(error.message).toBe(
-                `marblefootball_rounds validation failed: exchangeRateId: Path \`exchangeRateId\` is required., id: Path \`id\` is required.`
+                `marblefootball_rounds validation failed: exchangeRateId: Path \`exchangeRateId\` is required., id: Path \`id\` is required.`,
             );
         });
     });
