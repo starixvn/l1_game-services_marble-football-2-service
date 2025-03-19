@@ -108,17 +108,25 @@ describe("SettleGameRoundConsumer", () => {
     describe("calculateBetResult", () => {
         // Common test objects
         const defaultSettlementResult = {
-            home: false,
-            away: false,
-            draw: false,
-            draw4: false,
-            over: false,
-            under: false,
-            odd: false,
-            even: false,
+            firstHalfHome: false,
+            firstHalfAway: false,
+            firstHalfDraw: false,
+            firstHalfOver: false,
+            firstHalfUnder: false,
+            firstHalfOdd: false,
+            firstHalfEven: false,
+            secondHalfHome: false,
+            secondHalfAway: false,
+            secondHalfDraw: false,
+            secondHalfOver: false,
+            secondHalfUnder: false,
+            secondHalfOdd: false,
+            secondHalfEven: false,
+            secondHalfDraw4: false,
+            firstHalfDraw4: false
         };
 
-        const odds = { home: 2.0, away: 2.0, draw: 2.0, draw4: 50, over: 2.0, under: 2.0, odd: 2.0, even: 2.0 } as OddsType;
+        const odds = { firstHalfHome: 2.0, firstHalfAway: 2.0, firstHalfDraw: 2.0, firstHalfOver: 2.0, firstHalfUnder: 2.0, firstHalfOdd: 2.0, firstHalfEven: 2.0 } as OddsType;
 
         it("should calculate bet result correctly for a winning bet", () => {
             // Arrange
