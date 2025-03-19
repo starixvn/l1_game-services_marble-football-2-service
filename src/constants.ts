@@ -1,18 +1,3 @@
-// firstHalfHome
-// firstHalfAway
-// firstHalfDraw
-// firstHalfOver
-// firstHalfUnder
-// firstHalfOdd
-// firstHalfEven
-// secondHalfHome
-// secondHalfAway
-// secondHalfDraw
-// secondHalfUnder
-// secondHalfOver
-// secondHalfOdd
-// secondHalfEven
-
 export const BET_CHOICES = {
     firstHalfHome: "firstHalfHome",
     firstHalfAway: "firstHalfAway",
