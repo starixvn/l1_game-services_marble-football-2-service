@@ -1,20 +1,3 @@
-export const BET_CHOICES = {
-    firstHalfHome: "firstHalfHome",
-    firstHalfAway: "firstHalfAway",
-    firstHalfDraw: "firstHalfDraw",
-    firstHalfOver: "firstHalfOver",
-    firstHalfUnder: "firstHalfUnder",
-    firstHalfOdd: "firstHalfOdd",
-    firstHalfEven: "firstHalfEven",
-    secondHalfHome: "secondHalfHome",
-    secondHalfAway: "secondHalfAway",
-    secondHalfDraw: "secondHalfDraw",
-    secondHalfOver: "secondHalfOver",
-    secondHalfUnder: "secondHalfUnder",
-    secondHalfOdd: "secondHalfOdd",
-    secondHalfEven: "secondHalfEven",
-};
-
 export const SECOND_HALF_BET_CHOICES = {
     secondHalfHome: "secondHalfHome",
     secondHalfAway: "secondHalfAway",
@@ -24,6 +7,21 @@ export const SECOND_HALF_BET_CHOICES = {
     secondHalfOdd: "secondHalfOdd",
     secondHalfEven: "secondHalfEven",
 }
+
+export const FIRST_HALF_BET_CHOICES = {
+    firstHalfHome: "firstHalfHome",
+    firstHalfAway: "firstHalfAway",
+    firstHalfDraw: "firstHalfDraw",
+    firstHalfOver: "firstHalfOver",
+    firstHalfUnder: "firstHalfUnder",
+    firstHalfOdd: "firstHalfOdd",
+    firstHalfEven: "firstHalfEven",
+}
+
+export const BET_CHOICES = {
+    ...FIRST_HALF_BET_CHOICES,
+    ...SECOND_HALF_BET_CHOICES
+};
 
 
 export const ODDS_TYPE = {
