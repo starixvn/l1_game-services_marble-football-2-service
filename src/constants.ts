@@ -15,6 +15,17 @@ export const BET_CHOICES = {
     secondHalfEven: "secondHalfEven",
 };
 
+export const SECOND_HALF_BET_CHOICES = {
+    secondHalfHome: "secondHalfHome",
+    secondHalfAway: "secondHalfAway",
+    secondHalfDraw: "secondHalfDraw",
+    secondHalfOver: "secondHalfOver",
+    secondHalfUnder: "secondHalfUnder",
+    secondHalfOdd: "secondHalfOdd",
+    secondHalfEven: "secondHalfEven",
+}
+
+
 export const ODDS_TYPE = {
     ...BET_CHOICES,
     firstHalfDraw4: "firstHalfDraw4",
