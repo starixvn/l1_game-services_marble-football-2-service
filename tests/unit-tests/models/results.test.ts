@@ -34,7 +34,7 @@ describe("Results", () => {
             const error = actual.validateSync() as any;
 
             // Assert
-            expect(error.message).toBe(`marblefootball_results validation failed: roundId: Path \`roundId\` is required.`);
+            expect(error.message).toBe(`marblefootbal_2_results validation failed: roundId: Path \`roundId\` is required.`);
         });
     });
 
@@ -59,7 +59,7 @@ describe("Results", () => {
             const model = new results({});
 
             // Assert
-            expect(model.collection.name).toBe("marblefootball_dev_results");
+            expect(model.collection.name).toBe("marblefootbal_2_dev_results");
         });
 
         it("should not have _dev suffix in production environment", async () => {
@@ -72,7 +72,7 @@ describe("Results", () => {
             const model = new results({});
 
             // Assert
-            expect(model.collection.name).toBe("marblefootball_results");
+            expect(model.collection.name).toBe("marblefootbal_2_results");
         });
 
         it("should handle undefined environment as production", async () => {
@@ -85,7 +85,7 @@ describe("Results", () => {
             const model = new results({});
 
             // Assert
-            expect(model.collection.name).toBe("marblefootball_results");
+            expect(model.collection.name).toBe("marblefootbal_2_results");
         });
     });
 });

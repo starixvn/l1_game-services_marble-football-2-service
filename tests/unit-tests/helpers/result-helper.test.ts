@@ -77,14 +77,23 @@ describe("Result Helper", () => {
 
             const settlementResult = resultHelper.getSettlementResult(roundResult);
 
-            expect(settlementResult.home).toBe(false);
-            expect(settlementResult.away).toBe(false);
-            expect(settlementResult.draw).toBe(true);
-            expect(settlementResult.over).toBe(true);
-            expect(settlementResult.under).toBe(false);
-            expect(settlementResult.odd).toBe(false);
-            expect(settlementResult.even).toBe(true);
-            expect(settlementResult.draw4).toBe(false);
+            expect(settlementResult.firstHalfHome).toBe(false);
+            expect(settlementResult.firstHalfAway).toBe(false);
+            expect(settlementResult.firstHalfDraw).toBe(true);
+            expect(settlementResult.firstHalfOver).toBe(true);
+            expect(settlementResult.firstHalfUnder).toBe(false);
+            expect(settlementResult.firstHalfOdd).toBe(false);
+            expect(settlementResult.firstHalfEven).toBe(true);
+            expect(settlementResult.firstHalfDraw4).toBe(false);
+
+            expect(settlementResult.secondHalfHome).toBe(false);
+            expect(settlementResult.secondHalfAway).toBe(false);
+            expect(settlementResult.secondHalfDraw).toBe(true);
+            expect(settlementResult.secondHalfOver).toBe(true);
+            expect(settlementResult.secondHalfUnder).toBe(false);
+            expect(settlementResult.secondHalfOdd).toBe(false);
+            expect(settlementResult.secondHalfEven).toBe(true);
+            expect(settlementResult.secondHalfDraw4).toBe(false);
         });
     });
 

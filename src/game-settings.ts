@@ -7,9 +7,9 @@ export default {
     durations: {
         wholeRound: 121,
         startingRound: 111,
-        placingBets: 136,
-        lockingBet: 109,
-        streamingVideo: 108,
+        placingBets: 109,
+        lockingBet: 104,
+        streamingVideo: 100,
         placingBetSecondHalf: 58,
         lockingBetSecondHalf: 39,
         streamingVideoSecondHalf: 38

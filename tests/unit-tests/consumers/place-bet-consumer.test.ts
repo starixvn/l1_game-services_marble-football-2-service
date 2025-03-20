@@ -16,6 +16,7 @@ describe("PlaceBetConsumer", () => {
     };
 
     beforeEach(() => {
+        // Arrange: Set up base class mock
         jest.spyOn(Core.BaseEventConsumers.PlaceBetConsumer.prototype, 'composeBetAmountValidationCriteria')
             .mockReturnValue([]);
 
@@ -61,8 +62,10 @@ describe("PlaceBetConsumer", () => {
 
             describe("when using second half bet choice", () => {
                 it("should pass validation", () => {
+                    // Arrange
                     const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
 
+                    // Act
                     const result = placeBetConsumer.composeValidationCriteria(
                         defaultTestParams.player,
                         betChoice,
@@ -71,14 +74,17 @@ describe("PlaceBetConsumer", () => {
                         defaultTestParams.roundId
                     );
 
+                    // Assert
                     expect(result[0].failure).toBe(false);
                 });
             });
 
             describe("when using first half bet choice", () => {
                 it("should fail validation", () => {
+                    // Arrange
                     const betChoice = "firstHalfHome";
 
+                    // Act
                     const result = placeBetConsumer.composeValidationCriteria(
                         defaultTestParams.player,
                         betChoice,
@@ -87,6 +93,7 @@ describe("PlaceBetConsumer", () => {
                         defaultTestParams.roundId
                     );
 
+                    // Assert
                     expect(result[0].failure).toBe(true);
                     expect(result[0].notice).toEqual({ errorCode: "SB1935" });
                 });
@@ -100,8 +107,10 @@ describe("PlaceBetConsumer", () => {
 
             describe("when using second half bet choice", () => {
                 it("should NOT fail validation", () => {
+                    // Arrange
                     const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
 
+                    // Act
                     const result = placeBetConsumer.composeValidationCriteria(
                         defaultTestParams.player,
                         betChoice,
@@ -110,6 +119,7 @@ describe("PlaceBetConsumer", () => {
                         defaultTestParams.roundId
                     );
 
+                    // Assert
                     expect(result[0].failure).toBe(false);
                     expect(result[0].notice).toEqual({ errorCode: "SB1935" });
                 });
