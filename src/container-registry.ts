@@ -13,6 +13,7 @@ import { Bot, GameCron, ProcessBetQueue } from "./crons";
 import { betLogs, bets, results, rounds, tmpBets, tournaments } from "./models";
 import { RunningRoundInfoPublisher } from "./publishers";
 import { HistoryQuery } from "./query-apis";
+import PlaceBetConsumer from "./consumers/place-bet-consumer";
 
 export default class ContainerRegistry extends Table.TableContainerRegistry {
     register(appConfigs: any, definition: any, gameData: any): AwilixContainer<any> {
@@ -54,6 +55,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
             roundResultConsumer: asClass(RoundResultConsumer).singleton().proxy(),
             unsettledRoundConsumer: asClass(UnsettledRoundConsumer).singleton().proxy(),
             settleGameRoundConsumer: asClass(SettleGameRoundConsumer).singleton().proxy(),
+            placeBetConsumer: asClass(PlaceBetConsumer).singleton()
         });
     }
 
