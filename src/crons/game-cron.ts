@@ -120,7 +120,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
     override async proceed() {
         const { durations } = this.definition;
 
-        if (this.gameData.remainingTime === durations.wholeRound) {
+        if (this.isInitializingRound(this.gameData.remainingTime, durations)) {
             await this.checkGameStatus();
         }
 
@@ -164,6 +164,10 @@ export default class GameCron extends Table.Crons.TableGameCron {
             this.bot && (await this.bot.run());
             this.runningRoundInfoPublisher.publish();
         }
+    }
+
+    isInitializingRound(remainingTime: number, durations: any) {
+        return this.gameData.remainingTime === durations.wholeRound;
     }
 
     isDuringBetTime(remainingTime: number) {

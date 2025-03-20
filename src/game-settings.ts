@@ -5,11 +5,14 @@ export default {
     name: "MarbleFootball2",
     configName: "marblefootball2",
     durations: {
-        wholeRound: 151,
-        startingRound: 141,
+        wholeRound: 121,
+        startingRound: 111,
         placingBets: 136,
         lockingBet: 109,
         streamingVideo: 108,
+        placingBetSecondHalf: 58,
+        lockingBetSecondHalf: 39,
+        streamingVideoSecondHalf: 38
     },
     choices: Object.values(BET_CHOICES),
     choicesMapper: BET_CHOICE_ENUM,
