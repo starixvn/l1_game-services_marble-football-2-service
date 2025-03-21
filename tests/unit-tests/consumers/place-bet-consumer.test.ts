@@ -2,7 +2,6 @@ import { Core } from "sc-game-base";
 import PlaceBetConsumer from "../../../src/consumers/place-bet-consumer";
 import GameDefinition from "../../../src/game-definition";
 import { SECOND_HALF_BET_CHOICES } from "../../../src/constants";
-import { helpers } from "sc-common";
 
 describe("PlaceBetConsumer", () => {
     let placeBetConsumer: PlaceBetConsumer;
@@ -11,8 +10,8 @@ describe("PlaceBetConsumer", () => {
     let mockEventPublisher: any;
 
     const DURATIONS = {
-        placingBets: 130,
-        lockingBet: 100,
+        placingBetsFirstHalf: 130,
+        lockingBetFirstHalf: 100,
         placingBetSecondHalf: 80,
         lockingBetSecondHalf: 60,
     };
@@ -56,170 +55,475 @@ describe("PlaceBetConsumer", () => {
         placeBetConsumer.gameData = mockGameData;
     });
 
-    describe("composeBetChoiceValidationCriteria", () => {
-
-        describe("when within second half betting time", () => {
-            beforeEach(() => {
-                mockGameData.remainingTime = 70;
-            });
-
-            describe("when using second half bet choice", () => {
-                it("should pass validation", () => {
+    describe("composeBettingTimeValidationCriteria", () => {
+        const roundId = 1;
+        describe("first half", () => {
+            describe("betting boundary", () => {
+                it("right before placingBets, should fail validation", () => {
                     // Arrange
-                    const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
+                    mockGameData.remainingTime = 131;
 
                     // Act
-                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(
-                        betChoice
-                    );
+                    const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
 
                     // Assert
-                    expect(result[0].failure).toBe(false);
+                    expect(result[2].failure).toBe(true);
+                });
+
+                it("exactly at placingBets, should fail validation", () => {
+                    // Arrange
+                    mockGameData.remainingTime = 130;
+
+                    // Act
+                    const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
+
+                    // Assert
+                    expect(result[2].failure).toBe(true);
+                });
+
+                it("right after placingBets, should pass validation", () => {
+                    // Arrange
+                    mockGameData.remainingTime = 129;
+
+                    // Act
+                    const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
+
+                    // Assert
+                    expect(result[2].failure).toBe(false);
                 });
             });
 
-            describe("when using first half bet choice", () => {
-                it("should fail validation", () => {
-                    // Arrange
-                    const betChoice = "firstHalfHome";
+            describe("locking boundary", () => {
+                describe("right before lockingBet", () => {
+                    it("right before lockingBet, should pass validation", () => {
+                        // Arrange
+                        mockGameData.remainingTime = 101;   
 
                     // Act
-                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(
-                        betChoice
-                    );
+                    const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
 
                     // Assert
-                    expect(result[0].failure).toBe(true);
-                    expect(result[0].notice).toEqual({ errorCode: "SB1935" });
+                        expect(result[2].failure).toBe(false);
+                    });
+                });
+                describe("exactly at lockingBet", () => {
+                    it("exactly at lockingBet, should pass validation", () => {
+                        // Arrange
+                        mockGameData.remainingTime = 100;
+
+                    // Act
+                    const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
+
+                    // Assert
+                        expect(result[2].failure).toBe(false);
+                    });
+                });
+                describe("right after lockingBet", () => {
+                    it("right after lockingBet, should fail validation", () => {
+                        // Arrange
+                        mockGameData.remainingTime = 99;
+
+                    // Act
+                    const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
+
+                    // Assert
+                        expect(result[2].failure).toBe(true);
+                    });
                 });
             });
         });
-
-        describe("when not within second half betting time", () => {
-            beforeEach(() => {
-                mockGameData.remainingTime = 30;
-            });
-
-            describe("when using second half bet choice", () => {
-                it("should NOT fail validation", () => {
+        
+        describe("second half", () => {
+            describe("betting boundary", () => {
+                it("right before placingBets, should fail validation", () => {
                     // Arrange
-                    const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
+                    mockGameData.remainingTime = 81;
 
                     // Act
-                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(
-                        betChoice
-                    );
+                    const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
 
                     // Assert
-                    expect(result[0].failure).toBe(false);
-                    expect(result[0].notice).toEqual({ errorCode: "SB1935" });
+                    expect(result[2].failure).toBe(true);
                 });
-            });
-        });
 
-        describe("when within first half betting time", () => {
-            beforeEach(() => {
-                mockGameData.remainingTime = 110;
-            });
-
-            describe("when using first half bet choice", () => {
-                it("should pass validation", () => {
+                it("exactly at placingBets, should fail validation", () => {
                     // Arrange
-                    const betChoice = "firstHalfHome";
+                    mockGameData.remainingTime = 80;
 
                     // Act
-                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(
-                        betChoice
-                    );
+                    const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
 
                     // Assert
-                    expect(result[0].failure).toBe(false);
+                    expect(result[2].failure).toBe(true);
+                });
+
+                it("right after placingBets, should pass validation", () => {
+                    // Arrange
+                    mockGameData.remainingTime = 79;
+
+                    // Act
+                    const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
+
+                    // Assert
+                    expect(result[2].failure).toBe(false);
                 });
             });
 
-            describe("when using second half bet choice", () => {
-                it("should fail validation", () => {
-                    // Arrange
-                    const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
+            describe("locking boundary", () => {
+                describe("right before lockingBet", () => {
+                    it("right before lockingBet, should pass validation", () => {
+                        // Arrange
+                        mockGameData.remainingTime = 61;   
 
                     // Act
-                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(
-                        betChoice
-                    );
+                    const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
 
                     // Assert
-                    expect(result[0].failure).toBe(true);
-                    expect(result[0].notice).toEqual({ errorCode: "SB1935" });
+                        expect(result[2].failure).toBe(false);
+                    });
+                });
+                describe("exactly at lockingBet", () => {
+                    it("exactly at lockingBet, should pass validation", () => {
+                        // Arrange
+                        mockGameData.remainingTime = 60;
+
+                    // Act
+                    const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
+
+                    // Assert
+                        expect(result[2].failure).toBe(false);
+                    });
+                });
+                describe("right after lockingBet", () => {
+                    it("right after lockingBet, should fail validation", () => {
+                        // Arrange
+                        mockGameData.remainingTime = 59;
+
+                    // Act
+                    const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
+
+                    // Assert
+                        expect(result[2].failure).toBe(true);
+                    });
                 });
             });
         });
     });
 
-    describe("composeBettingTimeValidationCriteria", () => {
-        const roundId = 1;
+    describe("composeBetChoiceValidationCriteria", () => {
+        describe("first half", () => {
+            describe("betting boundary", () => {
+                it("right before placingBetsFirstHalf, should NOT validate first half bet choice", () => {
+                    // Arrange
+                    mockGameData.remainingTime = 131;
+                    const betChoice = "firstHalfHome";
 
-        describe("before first half betting time", () => {
-            it("should fail validation", () => {
-                // Arrange
-                mockGameData.remainingTime = 140;
+                    // Act
+                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
 
-                // Act
-                const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
+                    // Assert
+                    expect(result[0].failure).toBe(false);
+                    expect(result[0].notice).toEqual({ errorCode: "SB1935" });
+                });
 
-                // Assert
-                expect(result[2].failure).toBe(true);
+                it("right before placingBetsFirstHalf, should NOT validate second half bet choice", () => {
+                    // Arrange
+                    mockGameData.remainingTime = 131;
+                    const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
+
+                    // Act
+                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
+
+                    // Assert
+                    expect(result[0].failure).toBe(false);
+                    expect(result[0].notice).toEqual({ errorCode: "SB1935" });
+                });
+
+                it("exactly at placingBetsFirstHalf, should NOT validate first half bet choice", () => {
+                    // Arrange
+                    mockGameData.remainingTime = 130;
+                    const betChoice = "firstHalfHome";
+
+                    // Act
+                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
+
+                    // Assert
+                    expect(result[0].failure).toBe(false);
+                });
+
+                it("exactly at placingBetsFirstHalf, should NOT validate second half bet choice", () => {
+                    // Arrange
+                    mockGameData.remainingTime = 130;
+                    const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
+
+                    // Act
+                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
+
+                    // Assert
+                    expect(result[0].failure).toBe(false);
+                    expect(result[0].notice).toEqual({ errorCode: "SB1935" });
+                });
+
+                it("right after placingBetsFirstHalf, should pass validation for first half bet choice", () => {
+                    // Arrange
+                    mockGameData.remainingTime = 129;
+                    const betChoice = "firstHalfHome";
+
+                    // Act
+                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
+
+                    // Assert
+                    expect(result[0].failure).toBe(false);
+                });
+
+                it("right after placingBetsFirstHalf, should fail validation for second half bet choice", () => {
+                    // Arrange
+                    mockGameData.remainingTime = 129;
+                    const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
+
+                    // Act
+                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
+
+                    // Assert
+                    expect(result[0].failure).toBe(true);
+                    expect(result[0].notice).toEqual({ errorCode: "SB1935" });
+                });
+            });
+
+            describe("locking boundary", () => {
+                it("right before lockingBetFirstHalf, should pass validation for first half bet choice", () => {
+                    // Arrange
+                    mockGameData.remainingTime = 101;
+                    const betChoice = "firstHalfHome";
+
+                    // Act
+                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
+
+                    // Assert
+                    expect(result[0].failure).toBe(false);
+                });
+
+                it("right before lockingBetFirstHalf, should fail validation for second half bet choice", () => {
+                    // Arrange
+                    mockGameData.remainingTime = 101;
+                    const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
+
+                    // Act
+                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
+
+                    // Assert
+                    expect(result[0].failure).toBe(true);
+                    expect(result[0].notice).toEqual({ errorCode: "SB1935" });
+                });
+
+                it("exactly at lockingBetFirstHalf, should pass validation for first half bet choice", () => {
+                    // Arrange
+                    mockGameData.remainingTime = 100;
+                    const betChoice = "firstHalfHome";
+
+                    // Act
+                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
+
+                    // Assert
+                    expect(result[0].failure).toBe(false);
+                });
+
+                it("exactly at lockingBetFirstHalf, should fail validation for second half bet choice", () => {
+                    // Arrange
+                    mockGameData.remainingTime = 100;
+                    const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
+
+                    // Act
+                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
+
+                    // Assert
+                    expect(result[0].failure).toBe(true);
+                    expect(result[0].notice).toEqual({ errorCode: "SB1935" });
+                });
+
+                it("right after lockingBetFirstHalf, should NOT validate first half bet choice", () => {
+                    // Arrange
+                    mockGameData.remainingTime = 99;
+                    const betChoice = "firstHalfHome";
+
+                    // Act
+                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
+
+                    // Assert
+                    expect(result[0].failure).toBe(false);
+                    expect(result[0].notice).toEqual({ errorCode: "SB1935" });
+                });
+
+                it("right after lockingBetFirstHalf, should NOT validate second half bet choice", () => {
+                    // Arrange
+                    mockGameData.remainingTime = 99;
+                    const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
+
+                    // Act
+                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
+
+                    // Assert
+                    expect(result[0].failure).toBe(false);
+                    expect(result[0].notice).toEqual({ errorCode: "SB1935" });
+                });
             });
         });
+        
+        describe("second half", () => {
+            describe("betting boundary", () => {
+                it("right before placingBetSecondHalf, should NOT validate first half bet choice", () => {
+                    // Arrange
+                    mockGameData.remainingTime = 81;
+                    const betChoice = "firstHalfHome";
 
-        describe("during first half betting time", () => {
-            it("should pass validation", () => {
-                // Arrange
-                mockGameData.remainingTime = 110;
+                    // Act
+                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
 
-                // Act
-                const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
+                    // Assert
+                    expect(result[0].failure).toBe(false);
+                    expect(result[0].notice).toEqual({ errorCode: "SB1935" });
+                });
 
-                // Assert
-                expect(result[2].failure).toBe(false);
+                it("right before placingBetSecondHalf, should NOT validate second half bet choice", () => {
+                    // Arrange
+                    mockGameData.remainingTime = 81;
+                    const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
+
+                    // Act
+                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
+
+                    // Assert
+                    expect(result[0].failure).toBe(false);
+                    expect(result[0].notice).toEqual({ errorCode: "SB1935" });
+                });
+
+                it("exactly at placingBetSecondHalf, should NOT validate first half bet choice", () => {
+                    // Arrange
+                    mockGameData.remainingTime = 80;
+                    const betChoice = "firstHalfHome";
+
+                    // Act
+                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
+
+                    // Assert
+                    expect(result[0].failure).toBe(false);
+                    expect(result[0].notice).toEqual({ errorCode: "SB1935" });
+                });
+
+                it("exactly at placingBetSecondHalf, should NOT validate second half bet choice", () => {
+                    // Arrange
+                    mockGameData.remainingTime = 80;
+                    const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
+
+                    // Act
+                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
+
+                    // Assert
+                    expect(result[0].failure).toBe(false);
+                });
+
+                it("right after placingBetSecondHalf, should fail validation for first half bet choice", () => {
+                    // Arrange
+                    mockGameData.remainingTime = 79;
+                    const betChoice = "firstHalfHome";
+
+                    // Act
+                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
+
+                    // Assert
+                    expect(result[0].failure).toBe(true);
+                    expect(result[0].notice).toEqual({ errorCode: "SB1935" });
+                });
+
+                it("right after placingBetSecondHalf, should pass validation for second half bet choice", () => {
+                    // Arrange
+                    mockGameData.remainingTime = 79;
+                    const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
+
+                    // Act
+                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
+
+                    // Assert
+                    expect(result[0].failure).toBe(false);
+                });
             });
-        });
 
-        describe("after first half betting time and before second half betting time", () => {
-            it("should fail validation", () => {
-                // Arrange
-                mockGameData.remainingTime = 90;
+            describe("locking boundary", () => {
+                it("right before lockingBetSecondHalf, should fail validation for first half bet choice", () => {
+                    // Arrange
+                    mockGameData.remainingTime = 61;
+                    const betChoice = "firstHalfHome";
 
-                // Act
-                const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
+                    // Act
+                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
 
-                // Assert
-                expect(result[2].failure).toBe(true);
-            });
-        });
+                    // Assert
+                    expect(result[0].failure).toBe(true);
+                    expect(result[0].notice).toEqual({ errorCode: "SB1935" });
+                });
 
-        describe("during second half betting time", () => {
-            it("should pass validation", () => {
-                // Arrange
-                mockGameData.remainingTime = 70;
+                it("right before lockingBetSecondHalf, should pass validation for second half bet choice", () => {
+                    // Arrange
+                    mockGameData.remainingTime = 61;
+                    const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
 
-                // Act
-                const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
+                    // Act
+                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
 
-                // Assert
-                expect(result[2].failure).toBe(false);
-            });
-        });
+                    // Assert
+                    expect(result[0].failure).toBe(false);
+                });
 
-        describe("after second half betting time", () => {
-            it("should fail validation", () => {
-                // Arrange
-                mockGameData.remainingTime = 50;
+                it("exactly at lockingBetSecondHalf, should fail validation for first half bet choice", () => {
+                    // Arrange
+                    mockGameData.remainingTime = 60;
+                    const betChoice = "firstHalfHome";
 
-                // Act
-                const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
+                    // Act
+                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
 
-                // Assert
-                expect(result[2].failure).toBe(true);
+                    // Assert
+                    expect(result[0].failure).toBe(true);
+                    expect(result[0].notice).toEqual({ errorCode: "SB1935" });
+                });
+
+                it("exactly at lockingBetSecondHalf, should pass validation for second half bet choice", () => {
+                    // Arrange
+                    mockGameData.remainingTime = 60;
+                    const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
+
+                    // Act
+                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
+
+                    // Assert
+                    expect(result[0].failure).toBe(false);
+                });
+
+                it("right after lockingBetSecondHalf, should NOT validate first half bet choice", () => {
+                    // Arrange
+                    mockGameData.remainingTime = 59;
+                    const betChoice = "firstHalfHome";
+
+                    // Act
+                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
+
+                    // Assert
+                    expect(result[0].failure).toBe(false);
+                    expect(result[0].notice).toEqual({ errorCode: "SB1935" });
+                });
+
+                it("right after lockingBetSecondHalf, should NOT validate second half bet choice", () => {
+                    // Arrange
+                    mockGameData.remainingTime = 59;
+                    const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
+
+                    // Act
+                    const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
+
+                    // Assert
+                    expect(result[0].failure).toBe(false);
+                    expect(result[0].notice).toEqual({ errorCode: "SB1935" });
+                });
             });
         });
     });

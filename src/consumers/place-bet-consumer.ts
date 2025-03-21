@@ -49,8 +49,8 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
     }
 
     private isWithinFirstHalfBettingTime() {
-        const { placingBets, lockingBet } = this.definition.durations;
-        return this.isRemainingTimeWithinWindow(placingBets, lockingBet);
+        const { placingBetsFirstHalf, lockingBetFirstHalf } = this.definition.durations;
+        return this.isRemainingTimeWithinWindow(placingBetsFirstHalf, lockingBetFirstHalf);
     }
 
     private isWithinSecondHalfBettingTime() {
@@ -67,8 +67,8 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
         return Object.hasOwn(SECOND_HALF_BET_CHOICES, betChoice);
     }
 
-    private isRemainingTimeWithinWindow(start: number, end: number) {
+    private isRemainingTimeWithinWindow(placingBets: number, lockingBet: number) {
         const remainingTime = this.gameData.remainingTime;
-        return remainingTime < start && remainingTime >= end;
+        return remainingTime < placingBets && remainingTime >= lockingBet;
     }
 }

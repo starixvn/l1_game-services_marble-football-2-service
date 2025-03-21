@@ -1,9 +1,16 @@
 import { TableGameDefinition } from "sc-game-base/src/table";
-import { Duration as BaseDuration } from "sc-game-base/src/core/game-definition";
 export default class GameDefinition extends TableGameDefinition {
-    declare durations: Duration;
+    declare durations: Duration & { placingBets: number, lockingBet: number };
     constructor(gameSettings: GameSettings, generateResult: Function, settle: Function, generateRawResultForHash: Function) {
-        super(gameSettings, generateResult, settle, generateRawResultForHash);
+        super(
+        { 
+            ...gameSettings, 
+            durations: {
+            ...gameSettings.durations,
+            placingBets: gameSettings.durations.placingBetsFirstHalf,
+            lockingBet: gameSettings.durations.lockingBetFirstHalf
+            }
+        }, generateResult, settle, generateRawResultForHash);
     }
 }
 
@@ -20,12 +27,17 @@ export type GameSettings = {
     historyPageSize: number;
 };
 
-export type SoccerDuration = {
+export type Duration = {
+    /**@deprecated use placingBetsFirstHalf and placingBetsSecondHalf instead */
+    placingBets: number;
+    /**@deprecated use lockingBetFirstHalf and lockingBetSecondHalf instead */
+    lockingBet: number;
+    wholeRound: number;
+    placingBetsFirstHalf: number;
+    lockingBetFirstHalf: number;
     startingRound: number;
-    streamingVideo: number;
+    streamingVideoFirstHalf: number;
     placingBetSecondHalf: number;
     lockingBetSecondHalf: number;
     streamingVideoSecondHalf: number;
 }
-
-export type Duration = BaseDuration & SoccerDuration;
