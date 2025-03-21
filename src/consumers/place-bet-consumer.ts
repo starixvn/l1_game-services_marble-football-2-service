@@ -54,9 +54,9 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
     }
 
     private isWithinSecondHalfBettingTime() {
-        const { placingBetSecondHalf, lockingBetSecondHalf } = this.definition.durations;
+        const { placingBetsSecondHalf, lockingBetSecondHalf } = this.definition.durations;
 
-        return this.isRemainingTimeWithinWindow(placingBetSecondHalf, lockingBetSecondHalf)
+        return this.isRemainingTimeWithinWindow(placingBetsSecondHalf, lockingBetSecondHalf)
     }
 
     private isFirstHalfBetChoice(betChoice: string) {

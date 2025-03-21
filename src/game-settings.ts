@@ -9,8 +9,8 @@ export default {
         startingRound: 117,
         placingBetsFirstHalf: 114,
         lockingBetFirstHalf: 104,
-        streamingVideo: 100,
-        placingBetSecondHalf: 58,
+        streamingVideoFirstHalf: 100,
+        placingBetsSecondHalf: 58,
         lockingBetSecondHalf: 39,
         streamingVideoSecondHalf: 38
     },

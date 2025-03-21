@@ -37,7 +37,7 @@ export type Duration = {
     lockingBetFirstHalf: number;
     startingRound: number;
     streamingVideoFirstHalf: number;
-    placingBetSecondHalf: number;
+    placingBetsSecondHalf: number;
     lockingBetSecondHalf: number;
     streamingVideoSecondHalf: number;
 }

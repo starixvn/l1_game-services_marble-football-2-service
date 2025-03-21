@@ -12,7 +12,7 @@ describe("PlaceBetConsumer", () => {
     const DURATIONS = {
         placingBetsFirstHalf: 130,
         lockingBetFirstHalf: 100,
-        placingBetSecondHalf: 80,
+        placingBetsSecondHalf: 80,
         lockingBetSecondHalf: 60,
     };
 
@@ -371,7 +371,7 @@ describe("PlaceBetConsumer", () => {
         
         describe("second half", () => {
             describe("betting boundary", () => {
-                it("right before placingBetSecondHalf, should NOT validate first half bet choice", () => {
+                it("right before placingBetsSecondHalf, should NOT validate first half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 81;
                     const betChoice = "firstHalfHome";
@@ -384,7 +384,7 @@ describe("PlaceBetConsumer", () => {
                     expect(result[0].notice).toEqual({ errorCode: "SB1935" });
                 });
 
-                it("right before placingBetSecondHalf, should NOT validate second half bet choice", () => {
+                it("right before placingBetsSecondHalf, should NOT validate second half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 81;
                     const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
@@ -397,7 +397,7 @@ describe("PlaceBetConsumer", () => {
                     expect(result[0].notice).toEqual({ errorCode: "SB1935" });
                 });
 
-                it("exactly at placingBetSecondHalf, should NOT validate first half bet choice", () => {
+                it("exactly at placingBetsSecondHalf, should NOT validate first half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 80;
                     const betChoice = "firstHalfHome";
@@ -410,7 +410,7 @@ describe("PlaceBetConsumer", () => {
                     expect(result[0].notice).toEqual({ errorCode: "SB1935" });
                 });
 
-                it("exactly at placingBetSecondHalf, should NOT validate second half bet choice", () => {
+                it("exactly at placingBetsSecondHalf, should NOT validate second half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 80;
                     const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
@@ -422,7 +422,7 @@ describe("PlaceBetConsumer", () => {
                     expect(result[0].failure).toBe(false);
                 });
 
-                it("right after placingBetSecondHalf, should fail validation for first half bet choice", () => {
+                it("right after placingBetsSecondHalf, should fail validation for first half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 79;
                     const betChoice = "firstHalfHome";
@@ -435,7 +435,7 @@ describe("PlaceBetConsumer", () => {
                     expect(result[0].notice).toEqual({ errorCode: "SB1935" });
                 });
 
-                it("right after placingBetSecondHalf, should pass validation for second half bet choice", () => {
+                it("right after placingBetsSecondHalf, should pass validation for second half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 79;
                     const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
