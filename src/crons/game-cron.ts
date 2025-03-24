@@ -99,7 +99,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
         this.gameData.settlementResultFromAdmin = {};
     }
 
-    publishVideoStreamFirstHalf() {
+    private publishVideoStreamFirstHalf() {
         const videoResult = {
             firstHalfVideo: this.gameData.result.firstHalfVideo,
             firstHalfTimeline: this.gameData.result.firstHalfTimeline,
@@ -109,7 +109,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
         this.runningRoundInfoPublisher.publishToAllUsers({ videoResult });
     }
 
-    publishVideoStreamSecondHalf() {
+    private publishVideoStreamSecondHalf() {
         const videoResult = {
             secondHalfVideo: this.gameData.result.secondHalfVideo,
             secondHalfTimeline: this.gameData.result.secondHalfTimeline,
@@ -139,13 +139,8 @@ export default class GameCron extends Table.Crons.TableGameCron {
         }
 
         const remainingTime = this.gameData.remainingTime;
-        console.log("remainingTime", remainingTime);
         if (remainingTime === durations.startingRound) {
-            try {
-                await this.publishTournament();
-            } catch (error) {
-                console.error(error);
-            }
+            await this.publishTournament();
         }
 
         if (this.isStartingTime(remainingTime, durations)) {
@@ -182,7 +177,6 @@ export default class GameCron extends Table.Crons.TableGameCron {
 
         if (remainingTime < 0) {
             this.gameData.remainingTime = durations.wholeRound;
-
             await this.settleGameRoundConsumer.settleRound();
         }
 
@@ -209,7 +203,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
     }
 
     private isDuringSecondHalfBettingTime(remainingTime: number) {
-        const { placingBetsSecondHalf: placingBetsSecondHalf, lockingBetSecondHalf } = this.definition.durations;
+        const { placingBetsSecondHalf, lockingBetSecondHalf } = this.definition.durations;
 
         return remainingTime < placingBetsSecondHalf && remainingTime > lockingBetSecondHalf;
     }
