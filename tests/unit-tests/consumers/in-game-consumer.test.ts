@@ -12,9 +12,9 @@ describe("InGameConsumer test", () => {
     definition.durations = {
         wholeRound: 151,
         startingRound: 141,
-        placingBets: 136,
-        lockingBet: 109,
-        streamingVideo: 108,
+        placingBetsFirstHalf: 136,
+        lockingBetFirstHalf: 109,
+        streamingVideoFirstHalf: 108,
     };
     const gameData = stub<GameData>();
     const getBalance = jest.fn();
@@ -51,7 +51,7 @@ describe("InGameConsumer test", () => {
         const testCases = [
             {
                 phase: "streaming video",
-                timeRange: { start: 0, end: definition.durations.streamingVideo - 1 },
+                timeRange: { start: 0, end: definition.durations.streamingVideoFirstHalf - 1 },
                 resultDescription: "full video result",
                 expectedResult: fullVideoResult,
             },
@@ -63,13 +63,13 @@ describe("InGameConsumer test", () => {
             },
             {
                 phase: "starting",
-                timeRange: { start: definition.durations.placingBets + 1, end: definition.durations.startingRound },
+                timeRange: { start: definition.durations.placingBetsFirstHalf + 1, end: definition.durations.startingRound },
                 resultDescription: "empty result",
                 expectedResult: {},
             },
             {
                 phase: "placing bets",
-                timeRange: { start: definition.durations.streamingVideo, end: definition.durations.placingBets },
+                timeRange: { start: definition.durations.streamingVideoFirstHalf, end: definition.durations.placingBetsFirstHalf },
                 resultDescription: "empty result",
                 expectedResult: {},
             },

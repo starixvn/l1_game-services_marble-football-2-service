@@ -96,13 +96,20 @@ export default class GameCron extends Table.Crons.TableGameCron {
         this.gameData.settlementResultFromAdmin = {};
     }
 
-    publishVideoStream() {
+    publishVideoStreamFirstHalf() {
         const videoResult = {
             firstHalfVideo: this.gameData.result.firstHalfVideo,
-            secondHalfVideo: this.gameData.result.secondHalfVideo,
             firstHalfTimeline: this.gameData.result.firstHalfTimeline,
-            secondHalfTimeline: this.gameData.result.secondHalfTimeline,
             firstHalf: this.gameData.result.firstHalf,
+        };
+
+        this.runningRoundInfoPublisher.publishToAllUsers({ videoResult });
+    }
+
+    publishVideoStreamSecondHalf() {
+        const videoResult = {
+            secondHalfVideo: this.gameData.result.secondHalfVideo,
+            secondHalfTimeline: this.gameData.result.secondHalfTimeline,
             secondHalf: this.gameData.result.secondHalf,
         };
 
@@ -120,38 +127,54 @@ export default class GameCron extends Table.Crons.TableGameCron {
     override async proceed() {
         const { durations } = this.definition;
 
-        if (this.isInitializingRound(this.gameData.remainingTime, durations)) {
+        if (this.gameData.remainingTime === durations.wholeRound) {
             await this.checkGameStatus();
         }
-
+        
         if (!this.gameData.disabled) {
             this.gameData.remainingTime--;
         }
 
         const remainingTime = this.gameData.remainingTime;
-
+        console.log("remainingTime", remainingTime);
         if (remainingTime === durations.startingRound) {
-            await this.publishTournament();
+            try {
+                await this.publishTournament();
+            } catch (error) {
+                console.error(error);
+            }
         }
 
         if (this.isStartingTime(remainingTime, durations)) {
             this.resetForNewRound();
             this.bot?.reset();
-
-            await this.generateRoundData();
+                await this.generateRoundData();
         }
 
-        if (remainingTime === durations.placingBets) {
+        if (this.isStartPlacingBetFirstHalf(remainingTime)) {
             this.gameStatusPublisher.publishStartPlacingBetStatus();
         }
 
-        if (remainingTime === durations.lockingBet - 1) {
+        if (this.isLockingBetFirstHalf(remainingTime)) {
             this.gameStatusPublisher.publishEndPlacingBetStatus();
         }
 
-        if (remainingTime === durations.streamingVideo) {
+        if (this.isStreamingVideoFirstHalf(remainingTime)) {
             await this.getVideoTimeline();
-            this.publishVideoStream();
+            this.publishVideoStreamFirstHalf();
+        }
+
+        if (this.isStartPlacingBetSecondHalf(remainingTime)) {
+            this.gameStatusPublisher.publishStartPlacingBetStatus();
+        }
+
+        if (this.isLockingBetSecondHalf(remainingTime)) {
+            this.gameStatusPublisher.publishEndPlacingBetStatus();
+        }   
+
+        if (this.isStreamingVideoSecondHalf(remainingTime)) {
+            await this.getVideoTimeline();
+            this.publishVideoStreamSecondHalf();
         }
 
         if (remainingTime < 0) {
@@ -160,19 +183,62 @@ export default class GameCron extends Table.Crons.TableGameCron {
             await this.settleGameRoundConsumer.settleRound();
         }
 
-        if (this.isDuringBetTime(remainingTime)) {
+        if (this.isDuringFirstHalfBettingTime(remainingTime)) {
+            this.bot && (await this.bot.run());
+            this.runningRoundInfoPublisher.publish();
+        }
+
+        if (this.isDuringSecondHalfBettingTime(remainingTime)) {
             this.bot && (await this.bot.run());
             this.runningRoundInfoPublisher.publish();
         }
     }
 
-    isInitializingRound(remainingTime: number, durations: any) {
-        return this.gameData.remainingTime === durations.wholeRound;
+    private isDuringFirstHalfBettingTime(remainingTime: number) {
+        const { placingBetsFirstHalf, lockingBetFirstHalf } = this.definition.durations;
+
+        return remainingTime < placingBetsFirstHalf && remainingTime > lockingBetFirstHalf;
     }
 
-    isDuringBetTime(remainingTime: number) {
-        const { placingBets, lockingBet } = this.definition.durations;
+    private isDuringSecondHalfBettingTime(remainingTime: number) {
+        const { placingBetsSecondHalf: placingBetsSecondHalf, lockingBetSecondHalf } = this.definition.durations;
 
-        return remainingTime < placingBets && remainingTime > lockingBet;
+        return remainingTime < placingBetsSecondHalf && remainingTime > lockingBetSecondHalf;
+    }
+
+    private isStartPlacingBetFirstHalf(remainingTime: number) {
+        const { placingBetsFirstHalf } = this.definition.durations;
+
+        return remainingTime === placingBetsFirstHalf;
+    }   
+    
+    private isLockingBetFirstHalf(remainingTime: number) {
+        const { lockingBetFirstHalf } = this.definition.durations;
+
+        return remainingTime === lockingBetFirstHalf - 1;
+    }
+
+    private isStreamingVideoFirstHalf(remainingTime: number) {
+        const { streamingVideoFirstHalf } = this.definition.durations;
+
+        return remainingTime === streamingVideoFirstHalf;
+    }
+
+    private isStartPlacingBetSecondHalf(remainingTime: number) {
+        const { placingBetsSecondHalf } = this.definition.durations;
+
+        return remainingTime === placingBetsSecondHalf;
+    }   
+
+    private isLockingBetSecondHalf(remainingTime: number) {
+        const { lockingBetSecondHalf } = this.definition.durations;
+
+        return remainingTime === lockingBetSecondHalf - 1;
+    }   
+
+    private isStreamingVideoSecondHalf(remainingTime: number) {
+        const { streamingVideoSecondHalf } = this.definition.durations;
+
+        return remainingTime === streamingVideoSecondHalf;
     }
 }
