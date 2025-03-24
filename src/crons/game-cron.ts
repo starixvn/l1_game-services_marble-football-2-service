@@ -171,7 +171,6 @@ export default class GameCron extends Table.Crons.TableGameCron {
         }   
 
         if (this.isStreamingVideoSecondHalf(remainingTime)) {
-            await this.getVideoTimeline();
             this.publishVideoStreamSecondHalf();
         }
 
