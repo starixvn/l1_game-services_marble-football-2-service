@@ -3,24 +3,24 @@ import { BET_CHOICES } from "../../../src/constants";
 
 describe("betPercentage", () => {
     describe("calculateUserBetPercentage", () => {
-        const betChoices = ["home", "draw", "away"];
+        const betChoices = ["firstHalfHome", "firstHalfDraw", "firstHalfAway"];
 
         it("should calculate the correct percentages for each choice of specific choices", () => {
             // Arrange
             const playerBetCount = {
-                [BET_CHOICES.home]: ["player1", "player2"],
-                [BET_CHOICES.away]: ["player3"],
-                [BET_CHOICES.over]: ["player4"],
-                [BET_CHOICES.under]: ["player5"],
+                [BET_CHOICES.firstHalfHome]: ["player1", "player2"],
+                [BET_CHOICES.firstHalfAway]: ["player3"],
+                [BET_CHOICES.firstHalfOver]: ["player4"],
+                [BET_CHOICES.firstHalfUnder]: ["player5"],
             };
 
             // Act
             const result = betPercentage.calculatePlayerBetPercentage(playerBetCount, betChoices);
 
             // Assert
-            expect(result[BET_CHOICES.home]).toBe(67);
-            expect(result[BET_CHOICES.draw]).toBe(0);
-            expect(result[BET_CHOICES.away]).toBe(33);
+            expect(result[BET_CHOICES.firstHalfHome]).toBe(67);
+            expect(result[BET_CHOICES.firstHalfDraw]).toBe(0);
+            expect(result[BET_CHOICES.firstHalfAway]).toBe(33);
         });
 
         it("should handle empty playerBetCount", () => {
@@ -32,26 +32,26 @@ describe("betPercentage", () => {
 
             // Assert
             expect(result).toEqual({
-                home: 0,
-                draw: 0,
-                away: 0,
+                firstHalfHome: 0,
+                firstHalfDraw: 0,
+                firstHalfAway: 0,
             });
         });
 
         it("should handle zero total bets", () => {
             // Arrange
             const playerBetCount = {
-                [BET_CHOICES.home]: [],
-                [BET_CHOICES.away]: [],
+                [BET_CHOICES.firstHalfHome]: [],
+                [BET_CHOICES.firstHalfAway]: [],
             };
 
             // Act
             const result = betPercentage.calculatePlayerBetPercentage(playerBetCount, betChoices);
 
             // Assert
-            expect(result[BET_CHOICES.home]).toBe(0);
-            expect(result[BET_CHOICES.away]).toBe(0);
-            expect(result[BET_CHOICES.draw]).toBe(0);
+            expect(result[BET_CHOICES.firstHalfHome]).toBe(0);
+            expect(result[BET_CHOICES.firstHalfAway]).toBe(0);
+            expect(result[BET_CHOICES.firstHalfDraw]).toBe(0);
         });
     });
 
@@ -59,9 +59,12 @@ describe("betPercentage", () => {
         it("should calculate percentages using default bet choices", () => {
             // Arrange
             const playerBetCount = {
-                home: ["user1", "user2"],
-                draw: ["user3"],
-                away: ["user4", "user5", "user6"],
+                firstHalfHome: ["user1", "user2"],
+                firstHalfDraw: ["user3"],
+                firstHalfAway: ["user4", "user5", "user6"],
+                secondHalfHome: ["user7"],
+                secondHalfDraw: ["user8", "user9"],
+                secondHalfAway: ["user10", "user11", "user12"],
             };
 
             // Act
@@ -69,9 +72,12 @@ describe("betPercentage", () => {
 
             // Assert
             expect(result).toEqual({
-                home: 33,
-                draw: 17,
-                away: 50,
+                firstHalfHome: 17,
+                firstHalfDraw: 8,
+                firstHalfAway: 25,
+                secondHalfHome: 8,
+                secondHalfDraw: 17,
+                secondHalfAway: 25,
             });
         });
 
@@ -84,16 +90,20 @@ describe("betPercentage", () => {
 
             // Assert
             expect(result).toEqual({
-                home: 0,
-                draw: 0,
-                away: 0,
+                firstHalfHome: 0,
+                firstHalfDraw: 0,
+                firstHalfAway: 0,
+                secondHalfHome: 0,
+                secondHalfDraw: 0,
+                secondHalfAway: 0,
             });
         });
 
         it("should handle missing bet choices correctly", () => {
             // Arrange
             const playerBetCount = {
-                home: ["user1"],
+                firstHalfHome: ["user1"],
+                secondHalfHome: ["user2", "user3"],
             };
 
             // Act
@@ -101,9 +111,12 @@ describe("betPercentage", () => {
 
             // Assert
             expect(result).toEqual({
-                home: 100,
-                draw: 0,
-                away: 0,
+                firstHalfHome: 33,
+                firstHalfDraw: 0,
+                firstHalfAway: 0,
+                secondHalfHome: 67,
+                secondHalfDraw: 0,
+                secondHalfAway: 0,
             });
         });
     });
