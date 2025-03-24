@@ -8,11 +8,14 @@ import axios from "axios";
 import { retry } from "../helpers";
 import { generateVideoName } from "../helpers/result-helper";
 import defaultVideoTimelines from "../timelines/video-timelines";
+import GameStatusPublisher from "../publishers/game-status-publisher";
+
 
 export default class GameCron extends Table.Crons.TableGameCron {
     declare gameData: GameData;
     declare definition: GameDefinition;
     declare appConfigs: typeof AppConfigs;
+    declare gameStatusPublisher: GameStatusPublisher;
 
     tournamentConsumer: TournamentConsumer;
 
@@ -152,7 +155,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
         }
 
         if (this.isStartPlacingBetFirstHalf(remainingTime)) {
-            this.gameStatusPublisher.publishStartPlacingBetStatus();
+            this.notifyPlaceBetsWithDynamicOdds();
         }
 
         if (this.isLockingBetFirstHalf(remainingTime)) {
@@ -165,7 +168,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
         }
 
         if (this.isStartPlacingBetSecondHalf(remainingTime)) {
-            this.gameStatusPublisher.publishStartPlacingBetStatus();
+            this.notifyPlaceBetsWithDynamicOdds();
         }
 
         if (this.isLockingBetSecondHalf(remainingTime)) {
@@ -192,6 +195,11 @@ export default class GameCron extends Table.Crons.TableGameCron {
             this.bot && (await this.bot.run());
             this.runningRoundInfoPublisher.publish();
         }
+    }
+
+    private notifyPlaceBetsWithDynamicOdds() {
+        this.gameStatusPublisher.publishDynamicOddsStatus();
+        this.gameStatusPublisher.publishStartPlacingBetStatus();
     }
 
     private isDuringFirstHalfBettingTime(remainingTime: number) {
