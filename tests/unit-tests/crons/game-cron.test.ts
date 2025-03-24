@@ -276,7 +276,7 @@ describe("GameCron", () => {
             });
     
             describe("at streaming time", () => {
-                it("should call getVideoTimeline", async () => {
+                it("should NOT call getVideoTimeline", async () => {
                     // arrange
                     gameCron.gameData.remainingTime = definition.durations.streamingVideoSecondHalf + 1;
                     jest.spyOn(gameCron, "getVideoTimeline").mockResolvedValue();
@@ -285,7 +285,7 @@ describe("GameCron", () => {
                     await gameCron.proceed();
         
                     // assert
-                    expect(gameCron.getVideoTimeline).toHaveBeenCalled();
+                    expect(gameCron.getVideoTimeline).not.toHaveBeenCalled();
                 });
             });
     
