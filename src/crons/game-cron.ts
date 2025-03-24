@@ -1,3 +1,4 @@
+import { firstHalfConfig, secondHalfConfigs } from "./../match-configs";
 import { Table } from "sc-game-base";
 import GameData from "../game-data";
 import GameDefinition from "../game-definition";
@@ -11,6 +12,8 @@ import defaultVideoTimelines from "../timelines/video-timelines";
 import GameStatusPublisher from "../publishers/game-status-publisher";
 import { generateOdds } from "../helpers/odds";
 import { isFirstHalfOddsActive } from "../helpers/game-timing";
+
+import { securePickOne } from "../helpers/random-helper";
 
 export default class GameCron extends Table.Crons.TableGameCron {
     declare gameData: GameData;
@@ -36,6 +39,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
     override resetForNewRound() {
         super.resetForNewRound();
         this.gameData.playerBetCount = {};
+        this.updateNewMatchConfig();
     }
 
     async getVideoTimelineForHalf(videoName: string) {

@@ -1,24 +1,22 @@
-import { halfConfig, HalfConfigType, matchConfig } from "../match-configs";
+import { firstHalfConfig, secondHalfConfigs, overUnderConfig, HalfConfigType } from "../match-configs";
 import { ResultType, SettlementResultType } from "../models/rounds";
 import Chance from "chance";
 import { shuffle } from "./shuffle";
 import crypto from "crypto";
-import { DEFAULT_NUMBER_OF_VIDEOS, POOL_SIZE } from "../constants";
+import { DEFAULT_NUMBER_OF_VIDEOS } from "../constants";
 import { randomHelper } from ".";
 
 type DataResultType = {
-    randomMode: number;
     numberOfVideos: Record<string, number>;
-    pool?: string[];
 };
+
 export const generateResult = (data: DataResultType): ResultType => {
     const chance = new Chance();
-    const pool = data.pool || createScorePool(halfConfig, POOL_SIZE);
-    const randomMode = data.randomMode || 1;
     const numberOfVideos = data.numberOfVideos || DEFAULT_NUMBER_OF_VIDEOS;
 
-    const firstHalf = generateResultForHalf({ randomMode, numberOfVideos, pool });
-    const secondHalf = generateResultForHalf({ randomMode, numberOfVideos, pool });
+    const secondHalfConfig = randomHelper.securePickOne(secondHalfConfigs);
+    const firstHalf = generateResultForHalf(firstHalfConfig);
+    const secondHalf = generateResultForHalf(secondHalfConfig);
     const videoInfo = getVideoInfoFromResult(firstHalf, secondHalf, numberOfVideos);
     const homeWinsOnDraw = chance.bool();
     const penalty = generatePenaltyResult(homeWinsOnDraw);
@@ -27,7 +25,7 @@ export const generateResult = (data: DataResultType): ResultType => {
         firstHalf,
         secondHalf,
         ...videoInfo,
-        overUnderValue: matchConfig.ou,
+        overUnderValue: overUnderConfig.fulltime,
         homeWinsOnDraw,
         penalty,
     };
@@ -45,7 +43,7 @@ export const generateResultFromAdminRawResult = (roundResult: ResultType, number
         homeWinsOnDraw: roundResult.homeWinsOnDraw,
         penalty,
         ...videoInfo,
-        overUnderValue: matchConfig.ou,
+        overUnderValue: overUnderConfig.fulltime,
     };
 };
 
@@ -95,8 +93,8 @@ export const getSettlementResult = (roundResult: ResultType): SettlementResultTy
 
 export const generateRawResultForHash = () => {};
 
-const generateResultForHalf = (data: DataResultType) => {
-    const scoreResult = getScoreFromPool(data);
+const generateResultForHalf = (halfConfig: HalfConfigType) => {
+    const scoreResult = getScoreFromScoreRate(halfConfig.scoreRate);
 
     const [homeGoals, awayGoals] = scoreResult.split("-").map(Number);
     const sequence = Array(homeGoals).fill("H").concat(Array(awayGoals).fill("A"));
@@ -106,11 +104,13 @@ const generateResultForHalf = (data: DataResultType) => {
     return result || "0";
 };
 
-const getScoreFromPool = (data: DataResultType) => {
-    const pool = data.pool || createScorePool(halfConfig, POOL_SIZE);
+const getScoreFromScoreRate = (scoreRate: Record<string, number>) => {
+    const score = Object.keys(scoreRate);
+    const rate = Object.values(scoreRate);
 
-    const index = randomHelper.getRandomIndexFromArray(data.randomMode, POOL_SIZE);
-    return pool[index];
+    const randomScore = randomHelper.secureWeightedPick(score, rate);
+
+    return randomScore;
 };
 
 const getVideoInfoFromResult = (firstHalf: string, secondHalf: string, numberOfVideos: Record<string, number>) => {
@@ -146,16 +146,3 @@ const generatePenaltyResult = (homeWinsOnDraw: boolean) => {
 
     return homeWinsOnDraw ? { home: winningTeamPenalty, away: losingTeamPenalty } : { home: losingTeamPenalty, away: winningTeamPenalty };
 };
-
-export function createScorePool(config: HalfConfigType, poolSize: number): string[] {
-    const pool: string[] = [];
-
-    for (const [score, rate] of Object.entries(config.scoreRate)) {
-        const count = Math.round(rate * poolSize);
-        for (let i = 0; i < count; i++) {
-            pool.push(score);
-        }
-    }
-
-    return shuffle(shuffle(pool));
-}

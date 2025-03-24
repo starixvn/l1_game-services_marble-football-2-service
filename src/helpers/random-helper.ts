@@ -1,42 +1,120 @@
-import Chance from "chance";
-import { MersenneTwister19937, Random } from "random-js";
-import { createHash, getRandomValues, randomInt } from "crypto";
+import { randomInt, randomBytes, randomUUID } from "node:crypto";
 
-const chance = new Chance();
-const random = new Random(MersenneTwister19937.autoSeed());
+/**
+ * Securely shuffles an array using the Fisher-Yates algorithm with crypto.randomInt
+ */
+export function secureShuffle<T>(array: T[]): T[] {
+    const result = [...array];
+    for (let i = result.length - 1; i > 0; i--) {
+        const j = randomInt(0, i + 1);
+        [result[i], result[j]] = [result[j], result[i]];
+    }
+    return result;
+}
 
-const random1 = (arrLength: number) => randomInt(0, arrLength);
+/**
+ * Generates a cryptographically secure random boolean
+ */
+export function secureRandomBool(): boolean {
+    return randomInt(0, 2) === 1;
+}
 
-const random2 = (arrLength: number) => {
-    const array = new Uint32Array(1);
-    const randomArr = getRandomValues(array);
-    return randomArr[0] % arrLength;
-};
+/**
+ * Generates a cryptographically secure random number between 0 and 1
+ */
+export function secureRandomFloat(): number {
+    // Use 4 bytes (32 bits) for good precision
+    const buffer = randomBytes(4);
+    // Convert to a 32-bit unsigned int and divide by max uint32
+    return buffer.readUInt32BE() / 0xffffffff;
+}
 
-const random3 = (arrLength: number) => {
-    const timestamp = Date.now();
-    const randomValue = randomInt(0, arrLength);
-    return (randomValue + timestamp) % arrLength;
-};
+/**
+ * Generates a cryptographically secure random integer between min and max (inclusive)
+ * using the full range of available entropy
+ */
+export function secureRandomRange(min: number, max: number): number {
+    if (min > max) {
+        throw new Error("Min cannot be greater than max");
+    }
 
-const random4 = (arrLength: number) => random.integer(0, arrLength - 1);
+    if (!Number.isInteger(min) || !Number.isInteger(max)) {
+        throw new Error("Min and max must be integers");
+    }
 
-const random5 = (arrLength: number) => chance.integer({ min: 0, max: arrLength - 1 });
+    const range = max - min + 1;
+    if (range <= 0) {
+        throw new Error("Range is too large");
+    }
 
-const random6 = (arrLength: number) => {
-    const randomValue = randomInt(0, arrLength).toString();
-    const hash = createHash("sha256").update(randomValue).digest("hex");
-    return parseInt(hash.substring(0, 8), 16) % arrLength;
-};
+    // Use randomInt for small ranges as it's optimized for this case
+    if (range <= 281474976710656) {
+        // 2^48, max safe range for randomInt
+        return randomInt(min, max + 1);
+    }
 
-export const randomModes: any = {
-    1: [random1, random2, random3, random4],
-    2: [random1, random3, random5, random6],
-    3: [random2, random3, random4, random6],
-};
+    // For larger ranges, use randomBytes for full entropy
+    const bytes = randomBytes(6); // 48 bits
+    const value = bytes.readUIntBE(0, 6);
+    return min + (value % range);
+}
 
-export const getRandomIndexFromArray = (randomMode: number, arrLength: number): number => {
-    const mode = 1 <= randomMode && randomMode <= 3 ? randomMode : 1;
-    const randomShuffles: Function[] = randomModes[mode];
-    return chance.pickone(randomShuffles)(arrLength);
-};
+/**
+ * Generates a cryptographically secure v4 UUID
+ */
+export function secureUUID(): string {
+    return randomUUID();
+}
+
+/**
+ * Securely picks n unique items from an array
+ */
+export function securePickSet<T>(array: T[], count: number): T[] {
+    if (count < 0) {
+        throw new Error("Count must be non-negative");
+    }
+
+    if (count > array.length) {
+        throw new Error("Count cannot exceed array length");
+    }
+
+    return secureShuffle(array).slice(0, count);
+}
+
+/**
+ * Securely picks one random item from an array
+ */
+export function securePickOne<T>(array: T[]): T {
+    if (array.length === 0) {
+        throw new Error("Array cannot be empty");
+    }
+
+    return array[randomInt(0, array.length)];
+}
+
+export function secureWeightedPick<T>(array: T[], weights: number[]): T {
+    if (array.length === 0) {
+        throw new Error("Array cannot be empty");
+    }
+
+    if (array.length !== weights.length) {
+        throw new Error("Array and weights must have the same length");
+    }
+
+    const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+
+    const randomValue = secureRandomFloat() * totalWeight;
+
+    let cumulativeWeight = 0;
+
+    for (let i = 0; i < array.length; i++) {
+        cumulativeWeight += weights[i];
+
+        if (randomValue <= cumulativeWeight) {
+            return array[i];
+        }
+    }
+
+    // If we exit the loop without returning, something went wrong
+    throw new Error("Failed to pick an item from the array");
+}
