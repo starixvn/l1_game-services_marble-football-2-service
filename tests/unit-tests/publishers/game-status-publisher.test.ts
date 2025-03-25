@@ -46,6 +46,7 @@ describe("GameStatusPublisher", () => {
 
     describe("publishDynamicOddsStatus", () => {
         describe("when not in place bet time", () => {
+
             it("should should not publish odds", () => {
                 // Arrange
                 const dynamicOdds = {
@@ -57,6 +58,7 @@ describe("GameStatusPublisher", () => {
                     secondHalfDraw: 3.0
                 };
                 gameData.dynamicOdds = dynamicOdds;
+                gameData.remainingTime = definition.durations.placingBetsFirstHalf + 1;
     
                 // Act
                 publisher.publishDynamicOddsStatus();
@@ -68,91 +70,91 @@ describe("GameStatusPublisher", () => {
             });
         })
         
+        describe("when in first half placing bet time", () => {
 
-        it("should fall back to gameConfigs.odds when dynamicOdds is not available", () => {
-            // Arrange
-            gameData.dynamicOdds = undefined;
+            beforeEach(() => {
+                gameData.remainingTime = definition.durations.placingBetsFirstHalf;
+            })
 
-            // Act
-            publisher.publishDynamicOddsStatus();
+            it("should publish only first half odds from dynamicOdds", () => {
+                // Arrange
+                
+                gameData.dynamicOdds = { ...sampleOdds };
+    
+                // Act
+                publisher.publishDynamicOddsStatus();
+    
+                // Assert
+                const publishedData = (publisher.publishToAllUsers as jest.Mock).mock.calls[0][0];
+                
+                expect(publishedData).toEqual({
+                    odds: {
+                        firstHalfHome: 1.5,
+                        firstHalfAway: 2.5,
+                        firstHalfDraw: 3.0
+                    }
+                });
+            });
 
-            // Assert
-            expect(publisher.publishToAllUsers).toHaveBeenCalledWith({
-                odds: {} 
+            it("should publish only first half odds from config odds when dynamicOdds is not available", () => {
+                // Arrange
+                gameData.dynamicOdds = undefined;
+    
+                // Act
+                publisher.publishDynamicOddsStatus();
+    
+                // Assert
+                expect(publisher.publishToAllUsers).toHaveBeenCalledWith({
+                    odds: {
+                        firstHalfHome: 1.4,
+                        firstHalfAway: 2.4,
+                        firstHalfDraw: 2.9
+                    }
+                });
             });
         });
 
-        it("should publish only first half odds from dynamicOdds when in first half placing bet phase", () => {
-            // Arrange
-            gameData.remainingTime = definition.durations.placingBetsFirstHalf;
-            gameData.dynamicOdds = { ...sampleOdds };
-
-            // Act
-            publisher.publishDynamicOddsStatus();
-
-            // Assert
-            const publishedData = (publisher.publishToAllUsers as jest.Mock).mock.calls[0][0];
+        describe("when in second half placing bet time", () => {
             
-            expect(publishedData).toEqual({
-                odds: {
-                    firstHalfHome: 1.5,
-                    firstHalfAway: 2.5,
-                    firstHalfDraw: 3.0
-                }
+            beforeEach(() => {
+                gameData.remainingTime = definition.durations.placingBetsSecondHalf;
             });
-        });
 
-        it("should publish only first half odds from gameConfigs.odds when dynamicOdds is not available", () => {
-            // Arrange
-            gameData.remainingTime = definition.durations.placingBetsFirstHalf;
-            gameData.dynamicOdds = undefined;
-
-            // Act
-            publisher.publishDynamicOddsStatus();
-
-            // Assert
-            const publishedData = (publisher.publishToAllUsers as jest.Mock).mock.calls[0][0];
-            
-            expect(publishedData).toEqual({
-                odds: {
-                    firstHalfHome: 1.4,
-                    firstHalfAway: 2.4,
-                    firstHalfDraw: 2.9
-                }
+            it("should publish only second half odds from dynamicOdds", () => {
+                // Arrange
+                gameData.dynamicOdds = { ...sampleOdds };
+    
+                // Act
+                publisher.publishDynamicOddsStatus();
+    
+                // Assert
+                const publishedData = (publisher.publishToAllUsers as jest.Mock).mock.calls[0][0];
+                
+                expect(publishedData).toEqual({
+                    odds: {
+                        secondHalfHome: 1.8,
+                        secondHalfAway: 2.2,
+                        secondHalfDraw: 2.8
+                    }
+                });
             });
-        });
 
-        it("should publish only second half odds when in second half placing bet phase", () => {
-            // Arrange
-            gameData.remainingTime = definition.durations.placingBetsSecondHalf;
-            gameData.dynamicOdds = { ...sampleOdds };
-
-            // Act
-            publisher.publishDynamicOddsStatus();
-
-            // Assert
-            const publishedData = (publisher.publishToAllUsers as jest.Mock).mock.calls[0][0];
-            
-            expect(publishedData).toEqual({
-                odds: {
-                    secondHalfHome: 1.8,
-                    secondHalfAway: 2.2,
-                    secondHalfDraw: 2.8
-                }
+            it("should publish only second half odds from config odds when dynamicOdds is not available", () => {
+                // Arrange
+                gameData.dynamicOdds = undefined;
+    
+                // Act
+                publisher.publishDynamicOddsStatus();
+    
+                // Assert
+                expect(publisher.publishToAllUsers).toHaveBeenCalledWith({
+                    odds: {
+                        secondHalfHome: 1.7,
+                        secondHalfAway: 2.1,
+                        secondHalfDraw: 2.7
+                    }
+                });
             });
-        });
-
-        it("should publish empty odds object when not in a placing bet phase", () => {
-            // Arrange
-            gameData.remainingTime = 0; // Not in any placing bet phase
-            gameData.dynamicOdds = { ...sampleOdds };
-
-            // Act
-            publisher.publishDynamicOddsStatus();
-
-            // Assert
-            const publishedData = (publisher.publishToAllUsers as jest.Mock).mock.calls[0][0];
-            expect(publishedData).toEqual({ odds: {} });
         });
     });
 });
