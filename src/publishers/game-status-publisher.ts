@@ -13,17 +13,11 @@ export default class GameStatusPublisher extends Core.BaseEventPublishers.GameSt
     }
 
     publishDynamicOddsStatus() {
-        try {
-            const pureOdds = this.gameData.dynamicOdds 
+        const pureOdds = this.gameData.dynamicOdds 
             ?? this.gameData.gameConfigs.odds 
-            ?? this.gameData.gameConfigs.originalOdds;
 
         const odds = this.omitOddsBasedOnHalf(pureOdds);
-
-            this.publishToAllUsers({ odds });
-        } catch (error) {
-            console.error(error);
-        }
+        this.publishToAllUsers({ odds });
     }
 
     private omitOddsBasedOnHalf(target: Record<string, any>) {
