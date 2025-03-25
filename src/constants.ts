@@ -23,11 +23,19 @@ export const BET_CHOICES = {
     ...SECOND_HALF_BET_CHOICES
 };
 
+export const FIRST_HALF_ODDS_TYPE = {
+    ...FIRST_HALF_BET_CHOICES,
+    firstHalfDraw4: "firstHalfDraw4",
+}
+
+export const SECOND_HALF_ODDS_TYPE = {
+    ...SECOND_HALF_BET_CHOICES,
+    secondHalfDraw4: "secondHalfDraw4"
+}
 
 export const ODDS_TYPE = {
-    ...BET_CHOICES,
-    firstHalfDraw4: "firstHalfDraw4",
-    secondHalfDraw4: "secondHalfDraw4"
+    ...FIRST_HALF_ODDS_TYPE,
+    ...SECOND_HALF_ODDS_TYPE
 }
 
 export const BET_CHOICE_ENUM = {
