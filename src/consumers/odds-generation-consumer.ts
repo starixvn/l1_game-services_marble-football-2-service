@@ -1,7 +1,14 @@
+import GameData from "../game-data";
 import { OddsType } from "../match-configs";
 
-export default class OddGenerationConsumer {
-    public generateOdds(options: any): OddsType {
+export default class OddsGenerationConsumer {
+    gameData: GameData;
+
+    constructor(container: any) {
+        this.gameData = container.gameData;
+    }
+
+    generateOdds(options?: any): OddsType {
         return {
             firstHalfAway: 1,
             firstHalfDraw: 1,
@@ -20,5 +27,9 @@ export default class OddGenerationConsumer {
             secondHalfOver: 1,
             secondHalfUnder: 1
         }
+    }
+
+    generateAndUpdateOdds() {
+        this.gameData.dynamicOdds = this.generateOdds();
     }
 }

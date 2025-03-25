@@ -5,6 +5,10 @@ export default class GameStatusPublisher extends Core.BaseEventPublishers.GameSt
     declare gameData: GameData;
 
     publishDynamicOddsStatus() {
-        // TODO: Implement dynamic odds status publishing
+        const odds = this.gameData.dynamicOdds 
+            ?? this.gameData.gameConfigs.odds 
+            ?? this.gameData.gameConfigs.originalOdds;
+
+        this.publishToAllUsers({ odds });
     }
 }
