@@ -179,12 +179,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
             await this.settleGameRoundConsumer.settleRound();
         }
 
-        if (this.isDuringFirstHalfBettingTime(remainingTime)) {
-            this.bot && (await this.bot.run());
-            this.runningRoundInfoPublisher.publish();
-        }
-
-        if (this.isDuringSecondHalfBettingTime(remainingTime)) {
+        if (this.isDuringFirstHalfBettingTime(remainingTime) || this.isDuringSecondHalfBettingTime(remainingTime)) {
             this.bot && (await this.bot.run());
             this.runningRoundInfoPublisher.publish();
         }
