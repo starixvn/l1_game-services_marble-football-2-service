@@ -23,7 +23,7 @@ export default class InGameConsumer extends TableInGameConsumer {
 
         const remainingTime = this.gameData.remainingTime;
 
-        const isStreamingVideo = remainingTime < durations.streamingVideo && remainingTime >= 0;
+        const isStreamingVideo = remainingTime < durations.streamingVideoFirstHalf && remainingTime >= 0;
 
         const isShowingResult = remainingTime <= durations.wholeRound && remainingTime > durations.startingRound;
 

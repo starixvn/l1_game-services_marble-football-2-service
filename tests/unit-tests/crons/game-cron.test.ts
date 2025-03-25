@@ -75,12 +75,17 @@ describe("GameCron", () => {
     const definition = stub<GameDefinition>();
 
     definition.durations = {
-        wholeRound: 130,
-        startingRound: 125,
-        placingBets: 120,
-        lockingBet: 93,
-        streamingVideo: 90,
-    } as any;
+        wholeRound: 121,
+        startingRound: 117,
+        placingBetsFirstHalf: 114,
+        lockingBetFirstHalf: 104,
+        streamingVideoFirstHalf: 100,
+        placingBetsSecondHalf: 58,
+        lockingBetSecondHalf: 39,
+        streamingVideoSecondHalf: 38,
+        placingBets: 0,
+        lockingBet: 0,
+    };
 
     beforeEach(() => {
         const gameData = stub<GameData>({
@@ -159,80 +164,157 @@ describe("GameCron", () => {
             expect(gameCron.gameData.remainingTime).toBe(4);
         });
 
-        it("should publish start placing bet status at the correct time", async () => {
-            // arrange
-            gameCron.gameData.remainingTime = definition.durations.placingBets + 1;
+        describe("first half", () => {
+            it("should publish start placing bet status at placing bet time", async () => {
+                // arrange
+                gameCron.gameData.remainingTime = definition.durations.placingBetsFirstHalf + 1;
+    
+                // act
+                await gameCron.proceed();
+    
+                // assert
+                expect(gameStatusPublisher.publishStartPlacingBetStatus).toHaveBeenCalled();
+            });
 
-            // act
-            await gameCron.proceed();
+            it("should publish end placing bet status at locking bet time", async () => {
+                // arrange
+                gameCron.gameData.remainingTime = definition.durations.lockingBetFirstHalf;
+    
+                // act
+                await gameCron.proceed();
+    
+                // assert
+                expect(gameStatusPublisher.publishEndPlacingBetStatus).toHaveBeenCalled();
+            });
 
-            // assert
-            expect(gameStatusPublisher.publishStartPlacingBetStatus).toHaveBeenCalled();
-        });
+            it("should run bot and publish running round info during bet time", async () => {
+                // arrange
+                gameCron.gameData.remainingTime = definition.durations.placingBetsFirstHalf - 1;
+    
+                // act
+                await gameCron.proceed();
+    
+                // assert
+                expect(bot.run).toHaveBeenCalled();
+                expect(runningRoundInfoPublisher.publish).toHaveBeenCalled();
+            });
 
-        it("should publish end placing bet status locking bet time", async () => {
-            // arrange
-            gameCron.gameData.remainingTime = definition.durations.lockingBet;
+            describe("at streaming time", () => {
+                it("should call getVideoTimeline", async () => {
+                    // arrange
+                    gameCron.gameData.remainingTime = definition.durations.streamingVideoFirstHalf + 1;
+                    jest.spyOn(gameCron, "getVideoTimeline").mockResolvedValue();
+        
+                    // act
+                    await gameCron.proceed();
+        
+                    // assert
+                    expect(gameCron.getVideoTimeline).toHaveBeenCalled();
+                });
+            })
 
-            // act
-            await gameCron.proceed();
-
-            // assert
-            expect(gameStatusPublisher.publishEndPlacingBetStatus).toHaveBeenCalled();
-        });
-
-        it("should call getVideoTimeline at the correct time", async () => {
-            // arrange
-            gameCron.gameData.remainingTime = definition.durations.streamingVideo + 1;
-            jest.spyOn(gameCron, "getVideoTimeline").mockResolvedValue();
-
-            // act
-            await gameCron.proceed();
-
-            // assert
-            expect(gameCron.getVideoTimeline).toHaveBeenCalled();
-        });
-
-        it("should call publishVideoStream at the correct time", async () => {
-            // arrange
-            gameCron.gameData.remainingTime = definition.durations.streamingVideo + 1;
-            jest.spyOn(gameCron, "publishVideoStream");
-            jest.spyOn(gameCron, "getVideoTimeline").mockResolvedValue();
-
-            // act
-            await gameCron.proceed();
-
-            // assert
-            expect(gameCron.publishVideoStream).toHaveBeenCalled();
-        });
-
-        it("should publish video stream at the correct time", async () => {
-            // arrange
-            gameCron.gameData.remainingTime = definition.durations.streamingVideo + 1;
-            gameCron.gameData.result = {
-                firstHalfVideo: "http://marble-football/watch?v=HH",
-                secondHalfVideo: "http://marble-football/watch?v=AA",
-                firstHalfTimeline: [1, 2, 3],
-                secondHalfTimeline: [4, 5, 6],
-            } as any;
-
-            jest.spyOn(gameCron, "getVideoTimeline").mockResolvedValue();
-
-            // act
-            await gameCron.proceed();
-
-            // assert
-            expect(runningRoundInfoPublisher.publishToAllUsers).toHaveBeenCalledWith({
-                videoResult: {
+            it("should publish video stream", async () => {
+                // arrange
+                gameCron.gameData.remainingTime = definition.durations.streamingVideoFirstHalf + 1;
+                gameCron.gameData.result = {
                     firstHalfVideo: "http://marble-football/watch?v=HH",
-                    secondHalfVideo: "http://marble-football/watch?v=AA",
                     firstHalfTimeline: [1, 2, 3],
-                    secondHalfTimeline: [4, 5, 6],
-                },
+                    firstHalf: "HH",
+                } as any;
+    
+                jest.spyOn(gameCron, "getVideoTimeline").mockResolvedValue();
+    
+                // act
+                await gameCron.proceed();
+    
+                // assert
+                expect(runningRoundInfoPublisher.publishToAllUsers).toHaveBeenCalledWith({
+                    videoResult: {
+                        firstHalfVideo: "http://marble-football/watch?v=HH",
+                        firstHalfTimeline: [1, 2, 3],
+                        firstHalf: "HH",
+                    },
+                });
             });
         });
 
-        it("should publish tournament at the correct time", async () => {
+        describe("second half", () => {
+            it("should publish start placing bet status at placing bet time", async () => {
+                // arrange
+                gameCron.gameData.remainingTime = definition.durations.placingBetsSecondHalf + 1;
+                // Mock the notifyPlaceBetsWithDynamicOdds method
+                jest.spyOn(gameCron as any, "notifyPlaceBetsWithDynamicOdds");
+    
+                // act
+                await gameCron.proceed();
+    
+                // assert
+                expect((gameCron as any).notifyPlaceBetsWithDynamicOdds).toHaveBeenCalled();
+            });
+
+            it("should run bot and publish running round info during bet time", async () => {
+                // arrange
+                gameCron.gameData.remainingTime = definition.durations.placingBetsSecondHalf - 1;
+    
+                // act
+                await gameCron.proceed();
+    
+                // assert
+                expect(bot.run).toHaveBeenCalled();
+                expect(runningRoundInfoPublisher.publish).toHaveBeenCalled();
+            });
+    
+            it("should publish end placing bet status at locking bet time", async () => {
+                // arrange
+                gameCron.gameData.remainingTime = definition.durations.lockingBetSecondHalf;
+    
+                // act
+                await gameCron.proceed();
+    
+                // assert
+                expect(gameStatusPublisher.publishEndPlacingBetStatus).toHaveBeenCalled();
+            });
+    
+            describe("at streaming time", () => {
+                it("should NOT call getVideoTimeline", async () => {
+                    // arrange
+                    gameCron.gameData.remainingTime = definition.durations.streamingVideoSecondHalf + 1;
+                    jest.spyOn(gameCron, "getVideoTimeline").mockResolvedValue();
+        
+                    // act
+                    await gameCron.proceed();
+        
+                    // assert
+                    expect(gameCron.getVideoTimeline).not.toHaveBeenCalled();
+                });
+            });
+    
+            it("should publish video stream", async () => {
+                // arrange
+                gameCron.gameData.remainingTime = definition.durations.streamingVideoSecondHalf + 1;
+                gameCron.gameData.result = {
+                    secondHalfVideo: "http://marble-football/watch?v=AA",
+                    secondHalfTimeline: [4, 5, 6],
+                    secondHalf: "AA",
+                } as any;
+    
+                jest.spyOn(gameCron, "getVideoTimeline").mockResolvedValue();
+    
+                // act
+                await gameCron.proceed();
+    
+                // assert
+                expect(runningRoundInfoPublisher.publishToAllUsers).toHaveBeenCalledWith({
+                    videoResult: {
+                        secondHalfVideo: "http://marble-football/watch?v=AA",
+                        secondHalfTimeline: [4, 5, 6],
+                        secondHalf: "AA",
+                    },
+                });
+            });
+        });
+
+        it("should publish tournament at the round start time", async () => {
             // arrange
             gameCron.gameData.remainingTime = definition.durations.startingRound + 1;
 
@@ -271,18 +353,6 @@ describe("GameCron", () => {
             });
         });
 
-        it("should run bot and publish running round info during bet time", async () => {
-            // arrange
-            gameCron.gameData.remainingTime = 100;
-
-            // act
-            await gameCron.proceed();
-
-            // assert
-            expect(bot.run).toHaveBeenCalled();
-            expect(runningRoundInfoPublisher.publish).toHaveBeenCalled();
-        });
-
         it("should not decrement remaining time if game is disabled", async () => {
             // arrange
             gameCron.gameData.remainingTime = 5;
@@ -293,28 +363,6 @@ describe("GameCron", () => {
 
             // assert
             expect(gameCron.gameData.remainingTime).toBe(5);
-        });
-
-        it("should not run bot if remaining time is not during bet time", async () => {
-            // arrange
-            gameCron.gameData.remainingTime = 6;
-
-            // act
-            await gameCron.proceed();
-
-            // assert
-            expect(bot.run).not.toHaveBeenCalled();
-        });
-
-        it("should not publish running round info if remaining time is not during bet time", async () => {
-            // arrange
-            gameCron.gameData.remainingTime = 6;
-
-            // act
-            await gameCron.proceed();
-
-            // assert
-            expect(runningRoundInfoPublisher.publish).not.toHaveBeenCalled();
         });
     });
 
@@ -510,6 +558,90 @@ describe("GameCron", () => {
             // Assert
             expect(gameCron.gameData.result.secondHalfVideo).toEqual(videoName);
             expect(videoTimeline).toEqual([19.166666666666668, 26.9, 40.766666666666666]);
+        });
+    });
+
+    describe("timing helper methods", () => {
+        it("should correctly identify first half betting time", () => {
+            // Create test cases with different remaining times
+            const { placingBetsFirstHalf, lockingBetFirstHalf } = definition.durations;
+            
+            // Should be true during first half betting window
+            expect((gameCron as any).isDuringFirstHalfBettingTime(placingBetsFirstHalf - 1)).toBe(true);
+            expect((gameCron as any).isDuringFirstHalfBettingTime(lockingBetFirstHalf + 1)).toBe(true);
+            
+            // Should be false outside first half betting window
+            expect((gameCron as any).isDuringFirstHalfBettingTime(placingBetsFirstHalf)).toBe(false);
+            expect((gameCron as any).isDuringFirstHalfBettingTime(lockingBetFirstHalf)).toBe(false);
+        });
+
+        it("should correctly identify second half betting time", () => {
+            // Create test cases with different remaining times
+            const { placingBetsSecondHalf, lockingBetSecondHalf } = definition.durations;
+            
+            // Should be true during second half betting window
+            expect((gameCron as any).isDuringSecondHalfBettingTime(placingBetsSecondHalf - 1)).toBe(true);
+            expect((gameCron as any).isDuringSecondHalfBettingTime(lockingBetSecondHalf + 1)).toBe(true);
+            
+            // Should be false outside second half betting window
+            expect((gameCron as any).isDuringSecondHalfBettingTime(placingBetsSecondHalf)).toBe(false);
+            expect((gameCron as any).isDuringSecondHalfBettingTime(lockingBetSecondHalf)).toBe(false);
+        });
+
+        it("should correctly identify start placing bet first half time", () => {
+            const { placingBetsFirstHalf } = definition.durations;
+            
+            expect((gameCron as any).isStartPlacingBetFirstHalf(placingBetsFirstHalf)).toBe(true);
+            expect((gameCron as any).isStartPlacingBetFirstHalf(placingBetsFirstHalf - 1)).toBe(false);
+        });
+
+        it("should correctly identify locking bet first half time", () => {
+            const { lockingBetFirstHalf } = definition.durations;
+            
+            expect((gameCron as any).isLockingBetFirstHalf(lockingBetFirstHalf - 1)).toBe(true);
+            expect((gameCron as any).isLockingBetFirstHalf(lockingBetFirstHalf)).toBe(false);
+        });
+
+        it("should correctly identify streaming video first half time", () => {
+            const { streamingVideoFirstHalf } = definition.durations;
+            
+            expect((gameCron as any).isStreamingVideoFirstHalf(streamingVideoFirstHalf)).toBe(true);
+            expect((gameCron as any).isStreamingVideoFirstHalf(streamingVideoFirstHalf - 1)).toBe(false);
+        });
+
+        it("should correctly identify start placing bet second half time", () => {
+            const { placingBetsSecondHalf } = definition.durations;
+            
+            expect((gameCron as any).isStartPlacingBetSecondHalf(placingBetsSecondHalf)).toBe(true);
+            expect((gameCron as any).isStartPlacingBetSecondHalf(placingBetsSecondHalf - 1)).toBe(false);
+        });
+
+        it("should correctly identify locking bet second half time", () => {
+            const { lockingBetSecondHalf } = definition.durations;
+            
+            expect((gameCron as any).isLockingBetSecondHalf(lockingBetSecondHalf - 1)).toBe(true);
+            expect((gameCron as any).isLockingBetSecondHalf(lockingBetSecondHalf)).toBe(false);
+        });
+
+        it("should correctly identify streaming video second half time", () => {
+            const { streamingVideoSecondHalf } = definition.durations;
+            
+            expect((gameCron as any).isStreamingVideoSecondHalf(streamingVideoSecondHalf)).toBe(true);
+            expect((gameCron as any).isStreamingVideoSecondHalf(streamingVideoSecondHalf - 1)).toBe(false);
+        });
+    });
+
+    describe("notifyPlaceBetsWithDynamicOdds", () => {
+        it("should publish dynamic odds and start placing bet status", () => {
+            // Mock the publishDynamicOddsStatus since it's not defined in the stub
+            (gameStatusPublisher as any).publishDynamicOddsStatus = jest.fn();
+            
+            // Act
+            (gameCron as any).notifyPlaceBetsWithDynamicOdds();
+
+            // Assert
+            expect((gameStatusPublisher as any).publishDynamicOddsStatus).toHaveBeenCalled();
+            expect(gameStatusPublisher.publishStartPlacingBetStatus).toHaveBeenCalled();
         });
     });
 });

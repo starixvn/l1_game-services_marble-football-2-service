@@ -8,11 +8,14 @@ import axios from "axios";
 import { retry } from "../helpers";
 import { generateVideoName } from "../helpers/result-helper";
 import defaultVideoTimelines from "../timelines/video-timelines";
+import GameStatusPublisher from "../publishers/game-status-publisher";
+
 
 export default class GameCron extends Table.Crons.TableGameCron {
     declare gameData: GameData;
     declare definition: GameDefinition;
     declare appConfigs: typeof AppConfigs;
+    declare gameStatusPublisher: GameStatusPublisher;
 
     tournamentConsumer: TournamentConsumer;
 
@@ -92,17 +95,23 @@ export default class GameCron extends Table.Crons.TableGameCron {
 
     async generateRoundData() {
         await this.roundResultConsumer.generateResult();
-
         this.gameData.settlementResultFromAdmin = {};
     }
 
-    publishVideoStream() {
+    private publishVideoStreamFirstHalf() {
         const videoResult = {
             firstHalfVideo: this.gameData.result.firstHalfVideo,
-            secondHalfVideo: this.gameData.result.secondHalfVideo,
             firstHalfTimeline: this.gameData.result.firstHalfTimeline,
-            secondHalfTimeline: this.gameData.result.secondHalfTimeline,
             firstHalf: this.gameData.result.firstHalf,
+        };
+
+        this.runningRoundInfoPublisher.publishToAllUsers({ videoResult });
+    }
+
+    private publishVideoStreamSecondHalf() {
+        const videoResult = {
+            secondHalfVideo: this.gameData.result.secondHalfVideo,
+            secondHalfTimeline: this.gameData.result.secondHalfTimeline,
             secondHalf: this.gameData.result.secondHalf,
         };
 
@@ -120,16 +129,15 @@ export default class GameCron extends Table.Crons.TableGameCron {
     override async proceed() {
         const { durations } = this.definition;
 
-        if (this.isInitializingRound(this.gameData.remainingTime, durations)) {
+        if (this.gameData.remainingTime === durations.wholeRound) {
             await this.checkGameStatus();
         }
-
+        
         if (!this.gameData.disabled) {
             this.gameData.remainingTime--;
         }
 
         const remainingTime = this.gameData.remainingTime;
-
         if (remainingTime === durations.startingRound) {
             await this.publishTournament();
         }
@@ -137,42 +145,87 @@ export default class GameCron extends Table.Crons.TableGameCron {
         if (this.isStartingTime(remainingTime, durations)) {
             this.resetForNewRound();
             this.bot?.reset();
-
-            await this.generateRoundData();
+                await this.generateRoundData();
         }
 
-        if (remainingTime === durations.placingBets) {
-            this.gameStatusPublisher.publishStartPlacingBetStatus();
+        if (this.isStartPlacingBetFirstHalf(remainingTime) || this.isStartPlacingBetSecondHalf(remainingTime)) {
+            this.notifyPlaceBetsWithDynamicOdds();
         }
 
-        if (remainingTime === durations.lockingBet - 1) {
+        if (this.isLockingBetFirstHalf(remainingTime) || this.isLockingBetSecondHalf(remainingTime)) {
             this.gameStatusPublisher.publishEndPlacingBetStatus();
         }
 
-        if (remainingTime === durations.streamingVideo) {
+        if (this.isDuringFirstHalfBettingTime(remainingTime) || this.isDuringSecondHalfBettingTime(remainingTime)) {
+            this.bot && (await this.bot.run());
+            this.runningRoundInfoPublisher.publish();
+        }
+
+        if (this.isStreamingVideoFirstHalf(remainingTime)) {
             await this.getVideoTimeline();
-            this.publishVideoStream();
+            this.publishVideoStreamFirstHalf();
+        }
+
+        if (this.isStreamingVideoSecondHalf(remainingTime)) {
+            this.publishVideoStreamSecondHalf();
         }
 
         if (remainingTime < 0) {
             this.gameData.remainingTime = durations.wholeRound;
-
             await this.settleGameRoundConsumer.settleRound();
         }
-
-        if (this.isDuringBetTime(remainingTime)) {
-            this.bot && (await this.bot.run());
-            this.runningRoundInfoPublisher.publish();
-        }
     }
 
-    isInitializingRound(remainingTime: number, durations: any) {
-        return this.gameData.remainingTime === durations.wholeRound;
+    private notifyPlaceBetsWithDynamicOdds() {
+        this.gameStatusPublisher.publishDynamicOddsStatus();
+        this.gameStatusPublisher.publishStartPlacingBetStatus();
     }
 
-    isDuringBetTime(remainingTime: number) {
-        const { placingBets, lockingBet } = this.definition.durations;
+    private isDuringFirstHalfBettingTime(remainingTime: number) {
+        const { placingBetsFirstHalf, lockingBetFirstHalf } = this.definition.durations;
 
-        return remainingTime < placingBets && remainingTime > lockingBet;
+        return remainingTime < placingBetsFirstHalf && remainingTime > lockingBetFirstHalf;
+    }
+
+    private isDuringSecondHalfBettingTime(remainingTime: number) {
+        const { placingBetsSecondHalf, lockingBetSecondHalf } = this.definition.durations;
+
+        return remainingTime < placingBetsSecondHalf && remainingTime > lockingBetSecondHalf;
+    }
+
+    private isStartPlacingBetFirstHalf(remainingTime: number) {
+        const { placingBetsFirstHalf } = this.definition.durations;
+
+        return remainingTime === placingBetsFirstHalf;
+    }   
+    
+    private isLockingBetFirstHalf(remainingTime: number) {
+        const { lockingBetFirstHalf } = this.definition.durations;
+
+        return remainingTime === lockingBetFirstHalf - 1;
+    }
+
+    private isStreamingVideoFirstHalf(remainingTime: number) {
+        const { streamingVideoFirstHalf } = this.definition.durations;
+
+        return remainingTime === streamingVideoFirstHalf;
+    }
+
+    private isStartPlacingBetSecondHalf(remainingTime: number) {
+        const { placingBetsSecondHalf } = this.definition.durations;
+
+        return remainingTime === placingBetsSecondHalf;
+    }   
+
+    private isLockingBetSecondHalf(remainingTime: number) {
+        const { lockingBetSecondHalf } = this.definition.durations;
+
+        return remainingTime === lockingBetSecondHalf - 1;
+    }   
+
+    private isStreamingVideoSecondHalf(remainingTime: number) {
+        const { streamingVideoSecondHalf } = this.definition.durations;
+
+        return remainingTime === streamingVideoSecondHalf;
     }
 }

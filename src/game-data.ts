@@ -17,6 +17,7 @@ export default class GameData extends TableGameData {
     liveStreamServer = "";
     tournament = {} as ITournament;
     publishedTournament = {} as ITournament;
+    dynamicOdds?: Record<string, number>;
 }
 
 export type RealPlayer = {
