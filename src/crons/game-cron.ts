@@ -95,7 +95,6 @@ export default class GameCron extends Table.Crons.TableGameCron {
 
     async generateRoundData() {
         await this.roundResultConsumer.generateResult();
-
         this.gameData.settlementResultFromAdmin = {};
     }
 
@@ -149,26 +148,23 @@ export default class GameCron extends Table.Crons.TableGameCron {
                 await this.generateRoundData();
         }
 
-        if (this.isStartPlacingBetFirstHalf(remainingTime)) {
+        if (this.isStartPlacingBetFirstHalf(remainingTime) || this.isStartPlacingBetSecondHalf(remainingTime)) {
             this.notifyPlaceBetsWithDynamicOdds();
         }
 
-        if (this.isLockingBetFirstHalf(remainingTime)) {
+        if (this.isLockingBetFirstHalf(remainingTime) || this.isLockingBetSecondHalf(remainingTime)) {
             this.gameStatusPublisher.publishEndPlacingBetStatus();
+        }
+
+        if (this.isDuringFirstHalfBettingTime(remainingTime) || this.isDuringSecondHalfBettingTime(remainingTime)) {
+            this.bot && (await this.bot.run());
+            this.runningRoundInfoPublisher.publish();
         }
 
         if (this.isStreamingVideoFirstHalf(remainingTime)) {
             await this.getVideoTimeline();
             this.publishVideoStreamFirstHalf();
         }
-
-        if (this.isStartPlacingBetSecondHalf(remainingTime)) {
-            this.notifyPlaceBetsWithDynamicOdds();
-        }
-
-        if (this.isLockingBetSecondHalf(remainingTime)) {
-            this.gameStatusPublisher.publishEndPlacingBetStatus();
-        }   
 
         if (this.isStreamingVideoSecondHalf(remainingTime)) {
             this.publishVideoStreamSecondHalf();
@@ -177,11 +173,6 @@ export default class GameCron extends Table.Crons.TableGameCron {
         if (remainingTime < 0) {
             this.gameData.remainingTime = durations.wholeRound;
             await this.settleGameRoundConsumer.settleRound();
-        }
-
-        if (this.isDuringFirstHalfBettingTime(remainingTime) || this.isDuringSecondHalfBettingTime(remainingTime)) {
-            this.bot && (await this.bot.run());
-            this.runningRoundInfoPublisher.publish();
         }
     }
 
