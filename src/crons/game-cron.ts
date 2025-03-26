@@ -137,15 +137,19 @@ export default class GameCron extends Table.Crons.TableGameCron {
             this.gameData.remainingTime--;
         }
 
+        console.log(`remainingTime: ${this.gameData.remainingTime}`);
+
         const remainingTime = this.gameData.remainingTime;
         if (remainingTime === durations.startingRound) {
+            console.log("publish tournament");
             await this.publishTournament();
         }
 
         if (this.isStartingTime(remainingTime, durations)) {
+            console.log("resetForNewRound");
             this.resetForNewRound();
             this.bot?.reset();
-                await this.generateRoundData();
+            await this.generateRoundData();
         }
 
         if (this.isStartPlacingBetFirstHalf(remainingTime) || this.isStartPlacingBetSecondHalf(remainingTime)) {
@@ -153,6 +157,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
         }
 
         if (this.isLockingBetFirstHalf(remainingTime) || this.isLockingBetSecondHalf(remainingTime)) {
+            console.log("lock bet");
             this.gameStatusPublisher.publishEndPlacingBetStatus();
         }
 
@@ -162,11 +167,13 @@ export default class GameCron extends Table.Crons.TableGameCron {
         }
 
         if (this.isStreamingVideoFirstHalf(remainingTime)) {
+            console.log("streaming video first half");
             await this.getVideoTimeline();
             this.publishVideoStreamFirstHalf();
         }
 
         if (this.isStreamingVideoSecondHalf(remainingTime)) {
+            console.log("streaming video second half");
             this.publishVideoStreamSecondHalf();
         }
 
@@ -177,7 +184,8 @@ export default class GameCron extends Table.Crons.TableGameCron {
     }
 
     private notifyPlaceBetsWithDynamicOdds() {
-        this.gameStatusPublisher.publishDynamicOddsStatus();
+        console.log("start bet");
+        this.gameStatusPublisher.publishDynamicOddsStatus(this.isFirstHalfOddsActive());
         this.gameStatusPublisher.publishStartPlacingBetStatus();
     }
 
@@ -228,4 +236,12 @@ export default class GameCron extends Table.Crons.TableGameCron {
 
         return remainingTime === streamingVideoSecondHalf;
     }
+
+    private isFirstHalfOddsActive() {
+        const { placingBetsSecondHalf } = this.definition.durations;
+
+        return this.gameData.remainingTime > placingBetsSecondHalf;
+    }
+    
+    
 }
