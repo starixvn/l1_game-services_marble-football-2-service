@@ -1,10 +1,9 @@
 import { HalfConfigType, MatchConfigType } from "../match-configs";
 import { ResultType, SettlementResultType } from "../models/rounds";
 import Chance from "chance";
-import { shuffle } from "./shuffle";
 import crypto from "crypto";
 import { DEFAULT_NUMBER_OF_VIDEOS, OVER_UNDER_VALUE } from "../constants";
-import { randomHelper } from ".";
+import { secureShuffle, secureWeightedPick } from "sc-core-rng";
 
 type DataResultType = {
     numberOfVideos: Record<string, number>;
@@ -99,7 +98,7 @@ const generateResultForHalf = (halfConfig: HalfConfigType) => {
     const [homeGoals, awayGoals] = scoreResult.split("-").map(Number);
     const sequence = Array(homeGoals).fill("H").concat(Array(awayGoals).fill("A"));
 
-    const result = shuffle(sequence).join("");
+    const result = secureShuffle(sequence).join("");
 
     return result || "0";
 };
@@ -108,7 +107,7 @@ const getScoreFromScoreRate = (scoreRate: Record<string, number>) => {
     const score = Object.keys(scoreRate);
     const rate = Object.values(scoreRate);
 
-    const randomScore = randomHelper.secureWeightedPick(score, rate);
+    const randomScore = secureWeightedPick(score, rate);
 
     return randomScore;
 };

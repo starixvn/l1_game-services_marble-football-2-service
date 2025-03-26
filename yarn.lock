@@ -7018,6 +7018,11 @@ sc-common@1.8.1, sc-common@^1.8.1:
     mongoose-long "^0.3.0"
     numeral "^2.0.6"
 
+sc-core-rng@^1.1.0:
+  version "1.1.0"
+  resolved "http://npm.lumigame.com/sc-core-rng/-/sc-core-rng-1.1.0.tgz#90246a382ca507270b34eeb453bbd6db6879bca7"
+  integrity sha512-fjPYv8GBMhnjq5btJT/QsgyuRc3XILx7LPqvosP7BqquIa0CYDww9bRJAMDBRCzyprsZHo5zSjLhSIGIUEJdFg==
+
 sc-game-base@^5.4.0:
   version "5.4.0"
   resolved "http://npm.lumigame.com/sc-game-base/-/sc-game-base-5.4.0.tgz#46203fc17ae5a82fbd0a8160d422e17d74f60bca"

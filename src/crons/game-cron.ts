@@ -14,7 +14,7 @@ import { generateOdds } from "../helpers/odds";
 import { isFirstHalfOddsActive } from "../helpers/game-timing";
 
 import { calculatePreMatchOdds, calculateLiveOdds } from "../helpers/odds-helper";
-import { securePickOne } from "../helpers/random-helper";
+import { securePickOne } from "sc-core-rng";
 
 export default class GameCron extends Table.Crons.TableGameCron {
     declare gameData: GameData;
