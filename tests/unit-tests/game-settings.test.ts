@@ -15,15 +15,22 @@ describe("gameSettings", () => {
     });
 
     it("durations should be in the correct order", () => {
-        const { wholeRound, placingBets, lockingBet, streamingVideo } = gameSettings.durations;
+        const { wholeRound, placingBetsFirstHalf, lockingBetFirstHalf, streamingVideoFirstHalf, placingBetsSecondHalf, lockingBetSecondHalf, streamingVideoSecondHalf } = gameSettings.durations;
 
-        expect(wholeRound).toBeGreaterThan(placingBets);
-        expect(placingBets).toBeGreaterThan(lockingBet);
-        expect(lockingBet).toBeGreaterThan(streamingVideo);
+        expect(wholeRound).toBeGreaterThan(placingBetsFirstHalf);
+        expect(placingBetsFirstHalf).toBeGreaterThan(lockingBetFirstHalf);
+        expect(lockingBetFirstHalf).toBeGreaterThan(streamingVideoFirstHalf);
         expect(wholeRound).toBe(121);
-        expect(placingBets).toBe(109);
-        expect(lockingBet).toBe(104);
-        expect(streamingVideo).toBe(100);
+        expect(placingBetsFirstHalf).toBe(115);
+        expect(lockingBetFirstHalf).toBe(99);
+        expect(streamingVideoFirstHalf).toBe(94);
+        expect(wholeRound).toBeGreaterThan(placingBetsSecondHalf);
+        expect(placingBetsSecondHalf).toBeGreaterThan(lockingBetSecondHalf);
+        expect(lockingBetSecondHalf).toBeGreaterThan(streamingVideoSecondHalf);
+        expect(wholeRound).toBe(121);
+        expect(placingBetsSecondHalf).toBe(63);
+        expect(lockingBetSecondHalf).toBe(47);
+        expect(streamingVideoSecondHalf).toBe(42);
     });
 
     it("should have the correct choices", () => {

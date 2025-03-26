@@ -15,6 +15,11 @@ describe("InGameConsumer test", () => {
         placingBetsFirstHalf: 136,
         lockingBetFirstHalf: 109,
         streamingVideoFirstHalf: 108,
+        placingBetsSecondHalf: 136,
+        lockingBetSecondHalf: 109,
+        streamingVideoSecondHalf: 108,
+        placingBets: 136,
+        lockingBet: 109
     };
     const gameData = stub<GameData>();
     const getBalance = jest.fn();

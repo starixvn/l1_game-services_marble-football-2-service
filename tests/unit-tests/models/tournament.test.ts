@@ -38,7 +38,7 @@ describe("Tournament", () => {
             const error = actual.validateSync();
 
             // Assert
-            expect(error.message).toBe(`marblefootbal_2_tournaments validation failed: code: Path \`code\` is required.`);
+            expect(error.message).toBe(`marblefootball2_tournaments validation failed: code: Path \`code\` is required.`);
         });
     });
 
@@ -63,7 +63,7 @@ describe("Tournament", () => {
             const model = new tournaments({});
 
             // Assert
-            expect(model.collection.name).toBe("marblefootbal_2_dev_tournaments");
+            expect(model.collection.name).toBe("marblefootball2_dev_tournaments");
         });
 
         it("should not have _dev suffix in production environment", async () => {
@@ -76,7 +76,7 @@ describe("Tournament", () => {
             const model = new tournaments({});
 
             // Assert
-            expect(model.collection.name).toBe("marblefootbal_2_tournaments");
+            expect(model.collection.name).toBe("marblefootball2_tournaments");
         });
 
         it("should handle undefined environment as production", async () => {
@@ -89,7 +89,7 @@ describe("Tournament", () => {
             const model = new tournaments({});
 
             // Assert
-            expect(model.collection.name).toBe("marblefootbal_2_tournaments");
+            expect(model.collection.name).toBe("marblefootball2_tournaments");
         });
     });
 });

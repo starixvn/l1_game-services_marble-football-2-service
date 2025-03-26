@@ -38,7 +38,7 @@ describe("Bets", () => {
 
             // Assert
             expect(error.message).toBe(
-                `marblefootbal_2_bets validation failed: rate: Path \`rate\` is required., name: Path \`name\` is required., uid: Path \`uid\` is required., roundId: Path \`roundId\` is required.`,
+                `marblefootball2_bets validation failed: rate: Path \`rate\` is required., name: Path \`name\` is required., uid: Path \`uid\` is required., roundId: Path \`roundId\` is required.`,
             );
         });
     });
@@ -64,7 +64,7 @@ describe("Bets", () => {
             const model = new bets({});
 
             // Assert
-            expect(model.collection.name).toBe("marblefootbal_2_dev_bets");
+            expect(model.collection.name).toBe("marblefootball2_dev_bets");
         });
 
         it("should not have _dev suffix in production environment", async () => {
@@ -77,7 +77,7 @@ describe("Bets", () => {
             const model = new bets({});
 
             // Assert
-            expect(model.collection.name).toBe("marblefootbal_2_bets");
+            expect(model.collection.name).toBe("marblefootball2_bets");
         });
 
         it("should handle undefined environment as production", async () => {
@@ -90,7 +90,7 @@ describe("Bets", () => {
             const model = new bets({});
 
             // Assert
-            expect(model.collection.name).toBe("marblefootbal_2_bets");
+            expect(model.collection.name).toBe("marblefootball2_bets");
         });
     });
 });
