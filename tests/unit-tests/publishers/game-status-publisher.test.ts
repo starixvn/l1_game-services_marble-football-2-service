@@ -45,6 +45,20 @@ describe("GameStatusPublisher", () => {
     });
 
     describe("publishDynamicOddsStatus", () => {
+
+        describe("when dynamicOdds is not generated", () => {
+            it("should throw error", () => {
+                // Arrange
+                gameData.dynamicOdds = undefined;
+                
+                // Act
+                const act = () => publisher.publishDynamicOddsStatus();
+                
+                // Assert
+                expect(act).toThrow("Dynamic odds are not generated");
+            });
+        });
+
         describe("when not in place bet time", () => {
 
             it("should should not publish odds", () => {
@@ -95,23 +109,6 @@ describe("GameStatusPublisher", () => {
                     }
                 });
             });
-
-            it("should publish only first half odds from config odds when dynamicOdds is not available", () => {
-                // Arrange
-                gameData.dynamicOdds = undefined;
-    
-                // Act
-                publisher.publishDynamicOddsStatus();
-    
-                // Assert
-                expect(publisher.publishToAllUsers).toHaveBeenCalledWith({
-                    odds: {
-                        firstHalfHome: 1.4,
-                        firstHalfAway: 2.4,
-                        firstHalfDraw: 2.9
-                    }
-                });
-            });
         });
 
         describe("when in second half placing bet time", () => {
@@ -135,23 +132,6 @@ describe("GameStatusPublisher", () => {
                         secondHalfHome: 1.8,
                         secondHalfAway: 2.2,
                         secondHalfDraw: 2.8
-                    }
-                });
-            });
-
-            it("should publish only second half odds from config odds when dynamicOdds is not available", () => {
-                // Arrange
-                gameData.dynamicOdds = undefined;
-    
-                // Act
-                publisher.publishDynamicOddsStatus();
-    
-                // Assert
-                expect(publisher.publishToAllUsers).toHaveBeenCalledWith({
-                    odds: {
-                        secondHalfHome: 1.7,
-                        secondHalfAway: 2.1,
-                        secondHalfDraw: 2.7
                     }
                 });
             });

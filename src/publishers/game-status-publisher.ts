@@ -13,8 +13,11 @@ export default class GameStatusPublisher extends Core.BaseEventPublishers.GameSt
     }
 
     publishDynamicOddsStatus() {
-        const pureOdds = this.gameData.dynamicOdds 
-            ?? this.gameData.gameConfigs.odds 
+        if (!this.gameData.dynamicOdds) {
+            throw new Error("Dynamic odds are not generated");
+        }
+
+        const pureOdds = this.gameData.dynamicOdds;
 
         const odds = this.omitOddsBasedOnHalf(pureOdds);
         this.publishToAllUsers({ odds });
