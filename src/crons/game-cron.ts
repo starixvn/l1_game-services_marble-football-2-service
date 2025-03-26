@@ -40,7 +40,6 @@ export default class GameCron extends Table.Crons.TableGameCron {
     override resetForNewRound() {
         super.resetForNewRound();
         this.gameData.playerBetCount = {};
-        this.updateNewMatchConfig();
     }
 
     async getVideoTimelineByVideoName(videoName: string) {
@@ -148,6 +147,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
         if (this.isStartingTime(remainingTime, durations)) {
             this.resetForNewRound();
             this.bot?.reset();
+            this.updateNewMatchConfig();
             await this.generateRoundData();
         }
 
