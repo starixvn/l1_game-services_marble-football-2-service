@@ -19,7 +19,7 @@ describe("InGameConsumer test", () => {
         lockingBetSecondHalf: 109,
         streamingVideoSecondHalf: 108,
         placingBets: 136,
-        lockingBet: 109
+        lockingBet: 109,
     };
     const gameData = stub<GameData>();
     const getBalance = jest.fn();

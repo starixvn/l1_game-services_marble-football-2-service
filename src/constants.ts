@@ -6,7 +6,7 @@ export const SECOND_HALF_BET_CHOICES = {
     secondHalfUnder: "secondHalfUnder",
     secondHalfOdd: "secondHalfOdd",
     secondHalfEven: "secondHalfEven",
-}
+};
 
 export const FIRST_HALF_BET_CHOICES = {
     firstHalfHome: "firstHalfHome",
@@ -16,27 +16,27 @@ export const FIRST_HALF_BET_CHOICES = {
     firstHalfUnder: "firstHalfUnder",
     firstHalfOdd: "firstHalfOdd",
     firstHalfEven: "firstHalfEven",
-}
+};
 
 export const BET_CHOICES = {
     ...FIRST_HALF_BET_CHOICES,
-    ...SECOND_HALF_BET_CHOICES
+    ...SECOND_HALF_BET_CHOICES,
 };
 
 export const FIRST_HALF_ODDS_TYPE = {
     ...FIRST_HALF_BET_CHOICES,
     firstHalfDraw4: "firstHalfDraw4",
-}
+};
 
 export const SECOND_HALF_ODDS_TYPE = {
     ...SECOND_HALF_BET_CHOICES,
-    secondHalfDraw4: "secondHalfDraw4"
-}
+    secondHalfDraw4: "secondHalfDraw4",
+};
 
 export const ODDS_TYPE = {
     ...FIRST_HALF_ODDS_TYPE,
-    ...SECOND_HALF_ODDS_TYPE
-}
+    ...SECOND_HALF_ODDS_TYPE,
+};
 
 export const BET_CHOICE_ENUM = {
     firstHalfHome: 1,
@@ -53,7 +53,7 @@ export const BET_CHOICE_ENUM = {
     secondHalfUnder: 12,
     secondHalfOdd: 13,
     secondHalfEven: 14,
-}
+};
 
 export const DEFAULT_MARGIN = 0.02;
 

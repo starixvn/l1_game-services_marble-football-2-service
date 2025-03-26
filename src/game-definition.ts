@@ -1,16 +1,20 @@
 import { TableGameDefinition } from "sc-game-base/src/table";
 export default class GameDefinition extends TableGameDefinition {
-    declare durations: Duration & { placingBets: number, lockingBet: number };
+    declare durations: Duration & { placingBets: number; lockingBet: number };
     constructor(gameSettings: GameSettings, generateResult: Function, settle: Function, generateRawResultForHash: Function) {
         super(
-        { 
-            ...gameSettings, 
-            durations: {
-            ...gameSettings.durations,
-            placingBets: gameSettings.durations.placingBetsFirstHalf,
-            lockingBet: gameSettings.durations.lockingBetFirstHalf
-            }
-        }, generateResult, settle, generateRawResultForHash);
+            {
+                ...gameSettings,
+                durations: {
+                    ...gameSettings.durations,
+                    placingBets: gameSettings.durations.placingBetsFirstHalf,
+                    lockingBet: gameSettings.durations.lockingBetFirstHalf,
+                },
+            },
+            generateResult,
+            settle,
+            generateRawResultForHash,
+        );
     }
 }
 
@@ -40,4 +44,4 @@ export type Duration = {
     placingBetsSecondHalf: number;
     lockingBetSecondHalf: number;
     streamingVideoSecondHalf: number;
-}
+};

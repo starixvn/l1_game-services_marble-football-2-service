@@ -17,7 +17,6 @@ export default class GameStatusPublisher extends Core.BaseEventPublishers.GameSt
             throw new Error("Dynamic odds are not generated");
         }
 
-
         const pureOdds = this.gameData.dynamicOdds;
 
         const odds = this.omitOddsBasedOnHalf(pureOdds, isFirstHalf);
@@ -33,9 +32,6 @@ export default class GameStatusPublisher extends Core.BaseEventPublishers.GameSt
     }
 
     private static omitOdds(target: Record<string, any>, oddTypes: string[] = []) {
-        return Object.fromEntries(
-            Object.entries(target)
-                .filter(([key]) => !oddTypes.includes(key))
-        );
+        return Object.fromEntries(Object.entries(target).filter(([key]) => !oddTypes.includes(key)));
     }
 }

@@ -3,7 +3,7 @@ import { OddsType } from "../match-configs";
 
 export type GenerateOddsOptions = {
     gameData: GameData;
-}
+};
 
 export function generateOdds(options?: GenerateOddsOptions): OddsType {
     return {
@@ -22,6 +22,6 @@ export function generateOdds(options?: GenerateOddsOptions): OddsType {
         secondHalfHome: 1.6,
         secondHalfOdd: 1.6,
         secondHalfOver: 1.6,
-        secondHalfUnder: 1.6
-    }
+        secondHalfUnder: 1.6,
+    };
 }

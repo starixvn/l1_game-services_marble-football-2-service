@@ -12,7 +12,7 @@ export default {
         streamingVideoFirstHalf: 94,
         placingBetsSecondHalf: 63,
         lockingBetSecondHalf: 47,
-        streamingVideoSecondHalf: 42
+        streamingVideoSecondHalf: 42,
     },
     choices: Object.values(BET_CHOICES),
     choicesMapper: BET_CHOICE_ENUM,
