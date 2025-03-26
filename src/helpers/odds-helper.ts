@@ -126,14 +126,14 @@ export const calculatePreMatchOdds = (matchConfig: MatchConfigType, margins: Rec
 
     const odds = calculateBetOdds(probabilities, margins);
 
-    return { odds };
+    return odds;
 };
 
 export const calculateLiveOdds = (halfConfig: HalfConfigType, margins: Record<string, number>[] = [], firstHalfResult = "0-0") => {
     const { probabilities } = calculateProbabilitiesForBetChoices(halfConfig.scoreRate, firstHalfResult);
     const odds = calculateBetOdds(probabilities, margins);
 
-    return { odds };
+    return odds;
 };
 
 export const calculateDrawOdds = (probabilities: Record<string, number>, margins: Record<string, number>[] = []) => {

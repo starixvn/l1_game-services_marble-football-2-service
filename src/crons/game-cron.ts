@@ -13,6 +13,7 @@ import GameStatusPublisher from "../publishers/game-status-publisher";
 import { generateOdds } from "../helpers/odds";
 import { isFirstHalfOddsActive } from "../helpers/game-timing";
 
+import { calculatePreMatchOdds, calculateLiveOdds } from "../helpers/odds-helper";
 import { securePickOne } from "../helpers/random-helper";
 
 export default class GameCron extends Table.Crons.TableGameCron {
@@ -154,8 +155,14 @@ export default class GameCron extends Table.Crons.TableGameCron {
             await this.generateRoundData();
         }
 
-        if (this.isStartPlacingBetFirstHalf(remainingTime) || this.isStartPlacingBetSecondHalf(remainingTime)) {
-            this.notifyPlaceBetsWithDynamicOdds();
+        if (this.isStartPlacingBetFirstHalf(remainingTime)) {
+            this.calculateAndPublishOddsPreMatch();
+            this.gameStatusPublisher.publishStartPlacingBetStatus();
+        }
+
+        if (this.isStartPlacingBetSecondHalf(remainingTime)) {
+            this.calculateAndPublishOddsLive();
+            this.gameStatusPublisher.publishStartPlacingBetStatus();
         }
 
         if (this.isLockingBetFirstHalf(remainingTime) || this.isLockingBetSecondHalf(remainingTime)) {
@@ -183,7 +190,6 @@ export default class GameCron extends Table.Crons.TableGameCron {
     }
 
     private notifyPlaceBetsWithDynamicOdds() {
-        this.gameStatusPublisher.publishDynamicOddsStatus(this.isFirstHalfOddsActive());
         this.gameStatusPublisher.publishStartPlacingBetStatus();
     }
 
@@ -239,11 +245,34 @@ export default class GameCron extends Table.Crons.TableGameCron {
         return isFirstHalfOddsActive(this.gameData.remainingTime, this.definition.durations);
     }
 
-    private createOddsForCurrentRound() {
-        const odds = generateOdds({
-            gameData: this.gameData,
-        });
+    calculateAndPublishOddsPreMatch() {
+        const preMatchOdds = calculatePreMatchOdds(this.gameData.matchConfig, this.gameData.gameConfigs.margin);
+        const odds = {
+            firstHalfHome: preMatchOdds.home,
+            firstHalfAway: preMatchOdds.away,
+            firstHalfDraw: preMatchOdds.draw,
+            firstHalfOver: preMatchOdds.over,
+            firstHalfUnder: preMatchOdds.under,
+            firstHalfEven: preMatchOdds.even,
+            firstHalfOdd: preMatchOdds.odd,
+        };
 
-        this.gameData.dynamicOdds = odds;
+        this.runningRoundInfoPublisher.publishToAllUsers({ odds });
+    }
+
+    calculateAndPublishOddsLive() {
+        const { firstHalf } = this.gameData.result;
+        const liveOdds = calculateLiveOdds(this.gameData.matchConfig.secondHalfConfig, this.gameData.gameConfigs.margin, firstHalf);
+        const odds = {
+            secondHalfHome: liveOdds.home,
+            secondHalfAway: liveOdds.away,
+            secondHalfDraw: liveOdds.draw,
+            secondHalfOver: liveOdds.over,
+            secondHalfUnder: liveOdds.under,
+            secondHalfEven: liveOdds.even,
+            secondHalfOdd: liveOdds.odd,
+        };
+
+        this.runningRoundInfoPublisher.publishToAllUsers({ odds });
     }
 }
