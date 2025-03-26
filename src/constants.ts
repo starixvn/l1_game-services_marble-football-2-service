@@ -50,6 +50,8 @@ export const DEFAULT_MARGIN = 0.02;
 
 export const ODDS_FOR_DRAW_4 = 50;
 
+export const OVER_UNDER_VALUE = 4.5;
+
 export const IS_DEV_ENV = process.env.NODE_ENV === "development";
 
 export const GAME_NAME = "marblefootball2";

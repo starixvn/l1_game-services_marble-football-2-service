@@ -1,5 +1,15 @@
-import { DEFAULT_MARGIN, ODDS_FOR_DRAW_4 } from "../constants";
-import { HalfConfigType, MatchConfigType, overUnderConfig } from "../match-configs";
+import { DEFAULT_MARGIN, ODDS_FOR_DRAW_4, OVER_UNDER_VALUE } from "../constants";
+import { HalfConfigType, MatchConfigType } from "../match-configs";
+
+export type GeneratingOdds = {
+    home: number;
+    away: number;
+    draw: number;
+    over: number;
+    under: number;
+    even: number;
+    odd: number;
+};
 
 export const parseScore = (score: string): [number, number] => {
     const [home, away] = score.split("-").map(Number);
@@ -28,8 +38,9 @@ export const calculateFullTimeScoreRates = (firstHalf: HalfConfigType, secondHal
     return fulltimeScoreRates;
 };
 
-export const calculateProbabilitiesForBetChoices = (scoreRates: Record<string, number>, ouValue: number, handicap: number = 0) => {
+export const calculateProbabilitiesForBetChoices = (scoreRates: Record<string, number>, addingScore: string = "0-0") => {
     const totalRates = Object.values(scoreRates).reduce((sum, rate) => sum + rate, 0);
+    const [addingHome, addingAway] = parseScore(addingScore);
 
     let home = 0,
         away = 0,
@@ -43,13 +54,13 @@ export const calculateProbabilitiesForBetChoices = (scoreRates: Record<string, n
     for (const [score, rate] of Object.entries(scoreRates)) {
         const [homeGoals, awayGoals] = parseScore(score);
 
-        if (homeGoals + handicap > awayGoals) {
+        if (homeGoals + addingHome > awayGoals + addingAway) {
             home += rate;
-        } else if (homeGoals + handicap < awayGoals) {
+        } else if (homeGoals + addingHome < awayGoals + addingAway) {
             away += rate;
         } else {
             draw += rate;
-            if (homeGoals + handicap === 4) {
+            if (homeGoals + addingHome === 4) {
                 draw4 += rate;
             }
         }
@@ -57,15 +68,15 @@ export const calculateProbabilitiesForBetChoices = (scoreRates: Record<string, n
 
     for (const [score, rate] of Object.entries(scoreRates)) {
         const [homeGoals, awayGoals] = parseScore(score);
-        const totalGoals = homeGoals + awayGoals;
+        const totalGoals = homeGoals + awayGoals + addingHome + addingAway;
 
-        if (totalGoals > ouValue) {
+        if (totalGoals > OVER_UNDER_VALUE) {
             over += rate;
-        } else if (totalGoals < ouValue) {
+        } else if (totalGoals < OVER_UNDER_VALUE) {
             under += rate;
         }
 
-        if ((totalGoals + handicap) % 2 === 0) {
+        if (totalGoals % 2 === 0) {
             even += rate;
         } else {
             odd += rate;
@@ -86,7 +97,7 @@ export const calculateProbabilitiesForBetChoices = (scoreRates: Record<string, n
     };
 };
 
-export const calculateBetOdds = (probabilities: Record<string, number>, margins: Record<string, number>[] = []): Record<string, number> => {
+export const calculateBetOdds = (probabilities: Record<string, number>, margins: Record<string, number>[] = []): GeneratingOdds => {
     const sortedMargins = margins.toSorted((a, b) => a.max - b.max);
 
     const odds = Object.keys(probabilities)
@@ -94,14 +105,14 @@ export const calculateBetOdds = (probabilities: Record<string, number>, margins:
         .reduce((result, betChoice) => {
             const prob = probabilities[betChoice];
             const originalOdds = probabilityToBetOdds(prob);
-            const margin = sortedMargins.find((m) => originalOdds <= m.max)?.[betChoice] || 0;
+            const margin = sortedMargins.find((m) => originalOdds <= m.max)?.[betChoice] || DEFAULT_MARGIN;
             result[betChoice] = probabilityToBetOdds(prob, margin);
             return result;
         }, {} as Record<string, number>);
 
-    odds.draw = calculateDrawOdds(probabilities, DEFAULT_MARGIN);
+    odds.draw = calculateDrawOdds(probabilities, margins);
 
-    return odds;
+    return odds as GeneratingOdds;
 };
 
 export const probabilityToBetOdds = (prob: number, margin = 0): number => {
@@ -109,25 +120,27 @@ export const probabilityToBetOdds = (prob: number, margin = 0): number => {
     return odds > 20 ? Math.floor(odds) : roundToPrecision(odds);
 };
 
-export const calculateFulltimeOdds = (matchConfig: MatchConfigType, margins: Record<string, number>[] = []) => {
+export const calculatePreMatchOdds = (matchConfig: MatchConfigType, margins: Record<string, number>[] = []) => {
     const fullTimeScoreRates = calculateFullTimeScoreRates(matchConfig.firstHalfConfig, matchConfig.secondHalfConfig);
-    const { probabilities } = calculateProbabilitiesForBetChoices(fullTimeScoreRates, overUnderConfig.fulltime);
+    const { probabilities } = calculateProbabilitiesForBetChoices(fullTimeScoreRates);
 
     const odds = calculateBetOdds(probabilities, margins);
 
     return { odds };
 };
 
-export const calculateHalfOdds = (halfConfig: HalfConfigType, margins: Record<string, number>[] = [], handicap: number) => {
-    const { probabilities } = calculateProbabilitiesForBetChoices(halfConfig.scoreRate, overUnderConfig.halftime, handicap);
+export const calculateLiveOdds = (halfConfig: HalfConfigType, margins: Record<string, number>[] = [], firstHalfResult = "0-0") => {
+    const { probabilities } = calculateProbabilitiesForBetChoices(halfConfig.scoreRate, firstHalfResult);
     const odds = calculateBetOdds(probabilities, margins);
 
     return { odds };
 };
 
-export const calculateDrawOdds = (probabilities: Record<string, number>, margin: number = DEFAULT_MARGIN) => {
+export const calculateDrawOdds = (probabilities: Record<string, number>, margins: Record<string, number>[] = []) => {
     const drawProb = probabilities.draw;
     const drawProb4 = probabilities.draw4;
+    const originalOdds = (1 - drawProb4 * ODDS_FOR_DRAW_4) / (drawProb - drawProb4);
+    const margin = margins.find((m) => originalOdds <= m.max)?.draw || DEFAULT_MARGIN;
     const odds = (1 - margin - drawProb4 * ODDS_FOR_DRAW_4) / (drawProb - drawProb4);
     return roundToPrecision(odds);
 };
