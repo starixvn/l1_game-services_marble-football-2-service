@@ -21,7 +21,7 @@ import {
 import GameManagementApiClientFactory from "sc-game-base/src/core/game-management-api";
 import Bot from "../../src/crons/bot";
 import { IRound } from "../../src/models/rounds";
-import { TournamentConsumer, OddsGenerationConsumer } from "../../src/consumers";
+import { TournamentConsumer } from "../../src/consumers";
 jest.mock("sc-game-management-client");
 
 const roundsRepository = {
@@ -84,7 +84,6 @@ const unsettledRoundConsumer: UnsettledRoundConsumer = stub<UnsettledRoundConsum
 const roundResultPublisher: RoundResultPublisher = stub<RoundResultPublisher>();
 const userBetResultPublisher: UserBetResultPublisher = stub<UserBetResultPublisher>();
 const placeBetPublisher: PlaceBetPublisher = stub<PlaceBetPublisher>();
-const oddsGenerationConsumer: OddsGenerationConsumer = stub<OddsGenerationConsumer>();
 const baseMetrics: BaseMetrics = stub<BaseMetrics>();
 
 const logService: typeof logger = {
@@ -119,5 +118,4 @@ export {
     tournamentRepository,
     unsettledRoundConsumer,
     userBetResultPublisher,
-    oddsGenerationConsumer,
 };

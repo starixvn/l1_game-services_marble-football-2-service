@@ -15,7 +15,6 @@ import { RunningRoundInfoPublisher } from "./publishers";
 import { HistoryQuery } from "./query-apis";
 import PlaceBetConsumer from "./consumers/place-bet-consumer";
 import GameStatusPublisher from "./publishers/game-status-publisher";
-import OddsGenerationConsumer from "./consumers/odds-generation-consumer";
 
 export default class ContainerRegistry extends Table.TableContainerRegistry {
     register(appConfigs: any, definition: any, gameData: any): AwilixContainer<any> {
@@ -58,7 +57,6 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
             unsettledRoundConsumer: asClass(UnsettledRoundConsumer).singleton().proxy(),
             settleGameRoundConsumer: asClass(SettleGameRoundConsumer).singleton().proxy(),
             placeBetConsumer: asClass(PlaceBetConsumer).singleton(),
-            oddsGenerationConsumer: asClass(OddsGenerationConsumer).proxy(),
         });
     }
 
