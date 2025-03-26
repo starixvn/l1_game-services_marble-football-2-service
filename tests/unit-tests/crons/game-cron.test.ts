@@ -122,6 +122,49 @@ describe("GameCron", () => {
         (axios.get as jest.Mock).mockReset();
     });
 
+    describe("generateRoundData", () => {
+        it("should generate round data and reset settlement result from admin", async () => {
+            // act
+            await gameCron.generateRoundData();
+
+            // assert
+            expect(roundResultConsumer.generateResult).toHaveBeenCalled();
+            expect(gameCron.gameData.settlementResultFromAdmin).toEqual({});
+        });
+
+        it("should set dynamic odds when generating round data", async () => {
+            // arrange
+            const mockOdds = {
+                firstHalfAway: 2.0,
+                firstHalfDraw: 2.0,
+                firstHalfDraw4: 2.0,
+                firstHalfEven: 2.0,
+                firstHalfHome: 2.0,
+                firstHalfOdd: 2.0,
+                firstHalfOver: 2.0,
+                firstHalfUnder: 2.0,
+                secondHalfAway: 2.0,
+                secondHalfDraw: 2.0,
+                secondHalfDraw4: 2.0,
+                secondHalfEven: 2.0,
+                secondHalfHome: 2.0,
+                secondHalfOdd: 2.0,
+                secondHalfOver: 2.0,
+                secondHalfUnder: 2.0
+            };
+
+            jest.spyOn(gameCron as any, "createOddsForCurrentRound").mockImplementation(() => {
+                gameCron.gameData.dynamicOdds = mockOdds;
+            });
+
+            // act
+            await gameCron.generateRoundData();
+
+            // assert
+            expect(gameCron.gameData.dynamicOdds).toEqual(mockOdds);
+        });
+    });
+
     describe("proceed", () => {
         it("should reset player bet count for new round", () => {
             // act

@@ -9,6 +9,7 @@ import { retry } from "../helpers";
 import { generateVideoName } from "../helpers/result-helper";
 import defaultVideoTimelines from "../timelines/video-timelines";
 import GameStatusPublisher from "../publishers/game-status-publisher";
+import { generateOdds } from "../helpers/odds";
 
 
 export default class GameCron extends Table.Crons.TableGameCron {
@@ -96,6 +97,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
     async generateRoundData() {
         await this.roundResultConsumer.generateResult();
         this.gameData.settlementResultFromAdmin = {};
+        this.createOddsForCurrentRound();
     }
 
     private publishVideoStreamFirstHalf() {
@@ -236,5 +238,11 @@ export default class GameCron extends Table.Crons.TableGameCron {
         return this.gameData.remainingTime > placingBetsSecondHalf;
     }
     
-    
+    private createOddsForCurrentRound() {
+        const odds = generateOdds({
+            gameData: this.gameData,
+        });
+
+        this.gameData.dynamicOdds = odds;
+    }
 }
