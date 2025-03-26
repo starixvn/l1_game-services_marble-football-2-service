@@ -71,7 +71,7 @@ export const getSettlementResult = (roundResult: ResultType): SettlementResultTy
     const over = isOver;
     const under = !isOver;
     const odd = isOdd;
-    const even =!isOdd;
+    const even = !isOdd;
 
     return {
         firstHalfHome: home,
@@ -89,7 +89,7 @@ export const getSettlementResult = (roundResult: ResultType): SettlementResultTy
         secondHalfEven: even,
         secondHalfOdd: odd,
         secondHalfOver: over,
-        secondHalfUnder: under
+        secondHalfUnder: under,
     };
 };
 

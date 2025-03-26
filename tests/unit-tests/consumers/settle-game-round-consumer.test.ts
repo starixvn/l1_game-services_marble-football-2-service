@@ -123,10 +123,19 @@ describe("SettleGameRoundConsumer", () => {
             secondHalfOdd: false,
             secondHalfEven: false,
             secondHalfDraw4: false,
-            firstHalfDraw4: false
+            firstHalfDraw4: false,
         };
 
-        const odds = { firstHalfHome: 2.0, firstHalfAway: 2.0, firstHalfDraw: 2.0, firstHalfDraw4: 50, firstHalfOver: 2.0, firstHalfUnder: 2.0, firstHalfOdd: 2.0, firstHalfEven: 2.0 } as OddsType;
+        const odds = {
+            firstHalfHome: 2.0,
+            firstHalfAway: 2.0,
+            firstHalfDraw: 2.0,
+            firstHalfDraw4: 50,
+            firstHalfOver: 2.0,
+            firstHalfUnder: 2.0,
+            firstHalfOdd: 2.0,
+            firstHalfEven: 2.0,
+        } as OddsType;
 
         it("should calculate bet result correctly for a winning bet", () => {
             // Arrange

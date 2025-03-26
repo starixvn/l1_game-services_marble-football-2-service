@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { BET_CHOICES, MODEL_NAME_PREFIX, ODDS_TYPE } from "../constants";
+import { MODEL_NAME_PREFIX, ODDS_TYPE } from "../constants";
 import { MatchType } from "./tournaments";
 
 export type ResultType = {
@@ -41,15 +41,15 @@ export type SettlementResultType = {
     [key in keyof typeof ODDS_TYPE]: boolean;
 };
 
-const dynamicResultSchema = Object.values(ODDS_TYPE).reduce((schema, item) => ({
-    ...schema,
-    [item]: { type: Boolean }
-}), {})
-
-const settlementResultSchema = new mongoose.Schema<SettlementResultType>(
-    dynamicResultSchema,
-    { _id: false },
+const dynamicResultSchema = Object.values(ODDS_TYPE).reduce(
+    (schema, item) => ({
+        ...schema,
+        [item]: { type: Boolean },
+    }),
+    {},
 );
+
+const settlementResultSchema = new mongoose.Schema<SettlementResultType>(dynamicResultSchema, { _id: false });
 
 export interface IRound {
     id: number;

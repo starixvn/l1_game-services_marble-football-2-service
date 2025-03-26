@@ -14,6 +14,7 @@ import { betLogs, bets, results, rounds, tmpBets, tournaments } from "./models";
 import { RunningRoundInfoPublisher } from "./publishers";
 import { HistoryQuery } from "./query-apis";
 import PlaceBetConsumer from "./consumers/place-bet-consumer";
+import GameStatusPublisher from "./publishers/game-status-publisher";
 
 export default class ContainerRegistry extends Table.TableContainerRegistry {
     register(appConfigs: any, definition: any, gameData: any): AwilixContainer<any> {
@@ -55,7 +56,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
             roundResultConsumer: asClass(RoundResultConsumer).singleton().proxy(),
             unsettledRoundConsumer: asClass(UnsettledRoundConsumer).singleton().proxy(),
             settleGameRoundConsumer: asClass(SettleGameRoundConsumer).singleton().proxy(),
-            placeBetConsumer: asClass(PlaceBetConsumer).singleton()
+            placeBetConsumer: asClass(PlaceBetConsumer).singleton(),
         });
     }
 
@@ -64,6 +65,7 @@ export default class ContainerRegistry extends Table.TableContainerRegistry {
 
         this.container.register({
             runningRoundInfoPublisher: asClass(RunningRoundInfoPublisher).singleton(),
+            gameStatusPublisher: asClass(GameStatusPublisher).singleton(),
         });
     }
 

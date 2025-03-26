@@ -18,7 +18,6 @@ const Schema = new mongoose.Schema({
     roundId: { type: Number, default: 0, required: true },
 });
 
-//const modelName = IS_DEV_ENV ? "marblefootball_dev_betlogs" : "marblefootball_betlogs";
 const modelName = `${MODEL_NAME_PREFIX}_betlogs`;
 
 export default mongoose.model(modelName, Schema);

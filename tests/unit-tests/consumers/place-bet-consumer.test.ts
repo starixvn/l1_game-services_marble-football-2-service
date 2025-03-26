@@ -17,8 +17,7 @@ describe("PlaceBetConsumer", () => {
     };
 
     beforeEach(() => {
-        jest.spyOn(Core.BaseEventConsumers.PlaceBetConsumer.prototype, 'composeBetChoiceValidationCriteria')
-            .mockReturnValue([]);
+        jest.spyOn(Core.BaseEventConsumers.PlaceBetConsumer.prototype, "composeBetChoiceValidationCriteria").mockReturnValue([]);
 
         mockGameData = {
             remainingTime: 110,
@@ -27,13 +26,13 @@ describe("PlaceBetConsumer", () => {
                 enabled: true,
                 tournamentConfig: {},
                 videoStreamConfig: {
-                    videoInfos: []
-                }
-            }
+                    videoInfos: [],
+                },
+            },
         };
 
         mockGameDefinition = {
-            durations: DURATIONS
+            durations: DURATIONS,
         } as GameDefinition;
 
         mockEventPublisher = {
@@ -44,13 +43,10 @@ describe("PlaceBetConsumer", () => {
             publishToUser: jest.fn(),
             publishToUsers: jest.fn(),
             publishToTable: jest.fn(),
-            publishToTableExcept: jest.fn()
+            publishToTableExcept: jest.fn(),
         };
 
-        placeBetConsumer = new PlaceBetConsumer(
-            mockGameDefinition, 
-            mockGameData, 
-            mockEventPublisher);
+        placeBetConsumer = new PlaceBetConsumer(mockGameDefinition, mockGameData, mockEventPublisher);
         placeBetConsumer.definition = mockGameDefinition;
         placeBetConsumer.gameData = mockGameData;
     });
@@ -97,12 +93,12 @@ describe("PlaceBetConsumer", () => {
                 describe("right before lockingBet", () => {
                     it("right before lockingBet, should pass validation", () => {
                         // Arrange
-                        mockGameData.remainingTime = 101;   
+                        mockGameData.remainingTime = 101;
 
-                    // Act
-                    const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
+                        // Act
+                        const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
 
-                    // Assert
+                        // Assert
                         expect(result[2].failure).toBe(false);
                     });
                 });
@@ -111,10 +107,10 @@ describe("PlaceBetConsumer", () => {
                         // Arrange
                         mockGameData.remainingTime = 100;
 
-                    // Act
-                    const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
+                        // Act
+                        const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
 
-                    // Assert
+                        // Assert
                         expect(result[2].failure).toBe(false);
                     });
                 });
@@ -123,16 +119,16 @@ describe("PlaceBetConsumer", () => {
                         // Arrange
                         mockGameData.remainingTime = 99;
 
-                    // Act
-                    const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
+                        // Act
+                        const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
 
-                    // Assert
+                        // Assert
                         expect(result[2].failure).toBe(true);
                     });
                 });
             });
         });
-        
+
         describe("second half", () => {
             describe("betting boundary", () => {
                 it("right before placingBets, should fail validation", () => {
@@ -173,12 +169,12 @@ describe("PlaceBetConsumer", () => {
                 describe("right before lockingBet", () => {
                     it("right before lockingBet, should pass validation", () => {
                         // Arrange
-                        mockGameData.remainingTime = 61;   
+                        mockGameData.remainingTime = 61;
 
-                    // Act
-                    const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
+                        // Act
+                        const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
 
-                    // Assert
+                        // Assert
                         expect(result[2].failure).toBe(false);
                     });
                 });
@@ -187,10 +183,10 @@ describe("PlaceBetConsumer", () => {
                         // Arrange
                         mockGameData.remainingTime = 60;
 
-                    // Act
-                    const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
+                        // Act
+                        const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
 
-                    // Assert
+                        // Assert
                         expect(result[2].failure).toBe(false);
                     });
                 });
@@ -199,10 +195,10 @@ describe("PlaceBetConsumer", () => {
                         // Arrange
                         mockGameData.remainingTime = 59;
 
-                    // Act
-                    const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
+                        // Act
+                        const result = placeBetConsumer.composeBettingTimeValidationCriteria(roundId);
 
-                    // Assert
+                        // Assert
                         expect(result[2].failure).toBe(true);
                     });
                 });
@@ -368,7 +364,7 @@ describe("PlaceBetConsumer", () => {
                 });
             });
         });
-        
+
         describe("second half", () => {
             describe("betting boundary", () => {
                 it("right before placingBetsSecondHalf, should NOT validate first half bet choice", () => {

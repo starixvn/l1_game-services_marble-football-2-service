@@ -10,13 +10,13 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
         return [
             {
                 failure: this.isBetChoiceBanned(betChoice),
-                notice: this.getNoticeObj(helpers.noticeHelper.invalidBet)
+                notice: this.getNoticeObj(helpers.noticeHelper.invalidBet),
             },
-            ...super.composeBetChoiceValidationCriteria(betChoice)
-        ]
+            ...super.composeBetChoiceValidationCriteria(betChoice),
+        ];
     }
 
-    composeBettingTimeValidationCriteria(roundId: number): { failure: boolean; notice: string; }[] {
+    composeBettingTimeValidationCriteria(roundId: number): { failure: boolean; notice: string }[] {
         const configs = this.gameData.gameConfigs;
 
         return [
@@ -29,23 +29,22 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
                 notice: this.getNoticeObj(helpers.noticeHelper.invalidBet, { gameRoundId: roundId }),
             },
             {
-                failure:
-                    !this.isWithinFirstHalfBettingTime() && !this.isWithinSecondHalfBettingTime(),
+                failure: !this.isWithinFirstHalfBettingTime() && !this.isWithinSecondHalfBettingTime(),
                 notice: this.getNoticeObj(helpers.noticeHelper.placeBetNextRound),
             },
         ];
     }
 
     private isBetChoiceBanned(betChoice: string) {
-        return this.isBetChoiceBannedOnSecondHalf(betChoice) || this.isBetChoiceBannedOnFirstHalf(betChoice)
+        return this.isBetChoiceBannedOnSecondHalf(betChoice) || this.isBetChoiceBannedOnFirstHalf(betChoice);
     }
-    
+
     private isBetChoiceBannedOnFirstHalf(betChoice: string) {
-        return this.isWithinFirstHalfBettingTime() && !this.isFirstHalfBetChoice(betChoice)
+        return this.isWithinFirstHalfBettingTime() && !this.isFirstHalfBetChoice(betChoice);
     }
 
     private isBetChoiceBannedOnSecondHalf(betChoice: string) {
-        return this.isWithinSecondHalfBettingTime() && !this.isSecondHalfBetChoice(betChoice)
+        return this.isWithinSecondHalfBettingTime() && !this.isSecondHalfBetChoice(betChoice);
     }
 
     private isWithinFirstHalfBettingTime() {
@@ -56,7 +55,7 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
     private isWithinSecondHalfBettingTime() {
         const { placingBetsSecondHalf, lockingBetSecondHalf } = this.definition.durations;
 
-        return this.isRemainingTimeWithinWindow(placingBetsSecondHalf, lockingBetSecondHalf)
+        return this.isRemainingTimeWithinWindow(placingBetsSecondHalf, lockingBetSecondHalf);
     }
 
     private isFirstHalfBetChoice(betChoice: string) {

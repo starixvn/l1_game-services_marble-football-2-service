@@ -1,4 +1,4 @@
-import { BET_CHOICES, ODDS_TYPE } from "./constants";
+import { ODDS_TYPE } from "./constants";
 
 export type OddsType = {
     [key in keyof typeof ODDS_TYPE]: number;

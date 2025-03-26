@@ -13,14 +13,12 @@ export const calculatePlayerBetPercentage = (playerBetCount: Record<string, stri
 };
 
 export const getUserBetPercentage = (playerBetCount: Record<string, string[]>) => {
-    return calculatePlayerBetPercentage(
-        playerBetCount, 
-        [
-            BET_CHOICES.firstHalfHome, 
-            BET_CHOICES.firstHalfAway, 
-            BET_CHOICES.firstHalfDraw,
-            BET_CHOICES.secondHalfHome,
-            BET_CHOICES.secondHalfAway,
-            BET_CHOICES.secondHalfDraw
-        ]);
+    return calculatePlayerBetPercentage(playerBetCount, [
+        BET_CHOICES.firstHalfHome,
+        BET_CHOICES.firstHalfAway,
+        BET_CHOICES.firstHalfDraw,
+        BET_CHOICES.secondHalfHome,
+        BET_CHOICES.secondHalfAway,
+        BET_CHOICES.secondHalfDraw,
+    ]);
 };

@@ -84,7 +84,6 @@ const unsettledRoundConsumer: UnsettledRoundConsumer = stub<UnsettledRoundConsum
 const roundResultPublisher: RoundResultPublisher = stub<RoundResultPublisher>();
 const userBetResultPublisher: UserBetResultPublisher = stub<UserBetResultPublisher>();
 const placeBetPublisher: PlaceBetPublisher = stub<PlaceBetPublisher>();
-
 const baseMetrics: BaseMetrics = stub<BaseMetrics>();
 
 const logService: typeof logger = {

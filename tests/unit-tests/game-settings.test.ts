@@ -15,15 +15,30 @@ describe("gameSettings", () => {
     });
 
     it("durations should be in the correct order", () => {
-        const { wholeRound, placingBets, lockingBet, streamingVideo } = gameSettings.durations;
+        const {
+            wholeRound,
+            placingBetsFirstHalf,
+            lockingBetFirstHalf,
+            streamingVideoFirstHalf,
+            placingBetsSecondHalf,
+            lockingBetSecondHalf,
+            streamingVideoSecondHalf,
+        } = gameSettings.durations;
 
-        expect(wholeRound).toBeGreaterThan(placingBets);
-        expect(placingBets).toBeGreaterThan(lockingBet);
-        expect(lockingBet).toBeGreaterThan(streamingVideo);
+        expect(wholeRound).toBeGreaterThan(placingBetsFirstHalf);
+        expect(placingBetsFirstHalf).toBeGreaterThan(lockingBetFirstHalf);
+        expect(lockingBetFirstHalf).toBeGreaterThan(streamingVideoFirstHalf);
         expect(wholeRound).toBe(121);
-        expect(placingBets).toBe(109);
-        expect(lockingBet).toBe(104);
-        expect(streamingVideo).toBe(100);
+        expect(placingBetsFirstHalf).toBe(115);
+        expect(lockingBetFirstHalf).toBe(99);
+        expect(streamingVideoFirstHalf).toBe(94);
+        expect(wholeRound).toBeGreaterThan(placingBetsSecondHalf);
+        expect(placingBetsSecondHalf).toBeGreaterThan(lockingBetSecondHalf);
+        expect(lockingBetSecondHalf).toBeGreaterThan(streamingVideoSecondHalf);
+        expect(wholeRound).toBe(121);
+        expect(placingBetsSecondHalf).toBe(63);
+        expect(lockingBetSecondHalf).toBe(47);
+        expect(streamingVideoSecondHalf).toBe(42);
     });
 
     it("should have the correct choices", () => {
@@ -32,8 +47,20 @@ describe("gameSettings", () => {
 
     it("should have the correct choicesMapper", () => {
         expect(gameSettings.choicesMapper).toEqual({
-            firstHalfHome: 1, firstHalfAway: 2, firstHalfDraw: 3, firstHalfOver: 4, firstHalfUnder: 5, firstHalfOdd: 6, firstHalfEven: 7,
-            secondHalfHome: 8, secondHalfAway: 9, secondHalfDraw: 10, secondHalfOver: 11, secondHalfUnder: 12, secondHalfOdd: 13, secondHalfEven: 14
+            firstHalfHome: 1,
+            firstHalfAway: 2,
+            firstHalfDraw: 3,
+            firstHalfOver: 4,
+            firstHalfUnder: 5,
+            firstHalfOdd: 6,
+            firstHalfEven: 7,
+            secondHalfHome: 8,
+            secondHalfAway: 9,
+            secondHalfDraw: 10,
+            secondHalfOver: 11,
+            secondHalfUnder: 12,
+            secondHalfOdd: 13,
+            secondHalfEven: 14,
         });
     });
 
@@ -65,8 +92,16 @@ describe("gameSettings", () => {
             ratio: { mainOpts: 80, subOpts: 20 },
             mainOpts: [BET_CHOICES.firstHalfHome, BET_CHOICES.firstHalfAway, BET_CHOICES.secondHalfHome, BET_CHOICES.secondHalfAway],
             subOpts: [
-                BET_CHOICES.firstHalfOver, BET_CHOICES.firstHalfUnder, BET_CHOICES.firstHalfOdd, BET_CHOICES.firstHalfEven, BET_CHOICES.firstHalfDraw,
-                BET_CHOICES.secondHalfOver, BET_CHOICES.secondHalfUnder, BET_CHOICES.secondHalfOdd, BET_CHOICES.secondHalfEven, BET_CHOICES.secondHalfDraw
+                BET_CHOICES.firstHalfOver,
+                BET_CHOICES.firstHalfUnder,
+                BET_CHOICES.firstHalfOdd,
+                BET_CHOICES.firstHalfEven,
+                BET_CHOICES.firstHalfDraw,
+                BET_CHOICES.secondHalfOver,
+                BET_CHOICES.secondHalfUnder,
+                BET_CHOICES.secondHalfOdd,
+                BET_CHOICES.secondHalfEven,
+                BET_CHOICES.secondHalfDraw,
             ],
         });
     });
