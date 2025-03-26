@@ -1,7 +1,7 @@
 import type appConfigs from "../app-configs";
 import { DEFAULT_TOURNAMENT_CODES } from "../constants";
 import GameData from "../game-data";
-import { shuffle } from "../helpers";
+import { secureShuffle as shuffle } from "sc-core-rng";
 import generate from "../helpers/tournament/generate";
 import updateNext from "../helpers/tournament/update-next";
 import type { tournaments, rounds } from "../models";
@@ -45,7 +45,7 @@ export default class TournamentConsumer {
                     ended: ended,
                     currentMatch: tournament.currentMatch + 1,
                 },
-                { new: true },
+                { new: true }
             );
         }
     }

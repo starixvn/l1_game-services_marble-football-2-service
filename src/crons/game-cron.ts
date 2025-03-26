@@ -43,7 +43,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
         this.updateNewMatchConfig();
     }
 
-    async getVideoTimelineForHalf(videoName: string) {
+    async getVideoTimelineByVideoName(videoName: string) {
         const url = new URL(`${videoName}.json`, this.appConfigs.liveStreamServer);
 
         const agent = this.appConfigs.proxyServer.enabled ? new HttpsProxyAgent(this.appConfigs.proxyServer.url) : undefined;
@@ -58,29 +58,26 @@ export default class GameCron extends Table.Crons.TableGameCron {
         }
     }
 
-    async getVideoTimeline() {
+    async getVideoTimelineWithRetry(videoName: string, isFirstHalf: boolean) {
         const delay = 100;
         const retries = 3;
 
-        try {
-            const [firstHalfTimeline, secondHalfTimeline] = await Promise.all([
-                retry(() => this.getVideoTimelineForHalf(this.gameData.result.firstHalfVideo), retries, delay).catch((error) => {
-                    this.logService.logError(`In match ${this.gameData.roundId}, failed to fetch first half timeline: ${error}`);
-                    return this.getDefaultVideoTimeline(this.gameData.result.firstHalf, true);
-                }),
-                retry(() => this.getVideoTimelineForHalf(this.gameData.result.secondHalfVideo), retries, delay).catch((error) => {
-                    this.logService.logError(`In match ${this.gameData.roundId}, failed to fetch second half timeline: ${error}`);
-                    return this.getDefaultVideoTimeline(this.gameData.result.secondHalf, false);
-                }),
-            ]);
+        const timeline = await retry(() => this.getVideoTimelineByVideoName(videoName), retries, delay).catch((error) => {
+            this.logService.logError(
+                `In match ${this.gameData.roundId}, failed to fetch ${isFirstHalf ? "first half" : "second half"} timeline: ${error}`
+            );
+            return this.getDefaultVideoTimeline(videoName, isFirstHalf);
+        });
 
-            this.gameData.result.firstHalfTimeline = firstHalfTimeline;
-            this.gameData.result.secondHalfTimeline = secondHalfTimeline;
-        } catch (error) {
-            this.logService.logError(`Unexpected error fetching video timelines: ${error}`);
-            this.gameData.result.firstHalfTimeline = this.getDefaultVideoTimeline(this.gameData.result.firstHalf, true);
-            this.gameData.result.secondHalfTimeline = this.getDefaultVideoTimeline(this.gameData.result.secondHalf, false);
-        }
+        return timeline;
+    }
+
+    async getVideoTimelineForFirstHalf() {
+        this.gameData.result.firstHalfTimeline = await this.getVideoTimelineWithRetry(this.gameData.result.firstHalfVideo, true);
+    }
+
+    async getVideoTimelineForSecondHalf() {
+        this.gameData.result.secondHalfTimeline = await this.getVideoTimelineWithRetry(this.gameData.result.secondHalfVideo, false);
     }
 
     getDefaultVideoTimeline(result: string, isFirstHalf: boolean) {
@@ -102,7 +99,6 @@ export default class GameCron extends Table.Crons.TableGameCron {
     async generateRoundData() {
         await this.roundResultConsumer.generateResult();
         this.gameData.settlementResultFromAdmin = {};
-        this.createOddsForCurrentRound();
     }
 
     private publishVideoStreamFirstHalf() {
@@ -175,11 +171,12 @@ export default class GameCron extends Table.Crons.TableGameCron {
         }
 
         if (this.isStreamingVideoFirstHalf(remainingTime)) {
-            await this.getVideoTimeline();
+            await this.getVideoTimelineForFirstHalf();
             this.publishVideoStreamFirstHalf();
         }
 
         if (this.isStreamingVideoSecondHalf(remainingTime)) {
+            await this.getVideoTimelineForSecondHalf();
             this.publishVideoStreamSecondHalf();
         }
 
@@ -237,8 +234,11 @@ export default class GameCron extends Table.Crons.TableGameCron {
         return remainingTime === streamingVideoSecondHalf;
     }
 
-    private isFirstHalfOddsActive() {
-        return isFirstHalfOddsActive(this.gameData.remainingTime, this.definition.durations);
+    updateNewMatchConfig() {
+        this.gameData.matchConfig = {
+            firstHalfConfig: firstHalfConfig,
+            secondHalfConfig: securePickOne(secondHalfConfigs),
+        };
     }
 
     calculateAndPublishOddsPreMatch() {
@@ -253,7 +253,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
             firstHalfOdd: preMatchOdds.odd,
         };
 
-        this.runningRoundInfoPublisher.publishToAllUsers({ odds });
+        this.gameStatusPublisher.publishOdds(odds);
     }
 
     calculateAndPublishOddsLive() {
@@ -269,6 +269,6 @@ export default class GameCron extends Table.Crons.TableGameCron {
             secondHalfOdd: liveOdds.odd,
         };
 
-        this.runningRoundInfoPublisher.publishToAllUsers({ odds });
+        this.gameStatusPublisher.publishOdds(odds);
     }
 }

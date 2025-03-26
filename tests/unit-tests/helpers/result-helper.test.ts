@@ -13,17 +13,9 @@ jest.mock("chance", () => {
     };
 });
 
-jest.mock("../../../src/helpers/shuffle", () => ({
-    shuffle: jest.fn((array) => array),
-}));
-
-jest.mock("../../../src/helpers/random-helper", () => ({
-    getRandomIndexFromArray: jest.fn().mockReturnValue(0),
-}));
-
 jest.mock("../../../src/constants", () => ({
     DEFAULT_NUMBER_OF_VIDEOS: {},
-    POOL_SIZE: 10_000,
+    OVER_UNDER_VALUE: 4.5,
 }));
 
 const NUMBER_OF_VIDEOS = {
@@ -38,28 +30,31 @@ describe("Result Helper", () => {
 
     describe("generateResult", () => {
         it("should generate a result based on match configuration", () => {
+            // Arrange
+            const matchConfig = {
+                firstHalfConfig: {
+                    scoreRate: {
+                        "1-0": 1,
+                    },
+                },
+                secondHalfConfig: {
+                    scoreRate: {
+                        "0-1": 1,
+                    },
+                },
+            };
+
             // Act
-            const result = resultHelper.generateResult({ randomMode: 1, numberOfVideos: NUMBER_OF_VIDEOS });
+            const result = resultHelper.generateResult({ numberOfVideos: NUMBER_OF_VIDEOS, matchConfig });
 
             // Assert
-            expect(result.firstHalf).toBeDefined();
-            expect(result.secondHalf).toBeDefined();
+            expect(result.firstHalf).toBe("H");
+            expect(result.secondHalf).toBe("A");
             expect(result.overUnderValue).toBe(4.5);
             expect(result.homeWinsOnDraw).toBe(true);
             expect(result.firstHalfVideo).toBeDefined();
             expect(result.secondHalfVideo).toBeDefined();
             expect(result.penalty).toStrictEqual({ home: 2, away: 1 });
-        });
-
-        it("should use provided pool if available", () => {
-            // Arrange
-            const pool = ["1-0"];
-
-            // Act
-            const result = resultHelper.generateResult({ randomMode: 1, pool, numberOfVideos: NUMBER_OF_VIDEOS });
-            // Assert
-            expect(result.firstHalf).toBe("H");
-            expect(result.secondHalf).toBe("H");
         });
     });
 
@@ -148,22 +143,6 @@ describe("Result Helper", () => {
             const ignoredVideo = resultHelper.generateVideoName(result, NUMBER_OF_VIDEOS);
             const newVideo = resultHelper.generateVideoName(result, NUMBER_OF_VIDEOS, false, ignoredVideo);
             expect(newVideo).toBe(ignoredVideo);
-        });
-    });
-
-    describe("createScorePool", () => {
-        it("should create a pool of scores based on config", () => {
-            const config: HalfConfigType = {
-                scoreRate: {
-                    "1-0": 0.5,
-                    "0-1": 0.5,
-                },
-            };
-
-            const pool = resultHelper.createScorePool(config, 100);
-            expect(pool).toHaveLength(100);
-            expect(pool.filter((score) => score === "1-0").length).toBe(50);
-            expect(pool.filter((score) => score === "0-1").length).toBe(50);
         });
     });
 });
