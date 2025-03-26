@@ -12,36 +12,24 @@ export default class GameStatusPublisher extends Core.BaseEventPublishers.GameSt
         this.definition = definition;
     }
 
-    publishDynamicOddsStatus() {
+    publishDynamicOddsStatus(isFirstHalf: boolean) {
         if (!this.gameData.dynamicOdds) {
             throw new Error("Dynamic odds are not generated");
         }
 
+
         const pureOdds = this.gameData.dynamicOdds;
 
-        const odds = this.omitOddsBasedOnHalf(pureOdds);
+        const odds = this.omitOddsBasedOnHalf(pureOdds, isFirstHalf);
         this.publishToAllUsers({ odds });
     }
 
-    private omitOddsBasedOnHalf(target: Record<string, any>) {
-        if (this.isFirstHalfPlacingBet()) {
+    private omitOddsBasedOnHalf(target: Record<string, any>, isFirstHalf: boolean) {
+        if (isFirstHalf) {
             return GameStatusPublisher.omitOdds(target, Object.keys(SECOND_HALF_ODDS_TYPE));
         }
 
-        if (this.isSecondHalfPlacingBet()) {
-            return GameStatusPublisher.omitOdds(target, Object.keys(FIRST_HALF_ODDS_TYPE));
-        }
-
-        return {};
-    }
-
-    private isFirstHalfPlacingBet() {
-        return this.gameData.remainingTime === this.definition.durations.placingBetsFirstHalf;
-    }
-
-
-    private isSecondHalfPlacingBet() {
-        return this.gameData.remainingTime === this.definition.durations.placingBetsSecondHalf;
+        return GameStatusPublisher.omitOdds(target, Object.keys(FIRST_HALF_ODDS_TYPE));
     }
 
     private static omitOdds(target: Record<string, any>, oddTypes: string[] = []) {

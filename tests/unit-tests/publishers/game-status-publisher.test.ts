@@ -52,37 +52,13 @@ describe("GameStatusPublisher", () => {
                 gameData.dynamicOdds = undefined;
                 
                 // Act
-                const act = () => publisher.publishDynamicOddsStatus();
+                const act = () => publisher.publishDynamicOddsStatus(true);
                 
                 // Assert
                 expect(act).toThrow("Dynamic odds are not generated");
             });
         });
 
-        describe("when not in place bet time", () => {
-
-            it("should should not publish odds", () => {
-                // Arrange
-                const dynamicOdds = {
-                    firstHalfHome: 1.7,
-                    firstHalfAway: 2.7,
-                    firstHalfDraw: 3.2,
-                    secondHalfHome: 2.0,
-                    secondHalfAway: 2.4,
-                    secondHalfDraw: 3.0
-                };
-                gameData.dynamicOdds = dynamicOdds;
-                gameData.remainingTime = definition.durations.placingBetsFirstHalf + 1;
-    
-                // Act
-                publisher.publishDynamicOddsStatus();
-    
-                // Assert
-                expect(publisher.publishToAllUsers).toHaveBeenCalledWith({
-                    odds: {}
-                });
-            });
-        })
         
         describe("when in first half placing bet time", () => {
 
@@ -96,7 +72,7 @@ describe("GameStatusPublisher", () => {
                 gameData.dynamicOdds = { ...sampleOdds };
     
                 // Act
-                publisher.publishDynamicOddsStatus();
+                publisher.publishDynamicOddsStatus(true);
     
                 // Assert
                 const publishedData = (publisher.publishToAllUsers as jest.Mock).mock.calls[0][0];
@@ -122,7 +98,7 @@ describe("GameStatusPublisher", () => {
                 gameData.dynamicOdds = { ...sampleOdds };
     
                 // Act
-                publisher.publishDynamicOddsStatus();
+                publisher.publishDynamicOddsStatus(false);
     
                 // Assert
                 const publishedData = (publisher.publishToAllUsers as jest.Mock).mock.calls[0][0];
