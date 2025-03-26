@@ -31,8 +31,9 @@ export default class RoundResultConsumer extends RoundResultConsumerBase {
 
     override getDataForGenerateResult() {
         const numberOfVideos = this.getNumberOfVideos();
+        const { matchConfig } = this.gameData;
 
-        return { numberOfVideos };
+        return { numberOfVideos, matchConfig };
     }
 
     override async generateResult() {

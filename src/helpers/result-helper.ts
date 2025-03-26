@@ -1,22 +1,22 @@
-import { firstHalfConfig, secondHalfConfigs, overUnderConfig, HalfConfigType } from "../match-configs";
+import { HalfConfigType, MatchConfigType } from "../match-configs";
 import { ResultType, SettlementResultType } from "../models/rounds";
 import Chance from "chance";
 import { shuffle } from "./shuffle";
 import crypto from "crypto";
-import { DEFAULT_NUMBER_OF_VIDEOS } from "../constants";
+import { DEFAULT_NUMBER_OF_VIDEOS, OVER_UNDER_VALUE } from "../constants";
 import { randomHelper } from ".";
 
 type DataResultType = {
     numberOfVideos: Record<string, number>;
+    matchConfig: MatchConfigType;
 };
 
 export const generateResult = (data: DataResultType): ResultType => {
     const chance = new Chance();
     const numberOfVideos = data.numberOfVideos || DEFAULT_NUMBER_OF_VIDEOS;
 
-    const secondHalfConfig = randomHelper.securePickOne(secondHalfConfigs);
-    const firstHalf = generateResultForHalf(firstHalfConfig);
-    const secondHalf = generateResultForHalf(secondHalfConfig);
+    const firstHalf = generateResultForHalf(data.matchConfig.firstHalfConfig);
+    const secondHalf = generateResultForHalf(data.matchConfig.secondHalfConfig);
     const videoInfo = getVideoInfoFromResult(firstHalf, secondHalf, numberOfVideos);
     const homeWinsOnDraw = chance.bool();
     const penalty = generatePenaltyResult(homeWinsOnDraw);
@@ -25,7 +25,7 @@ export const generateResult = (data: DataResultType): ResultType => {
         firstHalf,
         secondHalf,
         ...videoInfo,
-        overUnderValue: overUnderConfig.fulltime,
+        overUnderValue: OVER_UNDER_VALUE,
         homeWinsOnDraw,
         penalty,
     };
@@ -43,7 +43,7 @@ export const generateResultFromAdminRawResult = (roundResult: ResultType, number
         homeWinsOnDraw: roundResult.homeWinsOnDraw,
         penalty,
         ...videoInfo,
-        overUnderValue: overUnderConfig.fulltime,
+        overUnderValue: OVER_UNDER_VALUE,
     };
 };
 

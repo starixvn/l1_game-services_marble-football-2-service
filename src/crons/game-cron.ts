@@ -189,10 +189,6 @@ export default class GameCron extends Table.Crons.TableGameCron {
         }
     }
 
-    private notifyPlaceBetsWithDynamicOdds() {
-        this.gameStatusPublisher.publishStartPlacingBetStatus();
-    }
-
     private isDuringFirstHalfBettingTime(remainingTime: number) {
         const { placingBetsFirstHalf, lockingBetFirstHalf } = this.definition.durations;
 
