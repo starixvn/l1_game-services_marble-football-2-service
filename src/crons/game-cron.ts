@@ -10,8 +10,6 @@ import { retry } from "../helpers";
 import { generateVideoName } from "../helpers/result-helper";
 import defaultVideoTimelines from "../timelines/video-timelines";
 import GameStatusPublisher from "../publishers/game-status-publisher";
-import { generateOdds } from "../helpers/odds";
-import { isFirstHalfOddsActive } from "../helpers/game-timing";
 
 import { calculatePreMatchOdds, calculateLiveOdds } from "../helpers/odds-helper";
 import { securePickOne } from "sc-core-rng";
