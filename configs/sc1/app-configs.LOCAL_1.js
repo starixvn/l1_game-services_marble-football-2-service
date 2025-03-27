@@ -34,7 +34,7 @@ export default {
     },
     sentry: {
         sentryUrl: "https://13f39b8359404ed5aec23655e64ccf78@sentry.lumigame.com/2",
-        logIdentifier: "MarbleFootBall",
+        logIdentifier: "MarbleFootball2",
         env: "LOCAL_1",
     },
     authenticateSettings: {
