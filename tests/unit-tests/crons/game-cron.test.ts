@@ -20,6 +20,7 @@ import GameDefinition from "../../../src/game-definition";
 import axios from "axios";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import crypto from "crypto";
+import { FIRST_HALF_BET_CHOICES, SECOND_HALF_BET_CHOICES } from "../../../src/constants";
 jest.mock("../../../src/timelines/video-timelines", () => ({
     "22841ea360fc3c3676a38502aa9a90a1ae1fbdac1d937746358efe559d349b6f_0": [],
     "53e5fe7054fb5c4867e0277e8867c0c08f9ca8be43fdac0d3b6c6ea5c7d656a2_AAAA": [1.8, 19.033333333333335, 33.8, 42.43333333333333],
@@ -659,6 +660,126 @@ describe("GameCron", () => {
             expect(gameCron.gameData.matchConfig).toBeDefined();
             expect(gameCron.gameData.matchConfig.firstHalfConfig).toBeDefined();
             expect(gameCron.gameData.matchConfig.secondHalfConfig).toBeDefined();
+        });
+    });
+
+    describe("calculateAndPublishOddsPreMatch", () => {
+        beforeEach(() => {
+            jest.clearAllMocks();
+
+            gameCron.gameData = {
+                matchConfig: {
+                    firstHalfConfig: {},
+                    secondHalfConfig: {},
+                },
+                gameConfigs: {
+                    margin: 0.05,
+                },
+            } as any;
+        });
+
+        it("should calculate pre-match odds and publish them", () => {
+            // Arrange
+            const mockOdds = {
+                home: 2.0,
+                away: 3.0,
+                draw: 3.5,
+                over: 1.9,
+                under: 1.9,
+                even: 1.95,
+                odd: 1.95,
+            };
+
+            jest.spyOn(require("../../../src/helpers/odds-helper"), "calculatePreMatchOdds").mockReturnValue(mockOdds);
+
+            // Act
+            gameCron.calculateAndPublishOddsPreMatch();
+
+            // Assert
+            expect(gameStatusPublisher.publishOdds).toHaveBeenCalledWith({
+                [FIRST_HALF_BET_CHOICES.firstHalfHome]: mockOdds.home,
+                [FIRST_HALF_BET_CHOICES.firstHalfAway]: mockOdds.away,
+                [FIRST_HALF_BET_CHOICES.firstHalfDraw]: mockOdds.draw,
+                [FIRST_HALF_BET_CHOICES.firstHalfOver]: mockOdds.over,
+                [FIRST_HALF_BET_CHOICES.firstHalfUnder]: mockOdds.under,
+                [FIRST_HALF_BET_CHOICES.firstHalfEven]: mockOdds.even,
+                [FIRST_HALF_BET_CHOICES.firstHalfOdd]: mockOdds.odd,
+            });
+        });
+
+        it("should pass correct parameters to calculatePreMatchOdds", () => {
+            // Arrange
+            const calculatePreMatchOddsSpy = jest.spyOn(require("../../../src/helpers/odds-helper"), "calculatePreMatchOdds");
+
+            // Act
+            gameCron.calculateAndPublishOddsPreMatch();
+
+            // Assert
+            expect(calculatePreMatchOddsSpy).toHaveBeenCalledWith(gameCron.gameData.matchConfig, gameCron.gameData.gameConfigs.margin);
+        });
+    });
+
+    describe("calculateAndPublishOddsLive", () => {
+        beforeEach(() => {
+            // Reset mocks
+            jest.clearAllMocks();
+
+            // Setup test data
+            gameCron.gameData = {
+                matchConfig: {
+                    secondHalfConfig: {},
+                },
+                gameConfigs: {
+                    margin: 0.05,
+                },
+                result: {
+                    firstHalf: "HH",
+                },
+            } as any;
+        });
+
+        it("should calculate live odds and publish them", () => {
+            // Arrange
+            const mockOdds = {
+                home: 2.5,
+                away: 2.8,
+                draw: 3.2,
+                over: 1.85,
+                under: 1.95,
+                even: 1.92,
+                odd: 1.92,
+            };
+
+            jest.spyOn(require("../../../src/helpers/odds-helper"), "calculateLiveOdds").mockReturnValue(mockOdds);
+
+            // Act
+            gameCron.calculateAndPublishOddsLive();
+
+            // Assert
+            expect(gameStatusPublisher.publishOdds).toHaveBeenCalledWith({
+                [SECOND_HALF_BET_CHOICES.secondHalfHome]: mockOdds.home,
+                [SECOND_HALF_BET_CHOICES.secondHalfAway]: mockOdds.away,
+                [SECOND_HALF_BET_CHOICES.secondHalfDraw]: mockOdds.draw,
+                [SECOND_HALF_BET_CHOICES.secondHalfOver]: mockOdds.over,
+                [SECOND_HALF_BET_CHOICES.secondHalfUnder]: mockOdds.under,
+                [SECOND_HALF_BET_CHOICES.secondHalfEven]: mockOdds.even,
+                [SECOND_HALF_BET_CHOICES.secondHalfOdd]: mockOdds.odd,
+            });
+        });
+
+        it("should pass correct parameters to calculateLiveOdds", () => {
+            // Arrange
+            const calculateLiveOddsSpy = jest.spyOn(require("../../../src/helpers/odds-helper"), "calculateLiveOdds");
+
+            // Act
+            gameCron.calculateAndPublishOddsLive();
+
+            // Assert
+            expect(calculateLiveOddsSpy).toHaveBeenCalledWith(
+                gameCron.gameData.matchConfig.secondHalfConfig,
+                gameCron.gameData.gameConfigs.margin,
+                gameCron.gameData.result.firstHalf
+            );
         });
     });
 });

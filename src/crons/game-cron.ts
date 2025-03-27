@@ -138,24 +138,24 @@ export default class GameCron extends Table.Crons.TableGameCron {
         }
 
         const remainingTime = this.gameData.remainingTime;
+
         if (remainingTime === durations.startingRound) {
             await this.publishTournament();
         }
 
-        if (this.isStartingTime(remainingTime, durations)) {
+        if (this.isStartPlacingBetFirstHalf(remainingTime)) {
             this.resetForNewRound();
             this.bot?.reset();
             this.updateNewMatchConfig();
-            await this.generateRoundData();
-        }
-
-        if (this.isStartPlacingBetFirstHalf(remainingTime)) {
             this.calculateAndPublishOddsPreMatch();
+            await this.generateRoundData();
+
             this.gameStatusPublisher.publishStartPlacingBetStatus();
         }
 
         if (this.isStartPlacingBetSecondHalf(remainingTime)) {
             this.calculateAndPublishOddsLive();
+
             this.gameStatusPublisher.publishStartPlacingBetStatus();
         }
 

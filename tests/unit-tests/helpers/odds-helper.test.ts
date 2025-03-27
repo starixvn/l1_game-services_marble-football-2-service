@@ -74,12 +74,13 @@ describe("odds-helper", () => {
         });
 
         it("should handle adding score correctly", () => {
-            const result = calculateProbabilitiesForBetChoices(mockScoreRates, "1-0");
+            const result = calculateProbabilitiesForBetChoices(mockScoreRates, "1-1");
             const { probabilities } = result;
 
-            expect(probabilities.home).toBeCloseTo(0.7);
-            expect(probabilities.away).toBeCloseTo(0);
+            expect(probabilities.home).toBeCloseTo(0.4);
+            expect(probabilities.away).toBeCloseTo(0.3);
             expect(probabilities.draw).toBeCloseTo(0.3);
+            expect(probabilities.draw4).toBeCloseTo(0.1);
         });
     });
 
