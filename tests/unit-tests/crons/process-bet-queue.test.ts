@@ -12,6 +12,8 @@ import {
     placeBetPublisher,
 } from "../global-stubs";
 import { TableProcessBetQueue } from "sc-game-base/src/table/crons";
+import { helpers } from "sc-common";
+import { Duration } from "../../../src/game-definition";
 
 describe("ProcessBetQueue", () => {
     let processBetQueue: ProcessBetQueue;
@@ -99,6 +101,84 @@ describe("ProcessBetQueue", () => {
 
             // Assert
             expect(processBetQueue.gameData.playerBetCount["invalidChoice"]).toBeUndefined();
+        });
+    });
+
+    describe("composeBettingTimeValidationCriteria", () => {
+        it("should return correct criteria when round ID matches and within betting time", () => {
+            // Arrange
+            const mockDurations: Duration = {
+                placingBets: 10,
+                lockingBet: 5,
+                wholeRound: 30,
+                placingBetsFirstHalf: 10,
+                lockingBetFirstHalf: 5,
+                startingRound: 2,
+                streamingVideoFirstHalf: 4,
+                placingBetsSecondHalf: 20,
+                lockingBetSecondHalf: 15,
+                streamingVideoSecondHalf: 14
+            };
+            processBetQueue.definition.durations = mockDurations;
+            processBetQueue.gameData.roundId = 1;
+            processBetQueue.gameData.remainingTime = 8;
+
+            const expectedBettingTimeResult = true;
+
+            jest.spyOn(require("../../../src/helpers/game-timing"), "isWithinBettingTime")
+                .mockReturnValue(expectedBettingTimeResult);
+
+            // Act
+            const criteria = processBetQueue.composeBettingTimeValidationCriteria(1);
+
+            // Assert
+            expect(criteria).toEqual([
+                {
+                    failure: !expectedBettingTimeResult,
+                    notice: { errorCode: helpers.noticeHelper.placeBetNextRound },
+                },
+                {
+                    failure: false,
+                    notice: { errorCode: helpers.noticeHelper.placeBetNextRound },
+                },
+            ]);
+        });
+
+        it("should return failure when round ID does not match", () => {
+            // Arrange
+            const mockDurations: Duration = {
+                placingBets: 10,
+                lockingBet: 5,
+                wholeRound: 30,
+                placingBetsFirstHalf: 10,
+                lockingBetFirstHalf: 5,
+                startingRound: 2,
+                streamingVideoFirstHalf: 4,
+                placingBetsSecondHalf: 20,
+                lockingBetSecondHalf: 15,
+                streamingVideoSecondHalf: 14
+            };
+            processBetQueue.definition.durations = mockDurations;
+            processBetQueue.gameData.roundId = 1;
+            processBetQueue.gameData.remainingTime = 8;
+
+            jest.spyOn(require("../../../src/helpers/game-timing"), "isWithinBettingTime")
+                .mockReturnValue(true);
+
+            // Act
+            const criteria = processBetQueue.composeBettingTimeValidationCriteria(2);
+
+            // Assert
+            expect(criteria).toEqual([
+                {
+                    failure: true,
+                    notice: { errorCode: helpers.noticeHelper.placeBetNextRound },
+                },
+                {
+                    failure: false,
+                    notice: { errorCode: helpers.noticeHelper.placeBetNextRound },
+                },
+            ]);
         });
     });
 });

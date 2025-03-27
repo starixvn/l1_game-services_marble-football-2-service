@@ -2,6 +2,7 @@ import { Core } from "sc-game-base";
 import GameDefinition from "../game-definition";
 import { FIRST_HALF_BET_CHOICES, SECOND_HALF_BET_CHOICES } from "../constants";
 import { helpers } from "sc-common";
+import { isWithinBettingTime, isWithinFirstHalfBettingTime, isWithinSecondHalfBettingTime } from "../helpers/game-timing";
 
 export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetConsumer {
     declare definition: GameDefinition;
@@ -29,7 +30,7 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
                 notice: this.getNoticeObj(helpers.noticeHelper.invalidBet, { gameRoundId: roundId }),
             },
             {
-                failure: !this.isWithinFirstHalfBettingTime() && !this.isWithinSecondHalfBettingTime(),
+                failure: !isWithinBettingTime(this.gameData.remainingTime, this.definition.durations),
                 notice: this.getNoticeObj(helpers.noticeHelper.placeBetNextRound),
             },
         ];
@@ -48,14 +49,11 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
     }
 
     private isWithinFirstHalfBettingTime() {
-        const { placingBetsFirstHalf, lockingBetFirstHalf } = this.definition.durations;
-        return this.isRemainingTimeWithinWindow(placingBetsFirstHalf, lockingBetFirstHalf);
+        return isWithinFirstHalfBettingTime(this.gameData.remainingTime, this.definition.durations);
     }
 
     private isWithinSecondHalfBettingTime() {
-        const { placingBetsSecondHalf, lockingBetSecondHalf } = this.definition.durations;
-
-        return this.isRemainingTimeWithinWindow(placingBetsSecondHalf, lockingBetSecondHalf);
+        return isWithinSecondHalfBettingTime(this.gameData.remainingTime, this.definition.durations);
     }
 
     private isFirstHalfBetChoice(betChoice: string) {
@@ -64,10 +62,5 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
 
     private isSecondHalfBetChoice(betChoice: string) {
         return Object.hasOwn(SECOND_HALF_BET_CHOICES, betChoice);
-    }
-
-    private isRemainingTimeWithinWindow(placingBets: number, lockingBet: number) {
-        const remainingTime = this.gameData.remainingTime;
-        return remainingTime < placingBets && remainingTime >= lockingBet;
     }
 }

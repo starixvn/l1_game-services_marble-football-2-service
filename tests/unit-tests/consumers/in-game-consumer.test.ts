@@ -10,16 +10,16 @@ describe("InGameConsumer test", () => {
     let consumer: InGameConsumer;
     const definition = stub<GameDefinition>();
     definition.durations = {
-        wholeRound: 151,
-        startingRound: 141,
-        placingBetsFirstHalf: 136,
-        lockingBetFirstHalf: 109,
-        streamingVideoFirstHalf: 108,
-        placingBetsSecondHalf: 136,
-        lockingBetSecondHalf: 109,
-        streamingVideoSecondHalf: 108,
-        placingBets: 136,
-        lockingBet: 109,
+        wholeRound: 121,
+        startingRound: 118,
+        placingBetsFirstHalf: 115,
+        lockingBetFirstHalf: 99,
+        streamingVideoFirstHalf: 94,
+        placingBetsSecondHalf: 63,
+        lockingBetSecondHalf: 47,
+        streamingVideoSecondHalf: 42,
+        lockingBet: 0,
+        placingBets: 0,
     };
     const gameData = stub<GameData>();
     const getBalance = jest.fn();
@@ -33,20 +33,31 @@ describe("InGameConsumer test", () => {
     });
 
     describe("getCurrentVideoResult", () => {
-        const fullVideoResult = {
+        const fullVideoFirstHalfResult = {
             firstHalfVideo: "video1.mp4",
-            secondHalfVideo: "video2.mp4",
-            firstHalfTimeline: [1, 2, 3],
-            secondHalfTimeline: [4, 5, 6],
             firstHalf: "AH",
+            firstHalfTimeline: [1, 2, 3],
+        };
+
+        const fullVideoSecondHalfResult = {
+            secondHalfVideo: "video2.mp4",
+            secondHalfTimeline: [4, 5, 6],
             secondHalf: "HA",
         };
 
-        const timelineResult = {
+        const timelineFirstHalfResult = {
             firstHalfTimeline: [1, 2, 3],
-            secondHalfTimeline: [4, 5, 6],
             firstHalf: "AH",
+        };
+
+        const timelineSecondHalfResult = {
+            secondHalfTimeline: [4, 5, 6],
             secondHalf: "HA",
+        };
+
+        const fullVideoResult = {
+            ...fullVideoFirstHalfResult,
+            ...fullVideoSecondHalfResult,
         };
 
         beforeEach(() => {
@@ -55,26 +66,38 @@ describe("InGameConsumer test", () => {
 
         const testCases = [
             {
-                phase: "streaming video",
-                timeRange: { start: 0, end: definition.durations.streamingVideoFirstHalf - 1 },
-                resultDescription: "full video result",
-                expectedResult: fullVideoResult,
+                phase: "streaming video first half",
+                timeRange: { start: definition.durations.placingBetsSecondHalf + 1, end: definition.durations.streamingVideoFirstHalf },
+                resultDescription: "full video first half result",
+                expectedResult: fullVideoFirstHalfResult,
             },
             {
-                phase: "showing result",
+                phase: "streaming video second half",
+                timeRange: { start: 0, end: definition.durations.streamingVideoSecondHalf },
+                resultDescription: "full video second half result",
+                expectedResult: fullVideoSecondHalfResult,
+            },
+            {
+                phase: "showing result second half",
+                timeRange: { start: 0, end: definition.durations.streamingVideoSecondHalf },
+                resultDescription: "full video second half result",
+                expectedResult: fullVideoSecondHalfResult,
+            },
+            {
+                phase: "showing result second half",
                 timeRange: { start: definition.durations.startingRound + 1, end: definition.durations.wholeRound },
-                resultDescription: "timeline result",
-                expectedResult: timelineResult,
+                resultDescription: "timeline result second half",
+                expectedResult: timelineSecondHalfResult,
             },
             {
                 phase: "starting",
-                timeRange: { start: definition.durations.placingBetsFirstHalf + 1, end: definition.durations.startingRound },
+                timeRange: { start: definition.durations.placingBetsFirstHalf, end: definition.durations.startingRound },
                 resultDescription: "empty result",
                 expectedResult: {},
             },
             {
-                phase: "placing bets",
-                timeRange: { start: definition.durations.streamingVideoFirstHalf, end: definition.durations.placingBetsFirstHalf },
+                phase: "placing bets first half",
+                timeRange: { start: definition.durations.streamingVideoFirstHalf + 1, end: definition.durations.placingBetsFirstHalf },
                 resultDescription: "empty result",
                 expectedResult: {},
             },
@@ -112,7 +135,7 @@ describe("InGameConsumer test", () => {
             gameData.playerBetCount = playerBetCount;
 
             jest.spyOn(TableInGameConsumer.prototype, "buildPayload").mockResolvedValue(basePayload);
-            jest.spyOn(consumer, "getCurrentVideoResult").mockReturnValue(videoResult);
+            jest.spyOn(consumer, "getCurrentVideoResult").mockReturnValue(videoResult as any);
             jest.spyOn(helper, "getUserBetPercentage").mockReturnValue(userBetPercentage);
 
             // act

@@ -7,6 +7,17 @@ export default class InGameConsumer extends TableInGameConsumer {
     declare gameData: GameData;
     declare definition: GameDefinition;
 
+    constructor(
+        definition: GameDefinition,
+        gameData: GameData,
+        roundQuery: any,
+        publisher: any,
+        getBalance: any,
+        gameManagementApiClientFactory: any,
+    ) {
+        super(definition, gameData, roundQuery, publisher, getBalance, gameManagementApiClientFactory);
+    }
+
     override async buildPayload(realPlayer: any) {
         const payload = await super.buildPayload(realPlayer);
         const { playerBetCount } = this.gameData;
@@ -20,29 +31,40 @@ export default class InGameConsumer extends TableInGameConsumer {
 
     getCurrentVideoResult() {
         const { durations } = this.definition;
-
         const remainingTime = this.gameData.remainingTime;
 
-        const isStreamingVideo = remainingTime < durations.streamingVideoFirstHalf && remainingTime >= 0;
+        const isStreamingVideoFirstHalf =
+            remainingTime <= durations.streamingVideoFirstHalf && remainingTime > durations.placingBetsSecondHalf;
+        const isStreamingVideoSecondHalf = remainingTime <= durations.streamingVideoSecondHalf && remainingTime >= 0;
+        const isShowingResultFirstHalf = remainingTime <= durations.placingBetsSecondHalf && remainingTime > durations.lockingBetSecondHalf;
+        const isShowingResultSecondHalf = remainingTime <= durations.wholeRound && remainingTime > durations.startingRound;
 
-        const isShowingResult = remainingTime <= durations.wholeRound && remainingTime > durations.startingRound;
-
-        if (isStreamingVideo) {
+        if (isStreamingVideoFirstHalf) {
             return {
                 firstHalfVideo: this.gameData.result?.firstHalfVideo,
-                secondHalfVideo: this.gameData.result?.secondHalfVideo,
                 firstHalfTimeline: this.gameData.result?.firstHalfTimeline,
-                secondHalfTimeline: this.gameData.result?.secondHalfTimeline,
                 firstHalf: this.gameData.result?.firstHalf,
+            };
+        }
+
+        if (isStreamingVideoSecondHalf) {
+            return {
+                secondHalfVideo: this.gameData.result?.secondHalfVideo,
+                secondHalfTimeline: this.gameData.result?.secondHalfTimeline,
                 secondHalf: this.gameData.result?.secondHalf,
             };
         }
 
-        if (isShowingResult) {
+        if (isShowingResultFirstHalf) {
             return {
                 firstHalfTimeline: this.gameData.result?.firstHalfTimeline,
-                secondHalfTimeline: this.gameData.result?.secondHalfTimeline,
                 firstHalf: this.gameData.result?.firstHalf,
+            };
+        }
+
+        if (isShowingResultSecondHalf) {
+            return {
+                secondHalfTimeline: this.gameData.result?.secondHalfTimeline,
                 secondHalf: this.gameData.result?.secondHalf,
             };
         }
