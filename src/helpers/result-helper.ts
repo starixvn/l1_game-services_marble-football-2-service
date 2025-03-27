@@ -107,9 +107,7 @@ const getScoreFromScoreRate = (scoreRate: Record<string, number>) => {
     const score = Object.keys(scoreRate);
     const rate = Object.values(scoreRate);
 
-    const randomScore = secureWeightedPick(score, rate);
-
-    return randomScore;
+    return secureWeightedPick(score, rate);
 };
 
 const getVideoInfoFromResult = (firstHalf: string, secondHalf: string, numberOfVideos: Record<string, number>) => {

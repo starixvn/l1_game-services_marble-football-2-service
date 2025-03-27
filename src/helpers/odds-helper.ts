@@ -38,7 +38,7 @@ export const calculateFullTimeScoreRates = (firstHalf: HalfConfigType, secondHal
     return fulltimeScoreRates;
 };
 
-export const calculateProbabilitiesForBetChoices = (scoreRates: Record<string, number>, addingScore: string = "0-0") => {
+export const calculateProbabilitiesForBetChoices = (scoreRates: Record<string, number>, addingScore = "0-0") => {
     const totalRates = Object.values(scoreRates).reduce((sum, rate) => sum + rate, 0);
     const [addingHome, addingAway] = parseScore(addingScore);
 
@@ -124,16 +124,13 @@ export const calculatePreMatchOdds = (matchConfig: MatchConfigType, margins: Rec
     const fullTimeScoreRates = calculateFullTimeScoreRates(matchConfig.firstHalfConfig, matchConfig.secondHalfConfig);
     const { probabilities } = calculateProbabilitiesForBetChoices(fullTimeScoreRates);
 
-    const odds = calculateBetOdds(probabilities, margins);
-
-    return odds;
+    return calculateBetOdds(probabilities, margins);
 };
 
 export const calculateLiveOdds = (halfConfig: HalfConfigType, margins: Record<string, number>[] = [], firstHalfResult = "0-0") => {
     const { probabilities } = calculateProbabilitiesForBetChoices(halfConfig.scoreRate, firstHalfResult);
-    const odds = calculateBetOdds(probabilities, margins);
 
-    return odds;
+    return calculateBetOdds(probabilities, margins);
 };
 
 export const calculateDrawOdds = (probabilities: Record<string, number>, margins: Record<string, number>[] = []) => {

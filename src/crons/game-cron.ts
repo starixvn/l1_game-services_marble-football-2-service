@@ -61,14 +61,13 @@ export default class GameCron extends Table.Crons.TableGameCron {
         const delay = 100;
         const retries = 3;
 
-        const timeline = await retry(() => this.getVideoTimelineByVideoName(videoName), retries, delay).catch((error) => {
+        return await retry(() => this.getVideoTimelineByVideoName(videoName), retries, delay).catch((error) => {
             this.logService.logError(
                 `In match ${this.gameData.roundId}, failed to fetch ${isFirstHalf ? "first half" : "second half"} timeline: ${error}`
             );
+
             return this.getDefaultVideoTimeline(videoName, isFirstHalf);
         });
-
-        return timeline;
     }
 
     async getVideoTimelineForFirstHalf() {
