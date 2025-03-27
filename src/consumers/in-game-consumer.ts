@@ -7,8 +7,18 @@ export default class InGameConsumer extends TableInGameConsumer {
     declare gameData: GameData;
     declare definition: GameDefinition;
 
+    constructor(
+        definition: GameDefinition,
+        gameData: GameData,
+        roundQuery: any,
+        publisher: any,
+        getBalance: any,
+        gameManagementApiClientFactory: any,
+    ) {
+        super(definition, gameData, roundQuery, publisher, getBalance, gameManagementApiClientFactory);
+    }
+
     override async buildPayload(realPlayer: any) {
-        console.log("buildPayload");
         const payload = await super.buildPayload(realPlayer);
         const { playerBetCount } = this.gameData;
         const userBetPercentage = getUserBetPercentage(playerBetCount);
@@ -23,13 +33,13 @@ export default class InGameConsumer extends TableInGameConsumer {
         const { durations } = this.definition;
         const remainingTime = this.gameData.remainingTime;
 
-        const isStreamingVideoFirstHalf = remainingTime <= durations.streamingVideoFirstHalf && remainingTime > durations.placingBetsSecondHalf;
+        const isStreamingVideoFirstHalf =
+            remainingTime <= durations.streamingVideoFirstHalf && remainingTime > durations.placingBetsSecondHalf;
         const isStreamingVideoSecondHalf = remainingTime <= durations.streamingVideoSecondHalf && remainingTime >= 0;
         const isShowingResultFirstHalf = remainingTime <= durations.placingBetsSecondHalf && remainingTime > durations.lockingBetSecondHalf;
         const isShowingResultSecondHalf = remainingTime <= durations.wholeRound && remainingTime > durations.startingRound;
 
         if (isStreamingVideoFirstHalf) {
-            console.log("isStreamingVideoFirstHalf");
             return {
                 firstHalfVideo: this.gameData.result?.firstHalfVideo,
                 firstHalfTimeline: this.gameData.result?.firstHalfTimeline,
@@ -38,7 +48,6 @@ export default class InGameConsumer extends TableInGameConsumer {
         }
 
         if (isStreamingVideoSecondHalf) {
-            console.log("isStreamingVideoSecondHalf");
             return {
                 secondHalfVideo: this.gameData.result?.secondHalfVideo,
                 secondHalfTimeline: this.gameData.result?.secondHalfTimeline,
@@ -47,7 +56,6 @@ export default class InGameConsumer extends TableInGameConsumer {
         }
 
         if (isShowingResultFirstHalf) {
-            console.log("isShowingResultFirstHalf");
             return {
                 firstHalfTimeline: this.gameData.result?.firstHalfTimeline,
                 firstHalf: this.gameData.result?.firstHalf,
@@ -55,13 +63,12 @@ export default class InGameConsumer extends TableInGameConsumer {
         }
 
         if (isShowingResultSecondHalf) {
-            console.log("isShowingResultSecondHalf");
             return {
                 secondHalfTimeline: this.gameData.result?.secondHalfTimeline,
                 secondHalf: this.gameData.result?.secondHalf,
             };
         }
-        
+
         return {};
     }
 }

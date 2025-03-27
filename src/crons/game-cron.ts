@@ -10,6 +10,7 @@ import { generateVideoName } from "../helpers/result-helper";
 import defaultVideoTimelines from "../timelines/video-timelines";
 import GameStatusPublisher from "../publishers/game-status-publisher";
 import { generateOdds } from "../helpers/odds";
+import { isFirstHalfOddsActive } from "../helpers/game-timing";
 
 export default class GameCron extends Table.Crons.TableGameCron {
     declare gameData: GameData;
@@ -231,9 +232,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
     }
 
     private isFirstHalfOddsActive() {
-        const { placingBetsSecondHalf } = this.definition.durations;
-
-        return this.gameData.remainingTime > placingBetsSecondHalf;
+        return isFirstHalfOddsActive(this.gameData.remainingTime, this.definition.durations);
     }
 
     private createOddsForCurrentRound() {

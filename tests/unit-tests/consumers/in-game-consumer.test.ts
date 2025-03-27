@@ -19,7 +19,7 @@ describe("InGameConsumer test", () => {
         lockingBetSecondHalf: 47,
         streamingVideoSecondHalf: 42,
         lockingBet: 0,
-        placingBets: 0
+        placingBets: 0,
     };
     const gameData = stub<GameData>();
     const getBalance = jest.fn();
@@ -33,9 +33,6 @@ describe("InGameConsumer test", () => {
     });
 
     describe("getCurrentVideoResult", () => {
-
-
-
         const fullVideoFirstHalfResult = {
             firstHalfVideo: "video1.mp4",
             firstHalf: "AH",
@@ -46,7 +43,7 @@ describe("InGameConsumer test", () => {
             secondHalfVideo: "video2.mp4",
             secondHalfTimeline: [4, 5, 6],
             secondHalf: "HA",
-        }
+        };
 
         const timelineFirstHalfResult = {
             firstHalfTimeline: [1, 2, 3],
@@ -56,12 +53,12 @@ describe("InGameConsumer test", () => {
         const timelineSecondHalfResult = {
             secondHalfTimeline: [4, 5, 6],
             secondHalf: "HA",
-        }
+        };
 
         const fullVideoResult = {
             ...fullVideoFirstHalfResult,
-            ...fullVideoSecondHalfResult   
-        }
+            ...fullVideoSecondHalfResult,
+        };
 
         beforeEach(() => {
             gameData.result = fullVideoResult as any;
