@@ -1,3 +1,4 @@
+import { FIRST_HALF_BET_CHOICES, SECOND_HALF_BET_CHOICES } from "./../constants";
 import { firstHalfConfig, secondHalfConfigs } from "./../match-configs";
 import { Table } from "sc-game-base";
 import GameData from "../game-data";
@@ -59,7 +60,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
         const delay = 100;
         const retries = 3;
 
-        return await retry(() => this.getVideoTimelineByVideoName(videoName), retries, delay).catch((error) => {
+        return retry(() => this.getVideoTimelineByVideoName(videoName), retries, delay).catch((error) => {
             this.logService.logError(
                 `In match ${this.gameData.roundId}, failed to fetch ${isFirstHalf ? "first half" : "second half"} timeline: ${error}`
             );
@@ -241,13 +242,13 @@ export default class GameCron extends Table.Crons.TableGameCron {
     calculateAndPublishOddsPreMatch() {
         const preMatchOdds = calculatePreMatchOdds(this.gameData.matchConfig, this.gameData.gameConfigs.margin);
         const odds = {
-            firstHalfHome: preMatchOdds.home,
-            firstHalfAway: preMatchOdds.away,
-            firstHalfDraw: preMatchOdds.draw,
-            firstHalfOver: preMatchOdds.over,
-            firstHalfUnder: preMatchOdds.under,
-            firstHalfEven: preMatchOdds.even,
-            firstHalfOdd: preMatchOdds.odd,
+            [FIRST_HALF_BET_CHOICES.firstHalfHome]: preMatchOdds.home,
+            [FIRST_HALF_BET_CHOICES.firstHalfAway]: preMatchOdds.away,
+            [FIRST_HALF_BET_CHOICES.firstHalfDraw]: preMatchOdds.draw,
+            [FIRST_HALF_BET_CHOICES.firstHalfOver]: preMatchOdds.over,
+            [FIRST_HALF_BET_CHOICES.firstHalfUnder]: preMatchOdds.under,
+            [FIRST_HALF_BET_CHOICES.firstHalfEven]: preMatchOdds.even,
+            [FIRST_HALF_BET_CHOICES.firstHalfOdd]: preMatchOdds.odd,
         };
 
         this.gameStatusPublisher.publishOdds(odds);
@@ -257,13 +258,13 @@ export default class GameCron extends Table.Crons.TableGameCron {
         const { firstHalf } = this.gameData.result;
         const liveOdds = calculateLiveOdds(this.gameData.matchConfig.secondHalfConfig, this.gameData.gameConfigs.margin, firstHalf);
         const odds = {
-            secondHalfHome: liveOdds.home,
-            secondHalfAway: liveOdds.away,
-            secondHalfDraw: liveOdds.draw,
-            secondHalfOver: liveOdds.over,
-            secondHalfUnder: liveOdds.under,
-            secondHalfEven: liveOdds.even,
-            secondHalfOdd: liveOdds.odd,
+            [SECOND_HALF_BET_CHOICES.secondHalfHome]: liveOdds.home,
+            [SECOND_HALF_BET_CHOICES.secondHalfAway]: liveOdds.away,
+            [SECOND_HALF_BET_CHOICES.secondHalfDraw]: liveOdds.draw,
+            [SECOND_HALF_BET_CHOICES.secondHalfOver]: liveOdds.over,
+            [SECOND_HALF_BET_CHOICES.secondHalfUnder]: liveOdds.under,
+            [SECOND_HALF_BET_CHOICES.secondHalfEven]: liveOdds.even,
+            [SECOND_HALF_BET_CHOICES.secondHalfOdd]: liveOdds.odd,
         };
 
         this.gameStatusPublisher.publishOdds(odds);
