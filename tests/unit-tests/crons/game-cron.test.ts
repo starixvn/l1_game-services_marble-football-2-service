@@ -181,12 +181,20 @@ describe("GameCron", () => {
                 // arrange
                 gameCron.gameData.remainingTime = definition.durations.placingBetsFirstHalf + 1;
                 gameCron.calculateAndPublishOddsPreMatch = jest.fn();
+                gameCron.resetForNewRound = jest.fn();
+                gameCron.bot = { reset: jest.fn() } as any;
+                gameCron.updateNewMatchConfig = jest.fn();
+                gameCron.generateRoundData = jest.fn().mockResolvedValue(null);
 
                 // act
                 await gameCron.proceed();
 
                 // assert
+                expect(gameCron.resetForNewRound).toHaveBeenCalled();
+                expect(gameCron.bot.reset).toHaveBeenCalled();
+                expect(gameCron.updateNewMatchConfig).toHaveBeenCalled();
                 expect(gameCron.calculateAndPublishOddsPreMatch).toHaveBeenCalled();
+                expect(gameCron.generateRoundData).toHaveBeenCalled();
                 expect(gameStatusPublisher.publishStartPlacingBetStatus).toHaveBeenCalled();
             });
 
