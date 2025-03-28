@@ -25,8 +25,6 @@ export const BET_CHOICES = {
 
 export const ODDS_TYPE = {
     ...BET_CHOICES,
-    firstHalfDraw4: "firstHalfDraw4",
-    secondHalfDraw4: "secondHalfDraw4",
 };
 
 export const BET_CHOICE_ENUM = {

@@ -79,7 +79,6 @@ describe("Result Helper", () => {
             expect(settlementResult.firstHalfUnder).toBe(false);
             expect(settlementResult.firstHalfOdd).toBe(false);
             expect(settlementResult.firstHalfEven).toBe(true);
-            expect(settlementResult.firstHalfDraw4).toBe(false);
 
             expect(settlementResult.secondHalfHome).toBe(false);
             expect(settlementResult.secondHalfAway).toBe(false);
@@ -88,7 +87,6 @@ describe("Result Helper", () => {
             expect(settlementResult.secondHalfUnder).toBe(false);
             expect(settlementResult.secondHalfOdd).toBe(false);
             expect(settlementResult.secondHalfEven).toBe(true);
-            expect(settlementResult.secondHalfDraw4).toBe(false);
         });
     });
 
