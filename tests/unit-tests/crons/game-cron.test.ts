@@ -20,6 +20,7 @@ import GameDefinition from "../../../src/game-definition";
 import axios from "axios";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import crypto from "crypto";
+import { FIRST_HALF_BET_CHOICES, SECOND_HALF_BET_CHOICES } from "../../../src/constants";
 jest.mock("../../../src/timelines/video-timelines", () => ({
     "22841ea360fc3c3676a38502aa9a90a1ae1fbdac1d937746358efe559d349b6f_0": [],
     "53e5fe7054fb5c4867e0277e8867c0c08f9ca8be43fdac0d3b6c6ea5c7d656a2_AAAA": [1.8, 19.033333333333335, 33.8, 42.43333333333333],
@@ -131,38 +132,6 @@ describe("GameCron", () => {
             expect(roundResultConsumer.generateResult).toHaveBeenCalled();
             expect(gameCron.gameData.settlementResultFromAdmin).toEqual({});
         });
-
-        it("should set dynamic odds when generating round data", async () => {
-            // arrange
-            const mockOdds = {
-                firstHalfAway: 2.0,
-                firstHalfDraw: 2.0,
-                firstHalfDraw4: 2.0,
-                firstHalfEven: 2.0,
-                firstHalfHome: 2.0,
-                firstHalfOdd: 2.0,
-                firstHalfOver: 2.0,
-                firstHalfUnder: 2.0,
-                secondHalfAway: 2.0,
-                secondHalfDraw: 2.0,
-                secondHalfDraw4: 2.0,
-                secondHalfEven: 2.0,
-                secondHalfHome: 2.0,
-                secondHalfOdd: 2.0,
-                secondHalfOver: 2.0,
-                secondHalfUnder: 2.0,
-            };
-
-            jest.spyOn(gameCron as any, "createOddsForCurrentRound").mockImplementation(() => {
-                gameCron.gameData.dynamicOdds = mockOdds;
-            });
-
-            // act
-            await gameCron.generateRoundData();
-
-            // assert
-            expect(gameCron.gameData.dynamicOdds).toEqual(mockOdds);
-        });
     });
 
     describe("proceed", () => {
@@ -208,14 +177,24 @@ describe("GameCron", () => {
         });
 
         describe("first half", () => {
-            it("should publish start placing bet status at placing bet time", async () => {
+            it("should publish start placing bet status and calculate pre-match odds at placing bet time", async () => {
                 // arrange
                 gameCron.gameData.remainingTime = definition.durations.placingBetsFirstHalf + 1;
+                gameCron.calculateAndPublishOddsPreMatch = jest.fn();
+                gameCron.resetForNewRound = jest.fn();
+                gameCron.bot = { reset: jest.fn() } as any;
+                gameCron.updateNewMatchConfig = jest.fn();
+                gameCron.generateRoundData = jest.fn().mockResolvedValue(null);
 
                 // act
                 await gameCron.proceed();
 
                 // assert
+                expect(gameCron.resetForNewRound).toHaveBeenCalled();
+                expect(gameCron.bot.reset).toHaveBeenCalled();
+                expect(gameCron.updateNewMatchConfig).toHaveBeenCalled();
+                expect(gameCron.calculateAndPublishOddsPreMatch).toHaveBeenCalled();
+                expect(gameCron.generateRoundData).toHaveBeenCalled();
                 expect(gameStatusPublisher.publishStartPlacingBetStatus).toHaveBeenCalled();
             });
 
@@ -242,57 +221,57 @@ describe("GameCron", () => {
                 expect(runningRoundInfoPublisher.publish).toHaveBeenCalled();
             });
 
-            describe("at streaming time", () => {
-                it("should call getVideoTimeline", async () => {
+            describe("at first half streaming time", () => {
+                it("should call getVideoTimelineForFirstHalf", async () => {
                     // arrange
                     gameCron.gameData.remainingTime = definition.durations.streamingVideoFirstHalf + 1;
-                    jest.spyOn(gameCron, "getVideoTimeline").mockResolvedValue();
+                    jest.spyOn(gameCron, "getVideoTimelineForFirstHalf").mockResolvedValue();
 
                     // act
                     await gameCron.proceed();
 
                     // assert
-                    expect(gameCron.getVideoTimeline).toHaveBeenCalled();
+                    expect(gameCron.getVideoTimelineForFirstHalf).toHaveBeenCalled();
                 });
-            });
 
-            it("should publish video stream", async () => {
-                // arrange
-                gameCron.gameData.remainingTime = definition.durations.streamingVideoFirstHalf + 1;
-                gameCron.gameData.result = {
-                    firstHalfVideo: "http://marble-football/watch?v=HH",
-                    firstHalfTimeline: [1, 2, 3],
-                    firstHalf: "HH",
-                } as any;
-
-                jest.spyOn(gameCron, "getVideoTimeline").mockResolvedValue();
-
-                // act
-                await gameCron.proceed();
-
-                // assert
-                expect(runningRoundInfoPublisher.publishToAllUsers).toHaveBeenCalledWith({
-                    videoResult: {
+                it("should publish video stream", async () => {
+                    // arrange
+                    gameCron.gameData.remainingTime = definition.durations.streamingVideoFirstHalf + 1;
+                    gameCron.gameData.result = {
                         firstHalfVideo: "http://marble-football/watch?v=HH",
                         firstHalfTimeline: [1, 2, 3],
                         firstHalf: "HH",
-                    },
+                    } as any;
+
+                    jest.spyOn(gameCron, "getVideoTimelineForFirstHalf").mockResolvedValue();
+
+                    // act
+                    await gameCron.proceed();
+
+                    // assert
+                    expect(runningRoundInfoPublisher.publishToAllUsers).toHaveBeenCalledWith({
+                        videoResult: {
+                            firstHalfVideo: "http://marble-football/watch?v=HH",
+                            firstHalfTimeline: [1, 2, 3],
+                            firstHalf: "HH",
+                        },
+                    });
                 });
             });
         });
 
         describe("second half", () => {
-            it("should publish start placing bet status at placing bet time", async () => {
+            it("should publish start placing bet status and calculate live odds at placing bet time", async () => {
                 // arrange
                 gameCron.gameData.remainingTime = definition.durations.placingBetsSecondHalf + 1;
-                // Mock the notifyPlaceBetsWithDynamicOdds method
-                jest.spyOn(gameCron as any, "notifyPlaceBetsWithDynamicOdds");
+                gameCron.calculateAndPublishOddsLive = jest.fn();
 
                 // act
                 await gameCron.proceed();
 
                 // assert
-                expect((gameCron as any).notifyPlaceBetsWithDynamicOdds).toHaveBeenCalled();
+                expect(gameCron.calculateAndPublishOddsLive).toHaveBeenCalled();
+                expect(gameStatusPublisher.publishStartPlacingBetStatus).toHaveBeenCalled();
             });
 
             it("should run bot and publish running round info during bet time", async () => {
@@ -319,40 +298,40 @@ describe("GameCron", () => {
             });
 
             describe("at streaming time", () => {
-                it("should NOT call getVideoTimeline", async () => {
+                it("should call getVideoTimelineForSecondHalf", async () => {
                     // arrange
                     gameCron.gameData.remainingTime = definition.durations.streamingVideoSecondHalf + 1;
-                    jest.spyOn(gameCron, "getVideoTimeline").mockResolvedValue();
+                    jest.spyOn(gameCron, "getVideoTimelineForSecondHalf").mockResolvedValue();
 
                     // act
                     await gameCron.proceed();
 
                     // assert
-                    expect(gameCron.getVideoTimeline).not.toHaveBeenCalled();
+                    expect(gameCron.getVideoTimelineForSecondHalf).toHaveBeenCalled();
                 });
-            });
 
-            it("should publish video stream", async () => {
-                // arrange
-                gameCron.gameData.remainingTime = definition.durations.streamingVideoSecondHalf + 1;
-                gameCron.gameData.result = {
-                    secondHalfVideo: "http://marble-football/watch?v=AA",
-                    secondHalfTimeline: [4, 5, 6],
-                    secondHalf: "AA",
-                } as any;
-
-                jest.spyOn(gameCron, "getVideoTimeline").mockResolvedValue();
-
-                // act
-                await gameCron.proceed();
-
-                // assert
-                expect(runningRoundInfoPublisher.publishToAllUsers).toHaveBeenCalledWith({
-                    videoResult: {
+                it("should publish video stream", async () => {
+                    // arrange
+                    gameCron.gameData.remainingTime = definition.durations.streamingVideoSecondHalf + 1;
+                    gameCron.gameData.result = {
                         secondHalfVideo: "http://marble-football/watch?v=AA",
                         secondHalfTimeline: [4, 5, 6],
                         secondHalf: "AA",
-                    },
+                    } as any;
+
+                    jest.spyOn(gameCron, "getVideoTimelineForSecondHalf").mockResolvedValue();
+
+                    // act
+                    await gameCron.proceed();
+
+                    // assert
+                    expect(runningRoundInfoPublisher.publishToAllUsers).toHaveBeenCalledWith({
+                        videoResult: {
+                            secondHalfVideo: "http://marble-football/watch?v=AA",
+                            secondHalfTimeline: [4, 5, 6],
+                            secondHalf: "AA",
+                        },
+                    });
                 });
             });
         });
@@ -409,7 +388,7 @@ describe("GameCron", () => {
         });
     });
 
-    describe("getVideoTimelineForHalf", () => {
+    describe("getVideoTimelineByVideoName", () => {
         beforeEach(() => {
             jest.clearAllMocks();
         });
@@ -429,7 +408,7 @@ describe("GameCron", () => {
             (axios.get as jest.Mock).mockResolvedValue({ data: { timeLine: mockTimeline } });
 
             // Act
-            const result = await gameCron.getVideoTimelineForHalf(videoName);
+            const result = await gameCron.getVideoTimelineByVideoName(videoName);
 
             // Assert
             expect(axios.get).toHaveBeenCalledWith("http://example.com/test-video.json", { httpsAgent: expect.any(HttpsProxyAgent) });
@@ -450,7 +429,7 @@ describe("GameCron", () => {
             (axios.get as jest.Mock).mockResolvedValue({ data: { timeLine: mockTimeline } });
 
             // Act
-            const result = await gameCron.getVideoTimelineForHalf(videoName);
+            const result = await gameCron.getVideoTimelineByVideoName(videoName);
 
             // Assert
             expect(axios.get).toHaveBeenCalledWith("http://example.com/test-video.json", { httpsAgent: undefined });
@@ -470,10 +449,90 @@ describe("GameCron", () => {
             (axios.get as jest.Mock).mockRejectedValue(mockError);
 
             // Act & Assert
-            await expect(gameCron.getVideoTimelineForHalf(videoName)).rejects.toThrow(mockError);
+            await expect(gameCron.getVideoTimelineByVideoName(videoName)).rejects.toThrow(mockError);
             expect(logService.logError).toHaveBeenCalledWith(
-                "In match 123, failed to get video timeline http://example.com/test-video.json with error: Error: Network error",
+                "In match 123, failed to get video timeline http://example.com/test-video.json with error: Error: Network error"
             );
+        });
+    });
+
+    describe("getVideoTimelineWithRetry", () => {
+        beforeEach(() => {
+            jest.clearAllMocks();
+        });
+
+        it("should correctly return timeline", async () => {
+            // Arrange
+            const mockFirstHalfTimeline = [
+                { time: 0, event: "start" },
+                { time: 10, event: "goal" },
+            ];
+
+            jest.spyOn(gameCron, "getVideoTimelineByVideoName").mockResolvedValueOnce(mockFirstHalfTimeline);
+
+            // Act
+            const timeline = await gameCron.getVideoTimelineWithRetry("first-half-video", true);
+
+            // Assert
+            expect(timeline).toEqual(mockFirstHalfTimeline);
+        });
+
+        it("should retry getting video timeline and fallback to default on failure", async () => {
+            // Arrange
+            const videoName = "test-video";
+            const mockError = new Error("Network error");
+            const mockTimeline = [7, 8, 9];
+            gameCron.gameData.roundId = 123;
+
+            jest.spyOn(gameCron, "getVideoTimelineByVideoName").mockRejectedValue(mockError);
+
+            jest.spyOn(gameCron, "getDefaultVideoTimeline").mockReturnValue(mockTimeline);
+            // Act
+            const result = await gameCron.getVideoTimelineWithRetry(videoName, true);
+
+            // Assert
+            expect(logService.logError).toHaveBeenCalledWith("In match 123, failed to fetch first half timeline: Error: Network error");
+            expect(result).toEqual(mockTimeline);
+        });
+    });
+
+    describe("getVideoTimelineForFirstHalf", () => {
+        it("should call getVideoTimelineWithRetry with correct arguments", async () => {
+            // Arrange
+            const videoName = "first-half-video";
+            const isFirstHalf = true;
+            const mockTimeline = [7, 8, 9];
+            gameCron.gameData.result = {
+                firstHalfVideo: videoName,
+            } as any;
+            jest.spyOn(gameCron, "getVideoTimelineWithRetry").mockResolvedValueOnce(mockTimeline);
+
+            // Act
+            await gameCron.getVideoTimelineForFirstHalf();
+
+            // Assert
+            expect(gameCron.getVideoTimelineWithRetry).toHaveBeenCalledWith(videoName, isFirstHalf);
+            expect(gameCron.gameData.result.firstHalfTimeline).toEqual(mockTimeline);
+        });
+    });
+
+    describe("getVideoTimelineForSecondHalf", () => {
+        it("should call getVideoTimelineWithRetry with correct arguments", async () => {
+            // Arrange
+            const videoName = "second-half-video";
+            const isFirstHalf = false;
+            const mockTimeline = [7, 8, 9];
+            gameCron.gameData.result = {
+                secondHalfVideo: videoName,
+            } as any;
+            jest.spyOn(gameCron, "getVideoTimelineWithRetry").mockResolvedValueOnce(mockTimeline);
+
+            // Act
+            await gameCron.getVideoTimelineForSecondHalf();
+
+            // Assert
+            expect(gameCron.getVideoTimelineWithRetry).toHaveBeenCalledWith(videoName, isFirstHalf);
+            expect(gameCron.gameData.result.secondHalfTimeline).toEqual(mockTimeline);
         });
     });
 
@@ -501,80 +560,6 @@ describe("GameCron", () => {
 
             // Assert
             expect(gameCron.gameData.publishedTournament).toEqual("fake tournament");
-        });
-    });
-
-    describe("getVideoTimeline", () => {
-        it("should correctly set firstHalfTimeline and secondHalfTimeline properties in gameData.result", async () => {
-            // Arrange
-            const mockFirstHalfTimeline = [
-                { time: 0, event: "start" },
-                { time: 10, event: "goal" },
-            ];
-            const mockSecondHalfTimeline = [
-                { time: 0, event: "start" },
-                { time: 15, event: "goal" },
-            ];
-            gameCron.gameData.result = {
-                firstHalfVideo: "first-half-video",
-                secondHalfVideo: "second-half-video",
-            } as any;
-            jest.spyOn(gameCron, "getVideoTimelineForHalf")
-                .mockResolvedValueOnce(mockFirstHalfTimeline)
-                .mockResolvedValueOnce(mockSecondHalfTimeline);
-
-            // Act
-            await gameCron.getVideoTimeline();
-
-            // Assert
-            expect(gameCron.getVideoTimelineForHalf).toHaveBeenCalledTimes(2);
-            expect(gameCron.getVideoTimelineForHalf).toHaveBeenCalledWith("first-half-video");
-            expect(gameCron.getVideoTimelineForHalf).toHaveBeenCalledWith("second-half-video");
-            expect(gameCron.gameData.result.firstHalfTimeline).toEqual(mockFirstHalfTimeline);
-            expect(gameCron.gameData.result.secondHalfTimeline).toEqual(mockSecondHalfTimeline);
-        });
-
-        it("should use default timeline when video timeline fetch fails", async () => {
-            // Arrange
-            const mockTimeline = [7, 8, 9];
-            gameCron.gameData.result = {
-                firstHalf: "HAA",
-                secondHalf: "AHH",
-            } as any;
-            jest.spyOn(gameCron, "getVideoTimelineForHalf")
-                .mockRejectedValueOnce(new Error("Network error"))
-                .mockRejectedValueOnce(new Error("Network error"));
-
-            jest.spyOn(gameCron, "getDefaultVideoTimeline").mockReturnValue(mockTimeline);
-
-            // Act
-            await gameCron.getVideoTimeline();
-
-            // Assert
-            expect(gameCron.gameData.result.firstHalfTimeline).toEqual(mockTimeline);
-            expect(gameCron.gameData.result.secondHalfTimeline).toEqual(mockTimeline);
-        });
-
-        it("should use default timeline for first half when only first half fetch fails", async () => {
-            // Arrange
-            const mockTimeline = [7, 8, 9];
-            gameCron.gameData.result = {
-                firstHalf: "HAA",
-                secondHalf: "AHH",
-            } as any;
-
-            jest.spyOn(gameCron, "getVideoTimelineForHalf")
-                .mockRejectedValueOnce(new Error("Network error"))
-                .mockResolvedValueOnce(mockTimeline);
-
-            jest.spyOn(gameCron, "getDefaultVideoTimeline").mockReturnValue(mockTimeline);
-
-            // Act
-            await gameCron.getVideoTimeline();
-
-            // Assert
-            expect(gameCron.getDefaultVideoTimeline).toHaveBeenCalledWith("HAA", true);
-            expect(gameCron.gameData.result.secondHalfTimeline).toEqual(mockTimeline);
         });
     });
 
@@ -674,17 +659,135 @@ describe("GameCron", () => {
         });
     });
 
-    describe("notifyPlaceBetsWithDynamicOdds", () => {
-        it("should publish dynamic odds and start placing bet status", () => {
-            // Mock the publishDynamicOddsStatus since it's not defined in the stub
-            (gameStatusPublisher as any).publishDynamicOddsStatus = jest.fn();
-
+    describe("updateNewMatchConfig", () => {
+        it("should update match config with first half and random second half config", () => {
             // Act
-            (gameCron as any).notifyPlaceBetsWithDynamicOdds();
+            gameCron.updateNewMatchConfig();
 
             // Assert
-            expect((gameStatusPublisher as any).publishDynamicOddsStatus).toHaveBeenCalled();
-            expect(gameStatusPublisher.publishStartPlacingBetStatus).toHaveBeenCalled();
+            expect(gameCron.gameData.matchConfig).toBeDefined();
+            expect(gameCron.gameData.matchConfig.firstHalfConfig).toBeDefined();
+            expect(gameCron.gameData.matchConfig.secondHalfConfig).toBeDefined();
+        });
+    });
+
+    describe("calculateAndPublishOddsPreMatch", () => {
+        beforeEach(() => {
+            jest.clearAllMocks();
+
+            gameCron.gameData = {
+                matchConfig: {
+                    firstHalfConfig: {},
+                    secondHalfConfig: {},
+                },
+                gameConfigs: {
+                    margin: 0.05,
+                },
+            } as any;
+        });
+
+        it("should calculate pre-match odds and publish them", () => {
+            // Arrange
+            const mockOdds = {
+                home: 2.0,
+                away: 3.0,
+                draw: 3.5,
+                over: 1.9,
+                under: 1.9,
+                even: 1.95,
+                odd: 1.95,
+            };
+
+            jest.spyOn(require("../../../src/helpers/odds-helper"), "calculatePreMatchOdds").mockReturnValue(mockOdds);
+
+            // Act
+            gameCron.calculateAndPublishOddsPreMatch();
+
+            // Assert
+            expect(gameStatusPublisher.publishOdds).toHaveBeenCalledWith({
+                [FIRST_HALF_BET_CHOICES.firstHalfHome]: mockOdds.home,
+                [FIRST_HALF_BET_CHOICES.firstHalfAway]: mockOdds.away,
+                [FIRST_HALF_BET_CHOICES.firstHalfDraw]: mockOdds.draw,
+                [FIRST_HALF_BET_CHOICES.firstHalfOver]: mockOdds.over,
+                [FIRST_HALF_BET_CHOICES.firstHalfUnder]: mockOdds.under,
+                [FIRST_HALF_BET_CHOICES.firstHalfEven]: mockOdds.even,
+                [FIRST_HALF_BET_CHOICES.firstHalfOdd]: mockOdds.odd,
+            });
+        });
+
+        it("should pass correct parameters to calculatePreMatchOdds", () => {
+            // Arrange
+            const calculatePreMatchOddsSpy = jest.spyOn(require("../../../src/helpers/odds-helper"), "calculatePreMatchOdds");
+
+            // Act
+            gameCron.calculateAndPublishOddsPreMatch();
+
+            // Assert
+            expect(calculatePreMatchOddsSpy).toHaveBeenCalledWith(gameCron.gameData.matchConfig, gameCron.gameData.gameConfigs.margin);
+        });
+    });
+
+    describe("calculateAndPublishOddsLive", () => {
+        beforeEach(() => {
+            // Reset mocks
+            jest.clearAllMocks();
+
+            // Setup test data
+            gameCron.gameData = {
+                matchConfig: {
+                    secondHalfConfig: {},
+                },
+                gameConfigs: {
+                    margin: 0.05,
+                },
+                result: {
+                    firstHalf: "HH",
+                },
+            } as any;
+        });
+
+        it("should calculate live odds and publish them", () => {
+            // Arrange
+            const mockOdds = {
+                home: 2.5,
+                away: 2.8,
+                draw: 3.2,
+                over: 1.85,
+                under: 1.95,
+                even: 1.92,
+                odd: 1.92,
+            };
+
+            jest.spyOn(require("../../../src/helpers/odds-helper"), "calculateLiveOdds").mockReturnValue(mockOdds);
+
+            // Act
+            gameCron.calculateAndPublishOddsLive();
+
+            // Assert
+            expect(gameStatusPublisher.publishOdds).toHaveBeenCalledWith({
+                [SECOND_HALF_BET_CHOICES.secondHalfHome]: mockOdds.home,
+                [SECOND_HALF_BET_CHOICES.secondHalfAway]: mockOdds.away,
+                [SECOND_HALF_BET_CHOICES.secondHalfDraw]: mockOdds.draw,
+                [SECOND_HALF_BET_CHOICES.secondHalfOver]: mockOdds.over,
+                [SECOND_HALF_BET_CHOICES.secondHalfUnder]: mockOdds.under,
+                [SECOND_HALF_BET_CHOICES.secondHalfEven]: mockOdds.even,
+                [SECOND_HALF_BET_CHOICES.secondHalfOdd]: mockOdds.odd,
+            });
+        });
+
+        it("should pass correct parameters to calculateLiveOdds", () => {
+            // Arrange
+            const calculateLiveOddsSpy = jest.spyOn(require("../../../src/helpers/odds-helper"), "calculateLiveOdds");
+
+            // Act
+            gameCron.calculateAndPublishOddsLive();
+
+            // Assert
+            expect(calculateLiveOddsSpy).toHaveBeenCalledWith(
+                gameCron.gameData.matchConfig.secondHalfConfig,
+                gameCron.gameData.result.firstHalf,
+                gameCron.gameData.gameConfigs.margin
+            );
         });
     });
 });

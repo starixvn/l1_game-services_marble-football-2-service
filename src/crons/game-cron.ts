@@ -1,3 +1,5 @@
+import { FIRST_HALF_BET_CHOICES, SECOND_HALF_BET_CHOICES } from "./../constants";
+import { firstHalfConfig, secondHalfConfigs } from "./../match-configs";
 import { Table } from "sc-game-base";
 import GameData from "../game-data";
 import GameDefinition from "../game-definition";
@@ -9,8 +11,9 @@ import { retry } from "../helpers";
 import { generateVideoName } from "../helpers/result-helper";
 import defaultVideoTimelines from "../timelines/video-timelines";
 import GameStatusPublisher from "../publishers/game-status-publisher";
-import { generateOdds } from "../helpers/odds";
-import { isFirstHalfOddsActive } from "../helpers/game-timing";
+
+import { calculatePreMatchOdds, calculateLiveOdds } from "../helpers/odds-helper";
+import { securePickOne } from "sc-core-rng";
 
 export default class GameCron extends Table.Crons.TableGameCron {
     declare gameData: GameData;
@@ -38,7 +41,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
         this.gameData.playerBetCount = {};
     }
 
-    async getVideoTimelineForHalf(videoName: string) {
+    async getVideoTimelineByVideoName(videoName: string) {
         const url = new URL(`${videoName}.json`, this.appConfigs.liveStreamServer);
 
         const agent = this.appConfigs.proxyServer.enabled ? new HttpsProxyAgent(this.appConfigs.proxyServer.url) : undefined;
@@ -53,29 +56,25 @@ export default class GameCron extends Table.Crons.TableGameCron {
         }
     }
 
-    async getVideoTimeline() {
+    async getVideoTimelineWithRetry(videoName: string, isFirstHalf: boolean) {
         const delay = 100;
         const retries = 3;
 
-        try {
-            const [firstHalfTimeline, secondHalfTimeline] = await Promise.all([
-                retry(() => this.getVideoTimelineForHalf(this.gameData.result.firstHalfVideo), retries, delay).catch((error) => {
-                    this.logService.logError(`In match ${this.gameData.roundId}, failed to fetch first half timeline: ${error}`);
-                    return this.getDefaultVideoTimeline(this.gameData.result.firstHalf, true);
-                }),
-                retry(() => this.getVideoTimelineForHalf(this.gameData.result.secondHalfVideo), retries, delay).catch((error) => {
-                    this.logService.logError(`In match ${this.gameData.roundId}, failed to fetch second half timeline: ${error}`);
-                    return this.getDefaultVideoTimeline(this.gameData.result.secondHalf, false);
-                }),
-            ]);
+        return retry(() => this.getVideoTimelineByVideoName(videoName), retries, delay).catch((error) => {
+            this.logService.logError(
+                `In match ${this.gameData.roundId}, failed to fetch ${isFirstHalf ? "first half" : "second half"} timeline: ${error}`
+            );
 
-            this.gameData.result.firstHalfTimeline = firstHalfTimeline;
-            this.gameData.result.secondHalfTimeline = secondHalfTimeline;
-        } catch (error) {
-            this.logService.logError(`Unexpected error fetching video timelines: ${error}`);
-            this.gameData.result.firstHalfTimeline = this.getDefaultVideoTimeline(this.gameData.result.firstHalf, true);
-            this.gameData.result.secondHalfTimeline = this.getDefaultVideoTimeline(this.gameData.result.secondHalf, false);
-        }
+            return this.getDefaultVideoTimeline(videoName, isFirstHalf);
+        });
+    }
+
+    async getVideoTimelineForFirstHalf() {
+        this.gameData.result.firstHalfTimeline = await this.getVideoTimelineWithRetry(this.gameData.result.firstHalfVideo, true);
+    }
+
+    async getVideoTimelineForSecondHalf() {
+        this.gameData.result.secondHalfTimeline = await this.getVideoTimelineWithRetry(this.gameData.result.secondHalfVideo, false);
     }
 
     getDefaultVideoTimeline(result: string, isFirstHalf: boolean) {
@@ -97,7 +96,6 @@ export default class GameCron extends Table.Crons.TableGameCron {
     async generateRoundData() {
         await this.roundResultConsumer.generateResult();
         this.gameData.settlementResultFromAdmin = {};
-        this.createOddsForCurrentRound();
     }
 
     private publishVideoStreamFirstHalf() {
@@ -140,18 +138,25 @@ export default class GameCron extends Table.Crons.TableGameCron {
         }
 
         const remainingTime = this.gameData.remainingTime;
+
         if (remainingTime === durations.startingRound) {
             await this.publishTournament();
         }
 
-        if (this.isStartingTime(remainingTime, durations)) {
+        if (this.isStartPlacingBetFirstHalf(remainingTime)) {
             this.resetForNewRound();
             this.bot?.reset();
+            this.updateNewMatchConfig();
+            this.calculateAndPublishOddsPreMatch();
             await this.generateRoundData();
+
+            this.gameStatusPublisher.publishStartPlacingBetStatus();
         }
 
-        if (this.isStartPlacingBetFirstHalf(remainingTime) || this.isStartPlacingBetSecondHalf(remainingTime)) {
-            this.notifyPlaceBetsWithDynamicOdds();
+        if (this.isStartPlacingBetSecondHalf(remainingTime)) {
+            this.calculateAndPublishOddsLive();
+
+            this.gameStatusPublisher.publishStartPlacingBetStatus();
         }
 
         if (this.isLockingBetFirstHalf(remainingTime) || this.isLockingBetSecondHalf(remainingTime)) {
@@ -164,11 +169,12 @@ export default class GameCron extends Table.Crons.TableGameCron {
         }
 
         if (this.isStreamingVideoFirstHalf(remainingTime)) {
-            await this.getVideoTimeline();
+            await this.getVideoTimelineForFirstHalf();
             this.publishVideoStreamFirstHalf();
         }
 
         if (this.isStreamingVideoSecondHalf(remainingTime)) {
+            await this.getVideoTimelineForSecondHalf();
             this.publishVideoStreamSecondHalf();
         }
 
@@ -176,11 +182,6 @@ export default class GameCron extends Table.Crons.TableGameCron {
             this.gameData.remainingTime = durations.wholeRound;
             await this.settleGameRoundConsumer.settleRound();
         }
-    }
-
-    private notifyPlaceBetsWithDynamicOdds() {
-        this.gameStatusPublisher.publishDynamicOddsStatus(this.isFirstHalfOddsActive());
-        this.gameStatusPublisher.publishStartPlacingBetStatus();
     }
 
     private isDuringFirstHalfBettingTime(remainingTime: number) {
@@ -231,15 +232,41 @@ export default class GameCron extends Table.Crons.TableGameCron {
         return remainingTime === streamingVideoSecondHalf;
     }
 
-    private isFirstHalfOddsActive() {
-        return isFirstHalfOddsActive(this.gameData.remainingTime, this.definition.durations);
+    updateNewMatchConfig() {
+        this.gameData.matchConfig = {
+            firstHalfConfig: firstHalfConfig,
+            secondHalfConfig: securePickOne(secondHalfConfigs),
+        };
     }
 
-    private createOddsForCurrentRound() {
-        const odds = generateOdds({
-            gameData: this.gameData,
-        });
+    calculateAndPublishOddsPreMatch() {
+        const preMatchOdds = calculatePreMatchOdds(this.gameData.matchConfig, this.gameData.gameConfigs.margin);
+        const odds = {
+            [FIRST_HALF_BET_CHOICES.firstHalfHome]: preMatchOdds.home,
+            [FIRST_HALF_BET_CHOICES.firstHalfAway]: preMatchOdds.away,
+            [FIRST_HALF_BET_CHOICES.firstHalfDraw]: preMatchOdds.draw,
+            [FIRST_HALF_BET_CHOICES.firstHalfOver]: preMatchOdds.over,
+            [FIRST_HALF_BET_CHOICES.firstHalfUnder]: preMatchOdds.under,
+            [FIRST_HALF_BET_CHOICES.firstHalfEven]: preMatchOdds.even,
+            [FIRST_HALF_BET_CHOICES.firstHalfOdd]: preMatchOdds.odd,
+        };
 
-        this.gameData.dynamicOdds = odds;
+        this.gameStatusPublisher.publishOdds(odds);
+    }
+
+    calculateAndPublishOddsLive() {
+        const { firstHalf } = this.gameData.result;
+        const liveOdds = calculateLiveOdds(this.gameData.matchConfig.secondHalfConfig, firstHalf, this.gameData.gameConfigs?.margin ?? []);
+        const odds = {
+            [SECOND_HALF_BET_CHOICES.secondHalfHome]: liveOdds.home,
+            [SECOND_HALF_BET_CHOICES.secondHalfAway]: liveOdds.away,
+            [SECOND_HALF_BET_CHOICES.secondHalfDraw]: liveOdds.draw,
+            [SECOND_HALF_BET_CHOICES.secondHalfOver]: liveOdds.over,
+            [SECOND_HALF_BET_CHOICES.secondHalfUnder]: liveOdds.under,
+            [SECOND_HALF_BET_CHOICES.secondHalfEven]: liveOdds.even,
+            [SECOND_HALF_BET_CHOICES.secondHalfOdd]: liveOdds.odd,
+        };
+
+        this.gameStatusPublisher.publishOdds(odds);
     }
 }

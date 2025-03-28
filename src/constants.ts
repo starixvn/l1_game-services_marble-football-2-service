@@ -23,19 +23,10 @@ export const BET_CHOICES = {
     ...SECOND_HALF_BET_CHOICES,
 };
 
-export const FIRST_HALF_ODDS_TYPE = {
-    ...FIRST_HALF_BET_CHOICES,
-    firstHalfDraw4: "firstHalfDraw4",
-};
-
-export const SECOND_HALF_ODDS_TYPE = {
-    ...SECOND_HALF_BET_CHOICES,
-    secondHalfDraw4: "secondHalfDraw4",
-};
-
 export const ODDS_TYPE = {
-    ...FIRST_HALF_ODDS_TYPE,
-    ...SECOND_HALF_ODDS_TYPE,
+    ...BET_CHOICES,
+    firstHalfDraw4: "firstHalfDraw4",
+    secondHalfDraw4: "secondHalfDraw4",
 };
 
 export const BET_CHOICE_ENUM = {
@@ -57,13 +48,15 @@ export const BET_CHOICE_ENUM = {
 
 export const DEFAULT_MARGIN = 0.02;
 
+export const ODDS_FOR_DRAW_4 = 50;
+
+export const OVER_UNDER_VALUE = 4.5;
+
 export const IS_DEV_ENV = process.env.NODE_ENV === "development";
 
 export const GAME_NAME = "marblefootball2";
 
 export const MODEL_NAME_PREFIX = IS_DEV_ENV ? `${GAME_NAME}_dev` : `${GAME_NAME}`;
-
-export const POOL_SIZE = 10_000;
 
 export const DEFAULT_NUMBER_OF_VIDEOS: Record<string, number> = {
     AAAA: 10,

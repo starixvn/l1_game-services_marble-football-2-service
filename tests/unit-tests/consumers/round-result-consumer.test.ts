@@ -19,7 +19,7 @@ jest.mock("sc-game-base/src/core/event-consumers", () => {
             public readonly definition: object,
             public readonly roundResultPublisher: object,
             public readonly resultsRepository: object,
-            public readonly provablyFairConsumer: object,
+            public readonly provablyFairConsumer: object
         ) {}
 
         generateResult() {
@@ -69,6 +69,18 @@ describe("RoundResultConsumer", () => {
         it("should return matchConfig from gameData", () => {
             // arrange
             gameData.gameConfigs.randomMode = 1;
+            gameData.matchConfig = {
+                firstHalfConfig: {
+                    scoreRate: {
+                        "1-0": 1,
+                    },
+                },
+                secondHalfConfig: {
+                    scoreRate: {
+                        "1-0": 1,
+                    },
+                },
+            };
             gameData.gameConfigs.videoStreamConfig = {
                 videoInfos: [
                     { videoName: "HAA", numberOfVideos: 1 },
@@ -80,7 +92,7 @@ describe("RoundResultConsumer", () => {
             const data = roundResultConsumer.getDataForGenerateResult();
 
             // assert
-            expect(data).toEqual({ randomMode: 1, numberOfVideos: { HAA: 1, AHH: 2 } });
+            expect(data).toEqual({ numberOfVideos: { HAA: 1, AHH: 2 }, matchConfig: gameData.matchConfig });
         });
     });
 

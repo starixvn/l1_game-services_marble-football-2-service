@@ -15,12 +15,12 @@ export const checkConnect = (socketOptions, callback) => {
     });
 };
 
-export const getTimeOutToBet = (remainingTime, durations) => {
+export const getTimeOutToBet = (remainingTime, lockingBet, placingBets, wholeRound) => {
     let timeout = 0;
-    if (remainingTime <= durations.lockingBet) {
-        timeout = durations.wholeRound - durations.placingBets + remainingTime + 1;
-    } else if (remainingTime >= durations.placingBets) {
-        timeout = remainingTime - durations.placingBets + 1;
+    if (remainingTime <= lockingBet) {
+        timeout = wholeRound - placingBets + remainingTime + 1;
+    } else if (remainingTime >= placingBets) {
+        timeout = remainingTime - placingBets + 1;
     }
 
     return timeout;

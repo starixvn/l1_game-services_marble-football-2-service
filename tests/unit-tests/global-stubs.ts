@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { logger } from "sc-common";
 import { Core } from "sc-game-base";
 import BaseMetrics from "sc-game-base/src/core/base-metrics";
+import { GameStatusPublisher } from "../../src/publishers";
 import {
     ProvablyFairConsumer,
     RoundIdConsumer,
@@ -12,7 +13,6 @@ import {
 } from "sc-game-base/src/core/event-consumers";
 import {
     BaseEventPublisher,
-    GameStatusPublisher,
     PlaceBetPublisher,
     RoundResultPublisher,
     RunningRoundInfoPublisher,
