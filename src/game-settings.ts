@@ -10,7 +10,6 @@ export default {
         placingBetsFirstHalf: 107,
         lockingBetFirstHalf: 90,
         streamingVideoFirstHalf: 89,
-        showingResultFirstHalf: 57,
         placingBetsSecondHalf: 54,
         lockingBetSecondHalf: 37,
         streamingVideoSecondHalf: 36,
