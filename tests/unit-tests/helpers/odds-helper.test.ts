@@ -72,7 +72,6 @@ describe("odds-helper", () => {
             expect(probabilities.home).toBeCloseTo(0.4);
             expect(probabilities.away).toBeCloseTo(0.3);
             expect(probabilities.draw).toBeCloseTo(0.3);
-            expect(probabilities.draw4).toBeCloseTo(0);
             expect(probabilities.over).toBeCloseTo(0.1);
             expect(probabilities.under).toBeCloseTo(0.9);
             expect(probabilities.even).toBeCloseTo(0.3);
@@ -86,7 +85,6 @@ describe("odds-helper", () => {
             expect(probabilities.home).toBeCloseTo(0.4);
             expect(probabilities.away).toBeCloseTo(0.3);
             expect(probabilities.draw).toBeCloseTo(0.3);
-            expect(probabilities.draw4).toBeCloseTo(0.1);
         });
     });
 
@@ -111,7 +109,6 @@ describe("odds-helper", () => {
             home: 0.5,
             away: 0.3,
             draw: 0.2,
-            draw4: 0,
             over: 0.5,
             under: 0.5,
             even: 0.5,
@@ -146,8 +143,7 @@ describe("odds-helper", () => {
 
     describe("calculateDrawOdds", () => {
         const mockProbabilities = {
-            draw: 0.21,
-            draw4: 0.01,
+            draw: 0.4,
         };
 
         it("should calculate draw odds correctly", () => {

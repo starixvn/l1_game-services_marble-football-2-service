@@ -122,15 +122,12 @@ describe("SettleGameRoundConsumer", () => {
             secondHalfUnder: false,
             secondHalfOdd: false,
             secondHalfEven: false,
-            secondHalfDraw4: false,
-            firstHalfDraw4: false,
         };
 
         const odds = {
             firstHalfHome: 2.0,
             firstHalfAway: 2.0,
             firstHalfDraw: 2.0,
-            firstHalfDraw4: 50,
             firstHalfOver: 2.0,
             firstHalfUnder: 2.0,
             firstHalfOdd: 2.0,
@@ -179,21 +176,6 @@ describe("SettleGameRoundConsumer", () => {
             expect(result.totalWin).toBe(100);
             expect(result.netWin).toBe(0);
             expect((result.winningByChoices as any).firstHalfHome).toEqual(100);
-        });
-
-        it("should handle draw4 special case correctly", () => {
-            // Arrange
-            const settlementResult = { ...defaultSettlementResult, firstHalfDraw: true, firstHalfDraw4: true };
-            const bet = { firstHalfDraw: 100, freeBet: false };
-
-            // Act
-            const result = settleGameRoundConsumer.calculateBetResult(settlementResult, bet, odds);
-
-            // Assert
-            expect(result.totalBetAmount).toBe(100);
-            expect(result.totalWin).toBe(5000);
-            expect(result.netWin).toBe(4900);
-            expect((result.winningByChoices as any).firstHalfDraw).toEqual(5000);
         });
 
         it("should handle multiple bets correctly", () => {
