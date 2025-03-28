@@ -143,7 +143,7 @@ describe("odds-helper", () => {
 
     describe("calculateDrawOdds", () => {
         const mockProbabilities = {
-            draw: 0.21,
+            draw: 0.4,
         };
 
         it("should calculate draw odds correctly", () => {
