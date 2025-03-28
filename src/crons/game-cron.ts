@@ -240,7 +240,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
     }
 
     calculateAndPublishOddsPreMatch() {
-        const preMatchOdds = calculatePreMatchOdds(this.gameData.matchConfig, this.gameData.gameConfigs.margin ?? []);
+        const preMatchOdds = calculatePreMatchOdds(this.gameData.matchConfig, this.gameData.gameConfigs?.margin ?? []);
         const odds = {
             [FIRST_HALF_BET_CHOICES.firstHalfHome]: preMatchOdds.home,
             [FIRST_HALF_BET_CHOICES.firstHalfAway]: preMatchOdds.away,
