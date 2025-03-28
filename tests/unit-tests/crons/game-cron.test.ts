@@ -785,8 +785,8 @@ describe("GameCron", () => {
             // Assert
             expect(calculateLiveOddsSpy).toHaveBeenCalledWith(
                 gameCron.gameData.matchConfig.secondHalfConfig,
-                gameCron.gameData.gameConfigs.margin,
-                gameCron.gameData.result.firstHalf
+                gameCron.gameData.result.firstHalf,
+                gameCron.gameData.gameConfigs.margin
             );
         });
     });

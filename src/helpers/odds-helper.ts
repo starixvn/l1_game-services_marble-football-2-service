@@ -127,8 +127,12 @@ export const calculatePreMatchOdds = (matchConfig: MatchConfigType, margins: Rec
     return calculateBetOdds(probabilities, margins);
 };
 
-export const calculateLiveOdds = (halfConfig: HalfConfigType, margins: Record<string, number>[] = [], firstHalfResult = "0-0") => {
-    const { probabilities } = calculateProbabilitiesForBetChoices(halfConfig.scoreRate, firstHalfResult);
+export const calculateLiveOdds = (halfConfig: HalfConfigType, firstHalfResult = "0", margins: Record<string, number>[] = []) => {
+    const firstHalfHomeGoals = firstHalfResult.split("H").length - 1;
+    const firstHalfAwayGoals = firstHalfResult.split("A").length - 1;
+    const addingScore = `${firstHalfHomeGoals}-${firstHalfAwayGoals}`;
+
+    const { probabilities } = calculateProbabilitiesForBetChoices(halfConfig.scoreRate, addingScore);
 
     return calculateBetOdds(probabilities, margins);
 };

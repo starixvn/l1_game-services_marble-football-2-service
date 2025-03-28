@@ -256,7 +256,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
 
     calculateAndPublishOddsLive() {
         const { firstHalf } = this.gameData.result;
-        const liveOdds = calculateLiveOdds(this.gameData.matchConfig.secondHalfConfig, this.gameData.gameConfigs.margin, firstHalf);
+        const liveOdds = calculateLiveOdds(this.gameData.matchConfig.secondHalfConfig, firstHalf, this.gameData.gameConfigs?.margin ?? []);
         const odds = {
             [SECOND_HALF_BET_CHOICES.secondHalfHome]: liveOdds.home,
             [SECOND_HALF_BET_CHOICES.secondHalfAway]: liveOdds.away,

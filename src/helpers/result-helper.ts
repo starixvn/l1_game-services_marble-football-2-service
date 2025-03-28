@@ -103,7 +103,7 @@ const generateResultForHalf = (halfConfig: HalfConfigType) => {
     return result || "0";
 };
 
-const getScoreFromScoreRate = (scoreRate: Record<string, number>) => {
+export const getScoreFromScoreRate = (scoreRate: Record<string, number>) => {
     const score = Object.keys(scoreRate);
     const rate = Object.values(scoreRate);
 

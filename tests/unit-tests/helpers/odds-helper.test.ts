@@ -11,6 +11,12 @@ import {
 } from "../../../src/helpers/odds-helper";
 import { HalfConfigType, MatchConfigType } from "../../../src/match-configs";
 
+jest.mock("../../../src/constants", () => ({
+    DEFAULT_MARGIN: 0,
+    OVER_UNDER_VALUE: 4.5,
+    ODDS_FOR_DRAW_4: 50,
+}));
+
 describe("odds-helper", () => {
     describe("parseScore", () => {
         it("should correctly parse score string into numbers", () => {
@@ -115,21 +121,26 @@ describe("odds-helper", () => {
         it("should calculate betting odds correctly", () => {
             const result = calculateBetOdds(mockProbabilities);
 
-            expect(result.home).toBeDefined();
-            expect(result.away).toBeDefined();
-            expect(result.draw).toBeDefined();
-            expect(result.over).toBeDefined();
-            expect(result.under).toBeDefined();
-            expect(result.even).toBeDefined();
-            expect(result.odd).toBeDefined();
+            expect(result.home).toBeCloseTo(2);
+            expect(result.away).toBeCloseTo(3.33);
+            expect(result.draw).toBeCloseTo(5);
+            expect(result.over).toBeCloseTo(2);
+            expect(result.under).toBeCloseTo(2);
+            expect(result.even).toBeCloseTo(2);
+            expect(result.odd).toBeCloseTo(2);
         });
 
         it("should apply margins correctly", () => {
-            const margins = [{ max: 2, home: 0.1, away: 0.1 }];
+            const margins = [
+                { max: 2, home: 0.1, away: 0.1 },
+                { max: 5, home: 0, away: 0.2 },
+            ];
             const result = calculateBetOdds(mockProbabilities, margins);
 
-            expect(result.home).toBeLessThan(2);
-            expect(result.away).toBeLessThan(3.33);
+            console.log(result);
+
+            expect(result.home).toBeCloseTo(1.8);
+            expect(result.away).toBeCloseTo(2.67);
         });
     });
 
@@ -141,7 +152,7 @@ describe("odds-helper", () => {
 
         it("should calculate draw odds correctly", () => {
             const result = calculateDrawOdds(mockProbabilities);
-            expect(result).toBeCloseTo(2.4);
+            expect(result).toBeCloseTo(2.5);
         });
     });
 
@@ -164,34 +175,38 @@ describe("odds-helper", () => {
         it("should return odds for all bet choices", () => {
             const result = calculatePreMatchOdds(mockMatchConfig);
 
-            expect(result.home).toBeDefined();
-            expect(result.away).toBeDefined();
-            expect(result.draw).toBeDefined();
-            expect(result.over).toBeDefined();
-            expect(result.under).toBeDefined();
-            expect(result.even).toBeDefined();
-            expect(result.odd).toBeDefined();
+            console.log(result);
+
+            expect(result.home).toBeCloseTo(4);
+            expect(result.away).toBeCloseTo(4);
+            expect(result.draw).toBeCloseTo(2);
+            expect(result.over).toBe(Infinity);
+            expect(result.under).toBeCloseTo(1);
+            expect(result.even).toBeCloseTo(1);
+            expect(result.odd).toBe(Infinity);
         });
     });
 
     describe("calculateLiveOdds", () => {
         const mockHalfConfig: HalfConfigType = {
             scoreRate: {
-                "1-0": 0.5,
-                "0-1": 0.5,
+                "1-0": 0.4,
+                "0-1": 0.3,
+                "0-2": 0.2,
+                "2-2": 0.1,
             },
         };
 
-        it("should return odds for all bet choices", () => {
-            const result = calculateLiveOdds(mockHalfConfig, [], "1-0");
+        it("should return odds correctly for all bet choices", () => {
+            const result = calculateLiveOdds(mockHalfConfig, "H", []);
 
-            expect(result.home).toBeDefined();
-            expect(result.away).toBeDefined();
-            expect(result.draw).toBeDefined();
-            expect(result.over).toBeDefined();
-            expect(result.under).toBeDefined();
-            expect(result.even).toBeDefined();
-            expect(result.odd).toBeDefined();
+            expect(result.home).toBeCloseTo(2);
+            expect(result.away).toBeCloseTo(5);
+            expect(result.draw).toBeCloseTo(3.33);
+            expect(result.over).toBeCloseTo(10);
+            expect(result.under).toBeCloseTo(1.11);
+            expect(result.even).toBeCloseTo(1.43);
+            expect(result.odd).toBeCloseTo(3.33);
         });
     });
 });
