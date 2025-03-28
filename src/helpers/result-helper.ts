@@ -64,7 +64,6 @@ export const getSettlementResult = (roundResult: ResultType): SettlementResultTy
     const home = homeGoals > awayGoals;
     const away = awayGoals > homeGoals;
     const draw = homeGoals === awayGoals;
-    const draw4 = homeGoals === awayGoals && homeGoals === 4;
     const over = isOver;
     const under = !isOver;
     const odd = isOdd;
@@ -74,7 +73,6 @@ export const getSettlementResult = (roundResult: ResultType): SettlementResultTy
         firstHalfHome: home,
         firstHalfAway: away,
         firstHalfDraw: draw,
-        firstHalfDraw4: draw4,
         firstHalfOver: over,
         firstHalfUnder: under,
         firstHalfOdd: odd,
@@ -82,7 +80,6 @@ export const getSettlementResult = (roundResult: ResultType): SettlementResultTy
         secondHalfHome: home,
         secondHalfAway: away,
         secondHalfDraw: draw,
-        secondHalfDraw4: draw4,
         secondHalfEven: even,
         secondHalfOdd: odd,
         secondHalfOver: over,
