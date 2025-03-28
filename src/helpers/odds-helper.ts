@@ -1,4 +1,4 @@
-import { DEFAULT_MARGIN, ODDS_FOR_DRAW_4, OVER_UNDER_VALUE } from "../constants";
+import { DEFAULT_MARGIN, OVER_UNDER_VALUE } from "../constants";
 import { HalfConfigType, MatchConfigType } from "../match-configs";
 
 export type GeneratingOdds = {

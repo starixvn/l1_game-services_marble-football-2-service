@@ -3,7 +3,6 @@ import GameData from "../game-data";
 import type TournamentConsumer from "./tournament-consumer";
 import { SettlementResultType } from "../models/rounds";
 import { OddsType } from "../match-configs";
-import { BET_CHOICES } from "../constants";
 
 export default class SettleGameRoundConsumer extends Table.EventConsumers.TableSettleGameRoundConsumer {
     declare gameData: GameData;
@@ -31,7 +30,7 @@ export default class SettleGameRoundConsumer extends Table.EventConsumers.TableS
         const betResult = Object.entries(settlementResult).reduce(
             (result, [choice, win]) => {
                 const betAmount = bet[choice] ?? 0;
-                let originalOdds = (odds as any)[choice] || 1;
+                const originalOdds = (odds as any)[choice] || 1;
 
                 const effectiveOdds = bet.freeBet ? originalOdds - 1 : originalOdds;
                 const winAmount = win ? betAmount * effectiveOdds : 0;
