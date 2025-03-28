@@ -181,4 +181,129 @@ describe("ProcessBetQueue", () => {
             ]);
         });
     });
+
+    describe("upsertBet", () => {
+        beforeEach(() => {
+            processBetQueue.gameData.dynamicOdds = { choice1: 1.5, choice2: 2.0 };
+            processBetQueue.betsRepository = {
+                updateOne: jest.fn().mockResolvedValue({ modifiedCount: 1 })
+            } as any;
+        });
+
+        it("should create a new bet when no existing bet is found", async () => {
+            // Arrange
+            const player = { 
+                UID: "player1",
+                profile: { name: "Test Player" }
+            };
+            const bet = {
+                amount: 100,
+                betChoice: "choice1",
+                roundId: 1,
+                clientSeed: new Date(),
+                freeBet: false
+            };
+            const rate = 1.5;
+
+            // Act
+            const result = await processBetQueue.upsertBet(player, bet.roundId, bet, rate);
+
+            // Assert
+            expect(processBetQueue.betsRepository.updateOne).toHaveBeenCalledWith(
+                { uid: player.UID, roundId: bet.roundId, freeBet: bet.freeBet },
+                {
+                    $inc: {
+                        [bet.betChoice]: bet.amount,
+                        totalAmount: bet.amount
+                    },
+                    $setOnInsert: expect.objectContaining({
+                        uid: player.UID,
+                        name: player.profile.name,
+                        odds: processBetQueue.gameData.dynamicOdds,
+                        freeBet: bet.freeBet,
+                        roundId: bet.roundId,
+                        clientSeed: bet.clientSeed
+                    })
+                },
+                { upsert: true, setDefaultsOnInsert: true }
+            );
+            expect(result).toBeInstanceOf(Date);
+        });
+
+        it("should update existing bet when found", async () => {
+            // Arrange
+            const player = { 
+                UID: "player1",
+                profile: { name: "Test Player" }
+            };
+            const bet = {
+                amount: 100,
+                betChoice: "choice1",
+                roundId: 1,
+                clientSeed: new Date(),
+                freeBet: false
+            };
+            const rate = 1.5;
+
+            // Act
+            await processBetQueue.upsertBet(player, bet.roundId, bet, rate);
+
+            // Assert
+            expect(processBetQueue.betsRepository.updateOne).toHaveBeenCalledWith(
+                { uid: player.UID, roundId: bet.roundId, freeBet: bet.freeBet },
+                {
+                    $inc: {
+                        [bet.betChoice]: bet.amount,
+                        totalAmount: bet.amount
+                    },
+                    $setOnInsert: expect.any(Object)
+                },
+                { upsert: true, setDefaultsOnInsert: true }
+            );
+        });
+
+        it("should include session information when player has session", async () => {
+            // Arrange
+            const player = { 
+                UID: "player1",
+                profile: { name: "Test Player" },
+                session: {
+                    siteId: "site1",
+                    currencyName: "USD",
+                    operatorId: "op1",
+                    playerId: "pid1"
+                }
+            };
+            const bet = {
+                amount: 100,
+                betChoice: "choice1",
+                roundId: 1,
+                clientSeed: new Date(),
+                freeBet: false
+            };
+            const rate = 1.5;
+
+            // Act
+            await processBetQueue.upsertBet(player, bet.roundId, bet, rate);
+
+            // Assert
+            expect(processBetQueue.betsRepository.updateOne).toHaveBeenCalledWith(
+                { uid: player.UID, roundId: bet.roundId, freeBet: bet.freeBet },
+                {
+                    $inc: {
+                        [bet.betChoice]: bet.amount,
+                        totalAmount: bet.amount
+                    },
+                    $setOnInsert: expect.objectContaining({
+                        siteId: player.session.siteId,
+                        currency: player.session.currencyName,
+                        rate: rate,
+                        operatorId: player.session.operatorId,
+                        playerId: player.session.playerId
+                    })
+                },
+                { upsert: true, setDefaultsOnInsert: true }
+            );
+        });
+    });
 });
