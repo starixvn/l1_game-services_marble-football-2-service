@@ -251,7 +251,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
             [FIRST_HALF_BET_CHOICES.firstHalfOdd]: preMatchOdds.odd,
         };
 
-        this.gameStatusPublisher.publishOdds(odds);
+        this.saveOddToGameDataAndPublish(odds);
     }
 
     calculateAndPublishOddsLive() {
@@ -267,6 +267,16 @@ export default class GameCron extends Table.Crons.TableGameCron {
             [SECOND_HALF_BET_CHOICES.secondHalfOdd]: liveOdds.odd,
         };
 
+        this.saveOddToGameDataAndPublish(odds);
+    }
+
+    private saveOddToGameDataAndPublish(odds: Record<string, number>) {
+        this.saveOddToGameData(odds);
         this.gameStatusPublisher.publishOdds(odds);
+    }
+
+    private saveOddToGameData(odds: Record<string, number>) {
+        const currentOdds = this.gameData.dynamicOdds;
+        this.gameData.dynamicOdds = { ...currentOdds, ...odds };
     }
 }
