@@ -28,14 +28,14 @@ describe("gameSettings", () => {
         expect(wholeRound).toBeGreaterThan(placingBetsFirstHalf);
         expect(placingBetsFirstHalf).toBeGreaterThan(lockingBetFirstHalf);
         expect(lockingBetFirstHalf).toBeGreaterThan(streamingVideoFirstHalf);
-        expect(wholeRound).toBe(121);
+        expect(wholeRound).toBe(124);
         expect(placingBetsFirstHalf).toBe(107);
         expect(lockingBetFirstHalf).toBe(90);
         expect(streamingVideoFirstHalf).toBe(89);
         expect(wholeRound).toBeGreaterThan(placingBetsSecondHalf);
         expect(placingBetsSecondHalf).toBeGreaterThan(lockingBetSecondHalf);
         expect(lockingBetSecondHalf).toBeGreaterThan(streamingVideoSecondHalf);
-        expect(wholeRound).toBe(121);
+        expect(wholeRound).toBe(124);
         expect(placingBetsSecondHalf).toBe(54);
         expect(lockingBetSecondHalf).toBe(37);
         expect(streamingVideoSecondHalf).toBe(36);
