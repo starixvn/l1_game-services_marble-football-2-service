@@ -73,46 +73,6 @@ const secondHalfConfig2: HalfConfigType = {
     },
 };
 
-const secondHalfConfig3: HalfConfigType = {
-    scoreRate: {
-        "0-0": 0,
-        "1-0": 0.11,
-        "0-1": 0.11,
-        "1-1": 0.09,
-        "2-0": 0.08,
-        "0-2": 0.08,
-        "2-1": 0.07,
-        "1-2": 0.07,
-        "3-0": 0.07,
-        "0-3": 0.07,
-        "2-2": 0.01,
-        "3-1": 0.01,
-        "1-3": 0.01,
-        "4-0": 0.11,
-        "0-4": 0.11,
-    },
-};
-
-const secondHalfConfig4: HalfConfigType = {
-    scoreRate: {
-        "0-0": 0,
-        "1-0": 0.09,
-        "0-1": 0.09,
-        "1-1": 0.11,
-        "2-0": 0.11,
-        "0-2": 0.11,
-        "2-1": 0.09,
-        "1-2": 0.09,
-        "3-0": 0.08,
-        "0-3": 0.08,
-        "2-2": 0.01,
-        "3-1": 0.01,
-        "1-3": 0.01,
-        "4-0": 0.06,
-        "0-4": 0.06,
-    },
-};
-
 const secondHalfConfig5: HalfConfigType = {
     scoreRate: {
         "0-0": 0,
@@ -133,31 +93,4 @@ const secondHalfConfig5: HalfConfigType = {
     },
 };
 
-const secondHalfConfig6: HalfConfigType = {
-    scoreRate: {
-        "0-0": 0,
-        "1-0": 0.08,
-        "0-1": 0.08,
-        "1-1": 0.13,
-        "2-0": 0.12,
-        "0-2": 0.12,
-        "2-1": 0.1,
-        "1-2": 0.1,
-        "3-0": 0.09,
-        "0-3": 0.09,
-        "2-2": 0.01,
-        "3-1": 0.01,
-        "1-3": 0.01,
-        "4-0": 0.03,
-        "0-4": 0.03,
-    },
-};
-
-export const secondHalfConfigs = [
-    secondHalfConfig1,
-    secondHalfConfig2,
-    secondHalfConfig3,
-    secondHalfConfig4,
-    secondHalfConfig5,
-    secondHalfConfig6,
-];
+export const secondHalfConfigs = [secondHalfConfig1, secondHalfConfig2, secondHalfConfig5];

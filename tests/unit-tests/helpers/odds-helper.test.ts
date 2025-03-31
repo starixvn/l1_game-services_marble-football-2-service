@@ -5,7 +5,6 @@ import {
     calculateProbabilitiesForBetChoices,
     calculateBetOdds,
     probabilityToBetOdds,
-    calculateDrawOdds,
     calculatePreMatchOdds,
     calculateLiveOdds,
 } from "../../../src/helpers/odds-helper";
@@ -15,6 +14,7 @@ jest.mock("../../../src/constants", () => ({
     DEFAULT_MARGIN: 0,
     OVER_UNDER_VALUE: 4.5,
     ODDS_FOR_DRAW_4: 50,
+    MAX_ODDS: 100,
 }));
 
 describe("odds-helper", () => {
@@ -125,30 +125,6 @@ describe("odds-helper", () => {
             expect(result.under).toBeCloseTo(2);
             expect(result.even).toBeCloseTo(2);
             expect(result.odd).toBeCloseTo(2);
-        });
-
-        it("should apply margins correctly", () => {
-            const margins = [
-                { max: 2, home: 0.1, away: 0.1 },
-                { max: 5, home: 0, away: 0.2 },
-            ];
-            const result = calculateBetOdds(mockProbabilities, margins);
-
-            console.log(result);
-
-            expect(result.home).toBeCloseTo(1.8);
-            expect(result.away).toBeCloseTo(2.67);
-        });
-    });
-
-    describe("calculateDrawOdds", () => {
-        const mockProbabilities = {
-            draw: 0.4,
-        };
-
-        it("should calculate draw odds correctly", () => {
-            const result = calculateDrawOdds(mockProbabilities);
-            expect(result).toBeCloseTo(2.5);
         });
     });
 

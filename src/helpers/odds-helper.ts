@@ -1,4 +1,4 @@
-import { DEFAULT_MARGIN, OVER_UNDER_VALUE } from "../constants";
+import { DEFAULT_MARGIN, MAX_ODDS, OVER_UNDER_VALUE } from "../constants";
 import { HalfConfigType, MatchConfigType } from "../match-configs";
 
 export type GeneratingOdds = {
@@ -52,6 +52,7 @@ export const calculateProbabilitiesForBetChoices = (scoreRates: Record<string, n
 
     for (const [score, rate] of Object.entries(scoreRates)) {
         const [homeGoals, awayGoals] = parseScore(score);
+        const totalGoals = homeGoals + awayGoals + addingHome + addingAway;
 
         if (homeGoals + addingHome > awayGoals + addingAway) {
             home += rate;
@@ -60,11 +61,6 @@ export const calculateProbabilitiesForBetChoices = (scoreRates: Record<string, n
         } else {
             draw += rate;
         }
-    }
-
-    for (const [score, rate] of Object.entries(scoreRates)) {
-        const [homeGoals, awayGoals] = parseScore(score);
-        const totalGoals = homeGoals + awayGoals + addingHome + addingAway;
 
         if (totalGoals > OVER_UNDER_VALUE) {
             over += rate;
@@ -92,32 +88,31 @@ export const calculateProbabilitiesForBetChoices = (scoreRates: Record<string, n
     };
 };
 
+export const calculateMarginFromOdds = (odds: number) => {
+    return (Math.log2(Math.min(odds, MAX_ODDS)) + 1) * DEFAULT_MARGIN;
+};
+
 export const calculateBetOdds = (probabilities: Record<string, number>, margins: Record<string, number>[] = []): GeneratingOdds => {
-    const sortedMargins = margins.toSorted((a, b) => a.max - b.max);
-
-    const odds = Object.keys(probabilities)
-        .filter((betChoice) => betChoice !== "draw")
-        .reduce((result, betChoice) => {
-            const prob = probabilities[betChoice];
-            const originalOdds = probabilityToBetOdds(prob);
-            const margin = sortedMargins.find((m) => originalOdds <= m.max)?.[betChoice] || DEFAULT_MARGIN;
-            result[betChoice] = probabilityToBetOdds(prob, margin);
-            return result;
-        }, {} as Record<string, number>);
-
-    odds.draw = calculateDrawOdds(probabilities, margins);
+    const odds = Object.keys(probabilities).reduce((result, betChoice) => {
+        const prob = probabilities[betChoice];
+        const originalOdds = probabilityToBetOdds(prob);
+        const margin = Math.max(DEFAULT_MARGIN, calculateMarginFromOdds(originalOdds));
+        result[betChoice] = probabilityToBetOdds(prob, margin);
+        return result;
+    }, {} as Record<string, number>);
 
     return odds as GeneratingOdds;
 };
 
 export const probabilityToBetOdds = (prob: number, margin = 0): number => {
     const odds = (1 - margin) / prob;
-    return odds > 20 ? Math.floor(odds) : roundToPrecision(odds);
+    return roundToPrecision(odds);
 };
 
 export const calculatePreMatchOdds = (matchConfig: MatchConfigType, margins: Record<string, number>[] = []) => {
     const fullTimeScoreRates = calculateFullTimeScoreRates(matchConfig.firstHalfConfig, matchConfig.secondHalfConfig);
     const { probabilities } = calculateProbabilitiesForBetChoices(fullTimeScoreRates);
+
     return calculateBetOdds(probabilities, margins);
 };
 
@@ -129,12 +124,4 @@ export const calculateLiveOdds = (halfConfig: HalfConfigType, firstHalfResult = 
     const { probabilities } = calculateProbabilitiesForBetChoices(halfConfig.scoreRate, addingScore);
 
     return calculateBetOdds(probabilities, margins);
-};
-
-export const calculateDrawOdds = (probabilities: Record<string, number>, margins: Record<string, number>[] = []) => {
-    const drawProb = probabilities.draw;
-    const originalOdds = 1 / drawProb;
-    const margin = margins.find((m) => originalOdds <= m.max)?.draw || DEFAULT_MARGIN;
-    const odds = (1 - margin) / drawProb;
-    return roundToPrecision(odds);
 };
