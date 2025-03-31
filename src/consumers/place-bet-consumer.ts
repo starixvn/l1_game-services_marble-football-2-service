@@ -3,9 +3,12 @@ import GameDefinition from "../game-definition";
 import { FIRST_HALF_BET_CHOICES, SECOND_HALF_BET_CHOICES } from "../constants";
 import { helpers } from "sc-common";
 import { isWithinBettingTime, isWithinFirstHalfBettingTime, isWithinSecondHalfBettingTime } from "../helpers/game-timing";
+import { CurrencyGroupGames } from "sc-game-management-client";
+import GameData from "../game-data";
 
 export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetConsumer {
     declare definition: GameDefinition;
+    declare gameData: GameData;
 
     composeBetChoiceValidationCriteria(betChoice: string) {
         return [
@@ -15,6 +18,39 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
             },
             ...super.composeBetChoiceValidationCriteria(betChoice),
         ];
+    }
+
+    composeBetAmountValidationCriteria(player: any, betChoice: string, amount: number, freeBet: boolean): { failure: boolean; notice: string; }[] {
+        const settings = this.gameData.currencyGroupGames.find((x) => x.groupId.toString() === player.session.currencyGroupId);
+        const configs = this.gameData.gameConfigs;
+        const { betTracks } = this.gameData.ingame[player.profile.name] || { betTracks: {} };
+        const totalAmount = this.definition.choices.reduce((total, choice) => total + (betTracks[choice] || 0), 0) + amount;
+        const minBet = Math.max(player.profile.minBet, settings?.minBet ?? 0);
+        const maxBet = Math.min(player.profile.maxBet, settings?.maxBet ?? Infinity);
+        const maxBetPerChoice = this.getMaxBetPerChoice(player, betChoice, settings);
+
+        return [
+            {
+                failure: freeBet && !configs.enableFreeBet,
+                notice: this.getNoticeObj(helpers.noticeHelper.invalidBet),
+            },
+            {
+                failure: amount > maxBetPerChoice || betTracks[betChoice] + amount > maxBetPerChoice,
+                notice: this.getNoticeObj(helpers.noticeHelper.maxBetForChoice, { maxBet: maxBetPerChoice }),
+            },
+            {
+                failure: amount < minBet,
+                notice: this.getNoticeObj(helpers.noticeHelper.minBet, { minBet }),
+            },
+            {
+                failure: amount > maxBet,
+                notice: this.getNoticeObj(helpers.noticeHelper.maxBet, { maxBet }),
+            },
+            {
+                failure: totalAmount > maxBet,
+                notice: this.getNoticeObj(helpers.noticeHelper.maxBet, { maxBet }),
+            },
+        ]; 
     }
 
     composeBettingTimeValidationCriteria(roundId: number): { failure: boolean; notice: string }[] {
@@ -62,5 +98,27 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
 
     private isSecondHalfBetChoice(betChoice: string) {
         return Object.hasOwn(SECOND_HALF_BET_CHOICES, betChoice);
+    }
+
+    private getMaxBetPerChoice(player: any, betChoice: string,settings?: CurrencyGroupGames) {
+        if (this.isFirstHalfBetChoice(betChoice)) {
+            return Math.min(player.profile.maxBet, settings?.maxBetPerChoice[betChoice] || Infinity);
+        }
+
+        return this.getMaxBetPerChoiceWithOdds(player, betChoice, settings);
+    }
+
+    private getMaxBetPerChoiceWithOdds(player: any, betChoice: string ,settings?: CurrencyGroupGames) {
+        const maxBet = player.profile.maxBet ?? Infinity;
+        const configuredMaxBetByBetChoice = settings?.maxBetPerChoice[betChoice] ?? Infinity;
+        const maxBetByOdds = this.getMaxBetByOdds(betChoice, maxBet);
+        
+        return Math.min(maxBet, configuredMaxBetByBetChoice, maxBetByOdds);
+    }
+
+    private getMaxBetByOdds(betChoice: string, maxBet: number) {
+        const odds = this.gameData?.dynamicOdds;
+        const betChoiceOdds = odds?.[betChoice] ?? 1;
+        return Math.round(maxBet / (betChoiceOdds - 1));
     }
 }

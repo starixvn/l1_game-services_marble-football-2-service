@@ -523,4 +523,206 @@ describe("PlaceBetConsumer", () => {
             });
         });
     });
+
+    describe("composeBetAmountValidationCriteria", () => {
+        let mockPlayer: any;
+        let mockSettings: any;
+
+        beforeEach(() => {
+            mockPlayer = {
+                profile: {
+                    name: "testPlayer",
+                    minBet: 10,
+                    maxBet: 1000
+                },
+                session: {
+                    currencyGroupId: "1"
+                }
+            };
+
+            mockSettings = {
+                groupId: "1",
+                minBet: 20,
+                maxBet: 2000,
+                maxBetPerChoice: {
+                    firstHalfHome: 500,
+                    secondHalfHome: 600
+                }
+            };
+
+            mockGameData.currencyGroupGames = [mockSettings];
+            mockGameData.gameConfigs = {
+                enableFreeBet: true
+            };
+            mockGameData.ingame = {
+                testPlayer: {
+                    betTracks: {}
+                }
+            };
+
+            // Add mock choices to game definition
+            mockGameDefinition.choices = [
+                "firstHalfHome",
+                "firstHalfAway",
+                "firstHalfDraw",
+                "secondHalfHome",
+                "secondHalfAway",
+                "secondHalfDraw"
+            ];
+        });
+
+        describe("free bet validation", () => {
+            it("should fail validation when free bet is disabled", () => {
+                // Arrange
+                mockGameData.gameConfigs.enableFreeBet = false;
+                const betChoice = "firstHalfHome";
+                const amount = 100;
+                const freeBet = true;
+
+                // Act
+                const result = placeBetConsumer.composeBetAmountValidationCriteria(mockPlayer, betChoice, amount, freeBet);
+
+                // Assert
+                expect(result[0].failure).toBe(true);
+                expect(result[0].notice).toEqual({ errorCode: "SB1935" });
+            });
+
+            it("should pass validation when free bet is enabled", () => {
+                // Arrange
+                mockGameData.gameConfigs.enableFreeBet = true;
+                const betChoice = "firstHalfHome";
+                const amount = 100;
+                const freeBet = true;
+
+                // Act
+                const result = placeBetConsumer.composeBetAmountValidationCriteria(mockPlayer, betChoice, amount, freeBet);
+
+                // Assert
+                expect(result[0].failure).toBe(false);
+            });
+        });
+
+        describe("max bet per choice validation", () => {
+            it("should fail validation when bet amount exceeds max bet per choice for first half", () => {
+                // Arrange
+                const betChoice = "firstHalfHome";
+                const amount = 600;
+                const freeBet = false;
+
+                // Act
+                const result = placeBetConsumer.composeBetAmountValidationCriteria(mockPlayer, betChoice, amount, freeBet);
+
+                // Assert
+                expect(result[1].failure).toBe(true);
+                expect(result[1].notice).toEqual({ errorCode: "SB1910", maxBet: 500 });
+            });
+
+            it("should fail validation when bet amount plus existing bet exceeds max bet per choice", () => {
+                // Arrange
+                mockGameData.ingame.testPlayer.betTracks = {
+                    firstHalfHome: 300
+                };
+                const betChoice = "firstHalfHome";
+                const amount = 300;
+                const freeBet = false;
+
+                // Act
+                const result = placeBetConsumer.composeBetAmountValidationCriteria(mockPlayer, betChoice, amount, freeBet);
+
+                // Assert
+                expect(result[1].failure).toBe(true);
+                expect(result[1].notice).toEqual({ errorCode: "SB1910", maxBet: 500 });
+            });
+        });
+
+        describe("min bet validation", () => {
+            it("should fail validation when bet amount is less than min bet", () => {
+                // Arrange
+                const betChoice = "firstHalfHome";
+                const amount = 5;
+                const freeBet = false;
+
+                // Act
+                const result = placeBetConsumer.composeBetAmountValidationCriteria(mockPlayer, betChoice, amount, freeBet);
+
+                // Assert
+                expect(result[2].failure).toBe(true);
+                expect(result[2].notice).toEqual({ errorCode: "SB1909", minBet: 20 });
+            });
+        });
+
+        describe("max bet validation", () => {
+            it("should fail validation when bet amount exceeds max bet", () => {
+                // Arrange
+                const betChoice = "firstHalfHome";
+                const amount = 2500;
+                const freeBet = false;
+
+                // Act
+                const result = placeBetConsumer.composeBetAmountValidationCriteria(mockPlayer, betChoice, amount, freeBet);
+
+                // Assert
+                expect(result[3].failure).toBe(true);
+                expect(result[3].notice).toEqual({ errorCode: "SB1911", maxBet: 1000 });
+            });
+
+            it("should fail validation when total bet amount exceeds max bet", () => {
+                // Arrange
+                mockGameData.ingame.testPlayer.betTracks = {
+                    firstHalfHome: 1500
+                };
+                const betChoice = "secondHalfHome";
+                const amount = 1000;
+                const freeBet = false;
+
+                // Act
+                const result = placeBetConsumer.composeBetAmountValidationCriteria(mockPlayer, betChoice, amount, freeBet);
+
+                // Assert
+                expect(result[4].failure).toBe(true);
+                expect(result[4].notice).toEqual({ errorCode: "SB1911", maxBet: 1000 });
+            });
+        });
+
+        describe("max bet by odds validation", () => {
+            beforeEach(() => {
+                mockGameData.dynamicOdds = {
+                    secondHalfHome: 2.5
+                };
+            });
+
+            it("should limit max bet based on odds for second half bets", () => {
+                // Arrange
+                const betChoice = "secondHalfHome";
+                const amount = 1000;
+                const freeBet = false;
+
+                // Act
+                const result = placeBetConsumer.composeBetAmountValidationCriteria(mockPlayer, betChoice, amount, freeBet);
+
+                // Assert
+                // maxBet / (odds - 1) = 1000 / (2.5 - 1) = 666.67
+                expect(result[1].failure).toBe(true);
+                expect(result[1].notice).toEqual({ errorCode: "SB1910", maxBet: 600 });
+            });
+
+            it("should limit max bet based on odds when odds-based calculation is smaller than configured max bet", () => {
+                // Arrange
+                mockGameData.dynamicOdds = {
+                    secondHalfHome: 3.0  // Higher odds will result in smaller max bet
+                };
+                const betChoice = "secondHalfHome";
+                const amount = 1000;
+                const freeBet = false;
+
+                // Act
+                const result = placeBetConsumer.composeBetAmountValidationCriteria(mockPlayer, betChoice, amount, freeBet);
+
+                // Assert
+                // maxBet / (odds - 1) = 1000 / (3.0 - 1) = 500
+                expect(result[1].failure).toBe(true);
+                expect(result[1].notice).toEqual({ errorCode: "SB1910", maxBet: 500 });
+            });
+        });
+    });
 });
