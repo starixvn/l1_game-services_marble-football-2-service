@@ -1,8 +1,13 @@
 import { TableGameConfigBot } from "sc-game-base/src/table/crons";
 import GameData from "../game-data";
+import { isWithinFirstHalfBettingTime } from "../helpers/game-timing";
+import GameDefinition from "../game-definition";
+import { FIRST_HALF_BET_CHOICES, SECOND_HALF_BET_CHOICES } from "../constants";
+import { helpers } from "sc-common";
 
 export default class Bot extends TableGameConfigBot {
     declare gameData: GameData;
+    declare definition: GameDefinition;
 
     override updateBalanceAndPublishBetPayload(botId: string, choice: string, amount: number, balance: number) {
         super.updateBalanceAndPublishBetPayload(botId, choice, amount, balance);
@@ -16,5 +21,31 @@ export default class Bot extends TableGameConfigBot {
             }
             !this.gameData.playerBetCount[choice].includes(playerId) && this.gameData.playerBetCount[choice].push(playerId);
         }
+    }
+
+    getBetChoice(bot: any) {
+        const betChoiceRatios = this.getBetChoicesRatios();
+        const underRatioGroups = helpers.arrayHelper.shuffle(betChoiceRatios.filter((data) => data.underBetRatio));
+        const betOptions = this.filterBetChoice(this.definition.choices);
+        const choice = underRatioGroups.length > 0 ? this.chance.pickone(underRatioGroups[0].group) : this.chance.pickone(betOptions);
+        const hedgeBetGroup = this.definition.hedgeBetGroups.find((group) => group.includes(choice));
+
+        if (hedgeBetGroup) {
+            const oppositeChoice = choice === hedgeBetGroup[0] ? hedgeBetGroup[1] : hedgeBetGroup[0];
+            return bot.choices.includes(oppositeChoice) ? oppositeChoice : choice;
+        } else {
+            return choice;
+        }
+    }
+
+    private filterBetChoice(betOptions: string[]) {
+        const remainingTime = this.gameData.remainingTime;
+        const durations = this.definition.durations;
+        const isFirstHalf = isWithinFirstHalfBettingTime(remainingTime, durations);
+        const acceptedBetChoices = isFirstHalf
+            ? FIRST_HALF_BET_CHOICES
+            : SECOND_HALF_BET_CHOICES;
+        
+        return betOptions.filter((choice) => Object.hasOwn(acceptedBetChoices, choice));
     }
 }
