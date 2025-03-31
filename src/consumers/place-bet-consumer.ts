@@ -119,6 +119,6 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
     private getMaxBetByOdds(betChoice: string, maxBet: number) {
         const odds = this.gameData?.dynamicOdds;
         const betChoiceOdds = odds?.[betChoice] ?? 1;
-        return Math.round(maxBet / (betChoiceOdds - 1));
+        return Math.round(maxBet / (Math.abs(betChoiceOdds - 1)));
     }
 }
