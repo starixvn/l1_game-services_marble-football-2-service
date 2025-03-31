@@ -633,6 +633,42 @@ describe("PlaceBetConsumer", () => {
                 expect(result[1].failure).toBe(true);
                 expect(result[1].notice).toEqual({ errorCode: "SB1910", maxBet: 500 });
             });
+
+            it("should limit max bet based on odds for second half bets", () => {
+                // Arrange
+                mockGameData.dynamicOdds = {
+                    secondHalfHome: 2.5
+                };
+                const betChoice = "secondHalfHome";
+                const amount = 1000;
+                const freeBet = false;
+
+                // Act
+                const result = placeBetConsumer.composeBetAmountValidationCriteria(mockPlayer, betChoice, amount, freeBet);
+
+                // Assert
+                // maxBet / (odds - 1) = 1000 / (2.5 - 1) = 666.67
+                expect(result[1].failure).toBe(true);
+                expect(result[1].notice).toEqual({ errorCode: "SB1910", maxBet: 600 });
+            });
+
+            it("should limit max bet based on odds when odds-based calculation is smaller than configured max bet", () => {
+                // Arrange
+                mockGameData.dynamicOdds = {
+                    secondHalfHome: 3.0  // Higher odds will result in smaller max bet
+                };
+                const betChoice = "secondHalfHome";
+                const amount = 1000;
+                const freeBet = false;
+
+                // Act
+                const result = placeBetConsumer.composeBetAmountValidationCriteria(mockPlayer, betChoice, amount, freeBet);
+
+                // Assert
+                // maxBet / (odds - 1) = 1000 / (3.0 - 1) = 500
+                expect(result[1].failure).toBe(true);
+                expect(result[1].notice).toEqual({ errorCode: "SB1910", maxBet: 500 });
+            });
         });
 
         describe("min bet validation", () => {
@@ -669,10 +705,10 @@ describe("PlaceBetConsumer", () => {
             it("should fail validation when total bet amount exceeds max bet", () => {
                 // Arrange
                 mockGameData.ingame.testPlayer.betTracks = {
-                    firstHalfHome: 1500
+                    firstHalfHome: 600
                 };
-                const betChoice = "secondHalfHome";
-                const amount = 1000;
+                const betChoice = "firstHalfAway";
+                const amount = 500;
                 const freeBet = false;
 
                 // Act
@@ -682,46 +718,24 @@ describe("PlaceBetConsumer", () => {
                 expect(result[4].failure).toBe(true);
                 expect(result[4].notice).toEqual({ errorCode: "SB1911", maxBet: 1000 });
             });
-        });
 
-        describe("max bet by odds validation", () => {
-            beforeEach(() => {
-                mockGameData.dynamicOdds = {
-                    secondHalfHome: 2.5
-                };
-            });
-
-            it("should limit max bet based on odds for second half bets", () => {
+            it("should fail validation when total amount across multiple bet choices exceeds max bet", () => {
                 // Arrange
-                const betChoice = "secondHalfHome";
-                const amount = 1000;
+                mockGameData.ingame.testPlayer.betTracks = {
+                    firstHalfHome: 300,
+                    firstHalfAway: 400,
+                    secondHalfHome: 200
+                };
+                const betChoice = "secondHalfAway";
+                const amount = 200;
                 const freeBet = false;
 
                 // Act
                 const result = placeBetConsumer.composeBetAmountValidationCriteria(mockPlayer, betChoice, amount, freeBet);
 
                 // Assert
-                // maxBet / (odds - 1) = 1000 / (2.5 - 1) = 666.67
-                expect(result[1].failure).toBe(true);
-                expect(result[1].notice).toEqual({ errorCode: "SB1910", maxBet: 600 });
-            });
-
-            it("should limit max bet based on odds when odds-based calculation is smaller than configured max bet", () => {
-                // Arrange
-                mockGameData.dynamicOdds = {
-                    secondHalfHome: 3.0  // Higher odds will result in smaller max bet
-                };
-                const betChoice = "secondHalfHome";
-                const amount = 1000;
-                const freeBet = false;
-
-                // Act
-                const result = placeBetConsumer.composeBetAmountValidationCriteria(mockPlayer, betChoice, amount, freeBet);
-
-                // Assert
-                // maxBet / (odds - 1) = 1000 / (3.0 - 1) = 500
-                expect(result[1].failure).toBe(true);
-                expect(result[1].notice).toEqual({ errorCode: "SB1910", maxBet: 500 });
+                expect(result[4].failure).toBe(true);
+                expect(result[4].notice).toEqual({ errorCode: "SB1911", maxBet: 1000 });
             });
         });
     });
