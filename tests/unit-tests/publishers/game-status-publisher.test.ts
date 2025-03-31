@@ -21,9 +21,7 @@ describe("GameStatusPublisher", () => {
             publisher.publishOdds(testOdds);
 
             expect(publisher.publishToAllUsers).toHaveBeenCalledWith({
-                odds: {
-                    values: testOdds,
-                },
+                odds: testOdds,
             });
         });
     });
