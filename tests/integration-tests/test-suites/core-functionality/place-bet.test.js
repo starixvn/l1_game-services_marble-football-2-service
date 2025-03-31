@@ -46,7 +46,7 @@ describe("when placing a bet", () => {
             );
 
             // Act
-            await placeBetAfterTimeout("firstHalfHome", 100.8, timeout, client);
+            await placeBetAfterTimeout("home", 100.8, timeout, client);
             const result = await client.handleGameEvent((data) => data.endBet);
 
             // Assert
@@ -58,7 +58,7 @@ describe("when placing a bet", () => {
             const timeCanBet = new Set([7, 8, 9]);
             let check = {};
             const interval = setInterval(() => client?.sendInGameEvent(), 1000);
-            const betChoice = "firstHalfHome";
+            const betChoice = "home";
 
             // Act & Assert
             for (let count = 0; count < 12; ) {
@@ -91,7 +91,7 @@ describe("when placing a bet", () => {
             );
 
             // Act
-            await placeBetAfterTimeout("secondHalfHome", 100.8, timeout, client);
+            await placeBetAfterTimeout("homeLive", 100.8, timeout, client);
             const result = await client.handleGameEvent((data) => data.endBet);
 
             // Assert
@@ -110,7 +110,7 @@ describe("when placing a bet", () => {
                 gameSettings.durations.wholeRound
             );
 
-            const betChoice = "secondHalfHome";
+            const betChoice = "homeLive";
 
             // Act
             await placeBetAfterTimeout(betChoice, 100.8, timeout, client);
@@ -125,7 +125,7 @@ describe("when placing a bet", () => {
             const timeCanBet = new Set([2, 3, 4]);
             let check = {};
             const interval = setInterval(() => client?.sendInGameEvent(), 1000);
-            const betChoice = "secondHalfHome";
+            const betChoice = "homeLive";
 
             // Act & Assert
             for (let count = 0; count < 12; ) {

@@ -49,31 +49,31 @@ describe("gameSettings", () => {
 
     it("should have the correct choicesMapper", () => {
         expect(gameSettings.choicesMapper).toEqual({
-            firstHalfHome: 1,
-            firstHalfAway: 2,
-            firstHalfDraw: 3,
-            firstHalfOver: 4,
-            firstHalfUnder: 5,
-            firstHalfOdd: 6,
-            firstHalfEven: 7,
-            secondHalfHome: 8,
-            secondHalfAway: 9,
-            secondHalfDraw: 10,
-            secondHalfOver: 11,
-            secondHalfUnder: 12,
-            secondHalfOdd: 13,
-            secondHalfEven: 14,
+            [BET_CHOICES.home]: 1,
+            [BET_CHOICES.away]: 2,
+            [BET_CHOICES.draw]: 3,
+            [BET_CHOICES.over]: 4,
+            [BET_CHOICES.under]: 5,
+            [BET_CHOICES.odd]: 6,
+            [BET_CHOICES.even]: 7,
+            [BET_CHOICES.homeLive]: 8,
+            [BET_CHOICES.awayLive]: 9,
+            [BET_CHOICES.drawLive]: 10,
+            [BET_CHOICES.overLive]: 11,
+            [BET_CHOICES.underLive]: 12,
+            [BET_CHOICES.oddLive]: 13,
+            [BET_CHOICES.evenLive]: 14,
         });
     });
 
     it("should have the correct hedgeBetGroups", () => {
         expect(gameSettings.hedgeBetGroups).toEqual([
-            [BET_CHOICES.firstHalfHome, BET_CHOICES.firstHalfAway],
-            [BET_CHOICES.firstHalfOver, BET_CHOICES.firstHalfUnder],
-            [BET_CHOICES.firstHalfOdd, BET_CHOICES.firstHalfEven],
-            [BET_CHOICES.secondHalfHome, BET_CHOICES.secondHalfAway],
-            [BET_CHOICES.secondHalfOver, BET_CHOICES.secondHalfUnder],
-            [BET_CHOICES.secondHalfOdd, BET_CHOICES.secondHalfEven],
+            [BET_CHOICES.home, BET_CHOICES.away],
+            [BET_CHOICES.over, BET_CHOICES.under],
+            [BET_CHOICES.odd, BET_CHOICES.even],
+            [BET_CHOICES.homeLive, BET_CHOICES.awayLive],
+            [BET_CHOICES.overLive, BET_CHOICES.underLive],
+            [BET_CHOICES.oddLive, BET_CHOICES.evenLive],
         ]);
     });
 
@@ -92,18 +92,18 @@ describe("gameSettings", () => {
     it("should have the correct botSettings", () => {
         expect(gameSettings.botSettings).toEqual({
             ratio: { mainOpts: 80, subOpts: 20 },
-            mainOpts: [BET_CHOICES.firstHalfHome, BET_CHOICES.firstHalfAway, BET_CHOICES.secondHalfHome, BET_CHOICES.secondHalfAway],
+            mainOpts: [BET_CHOICES.home, BET_CHOICES.away, BET_CHOICES.homeLive, BET_CHOICES.awayLive],
             subOpts: [
-                BET_CHOICES.firstHalfOver,
-                BET_CHOICES.firstHalfUnder,
-                BET_CHOICES.firstHalfOdd,
-                BET_CHOICES.firstHalfEven,
-                BET_CHOICES.firstHalfDraw,
-                BET_CHOICES.secondHalfOver,
-                BET_CHOICES.secondHalfUnder,
-                BET_CHOICES.secondHalfOdd,
-                BET_CHOICES.secondHalfEven,
-                BET_CHOICES.secondHalfDraw,
+                BET_CHOICES.over,
+                BET_CHOICES.under,
+                BET_CHOICES.odd,
+                BET_CHOICES.even,
+                BET_CHOICES.draw,
+                BET_CHOICES.overLive,
+                BET_CHOICES.underLive,
+                BET_CHOICES.oddLive,
+                BET_CHOICES.evenLive,
+                BET_CHOICES.drawLive,
             ],
         });
     });

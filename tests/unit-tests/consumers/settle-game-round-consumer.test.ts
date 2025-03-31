@@ -14,6 +14,8 @@ import {
 import { stub } from "jest-auto-stub";
 import GameDefinition from "../../../src/game-definition";
 import { OddsType } from "../../../src/match-configs";
+import { BET_CHOICES } from "../../../src/constants";
+import { SettlementResultType } from "../../../src/models/rounds";
 
 describe("SettleGameRoundConsumer", () => {
     let settleGameRoundConsumer: SettleGameRoundConsumer;
@@ -108,36 +110,36 @@ describe("SettleGameRoundConsumer", () => {
     describe("calculateBetResult", () => {
         // Common test objects
         const defaultSettlementResult = {
-            firstHalfHome: false,
-            firstHalfAway: false,
-            firstHalfDraw: false,
-            firstHalfOver: false,
-            firstHalfUnder: false,
-            firstHalfOdd: false,
-            firstHalfEven: false,
-            secondHalfHome: false,
-            secondHalfAway: false,
-            secondHalfDraw: false,
-            secondHalfOver: false,
-            secondHalfUnder: false,
-            secondHalfOdd: false,
-            secondHalfEven: false,
-        };
+            [BET_CHOICES.home]: false,
+            [BET_CHOICES.away]: false,
+            [BET_CHOICES.draw]: false,
+            [BET_CHOICES.over]: false,
+            [BET_CHOICES.under]: false,
+            [BET_CHOICES.odd]: false,
+            [BET_CHOICES.even]: false,
+            [BET_CHOICES.homeLive]: false,
+            [BET_CHOICES.awayLive]: false,
+            [BET_CHOICES.drawLive]: false,
+            [BET_CHOICES.overLive]: false,
+            [BET_CHOICES.underLive]: false,
+            [BET_CHOICES.oddLive]: false,
+            [BET_CHOICES.evenLive]: false,
+        } as SettlementResultType;
 
         const odds = {
-            firstHalfHome: 2.0,
-            firstHalfAway: 2.0,
-            firstHalfDraw: 2.0,
-            firstHalfOver: 2.0,
-            firstHalfUnder: 2.0,
-            firstHalfOdd: 2.0,
-            firstHalfEven: 2.0,
+            home: 2.0,
+            away: 2.0,
+            draw: 2.0,
+            over: 2.0,
+            under: 2.0,
+            odd: 2.0,
+            even: 2.0,
         } as OddsType;
 
         it("should calculate bet result correctly for a winning bet", () => {
             // Arrange
-            const settlementResult = { ...defaultSettlementResult, firstHalfHome: true };
-            const bet = { firstHalfHome: 100, freeBet: false };
+            const settlementResult = { ...defaultSettlementResult, [BET_CHOICES.home]: true };
+            const bet = { [BET_CHOICES.home]: 100, freeBet: false };
 
             // Act
             const result = settleGameRoundConsumer.calculateBetResult(settlementResult, bet, odds);
@@ -146,13 +148,13 @@ describe("SettleGameRoundConsumer", () => {
             expect(result.totalBetAmount).toBe(100);
             expect(result.totalWin).toBe(200);
             expect(result.netWin).toBe(100);
-            expect((result.winningByChoices as any).firstHalfHome).toEqual(200);
+            expect((result.winningByChoices as any)[BET_CHOICES.home]).toEqual(200);
         });
 
         it("should calculate bet result correctly for a losing bet", () => {
             // Arrange
-            const settlementResult = { ...defaultSettlementResult, firstHalfAway: true };
-            const bet = { firstHalfHome: 100, freeBet: false };
+            const settlementResult = { ...defaultSettlementResult, [BET_CHOICES.away]: false };
+            const bet = { [BET_CHOICES.away]: 100, freeBet: false };
 
             // Act
             const result = settleGameRoundConsumer.calculateBetResult(settlementResult, bet, odds);
@@ -160,13 +162,13 @@ describe("SettleGameRoundConsumer", () => {
             // Assert
             expect(result.totalBetAmount).toBe(100);
             expect(result.totalWin).toBe(0);
-            expect((result.winningByChoices as any).firstHalfAway).toEqual(0);
+            expect((result.winningByChoices as any)[BET_CHOICES.home]).toEqual(0);
         });
 
         it("should handle free bets correctly", () => {
             // Arrange
-            const settlementResult = { ...defaultSettlementResult, firstHalfHome: true };
-            const bet = { firstHalfHome: 100, freeBet: true };
+            const settlementResult = { ...defaultSettlementResult, [BET_CHOICES.home]: true };
+            const bet = { [BET_CHOICES.home]: 100, freeBet: true };
 
             // Act
             const result = settleGameRoundConsumer.calculateBetResult(settlementResult, bet, odds);
@@ -175,13 +177,13 @@ describe("SettleGameRoundConsumer", () => {
             expect(result.totalBetAmount).toBe(100);
             expect(result.totalWin).toBe(100);
             expect(result.netWin).toBe(0);
-            expect((result.winningByChoices as any).firstHalfHome).toEqual(100);
+            expect((result.winningByChoices as any)[BET_CHOICES.home]).toEqual(100);
         });
 
         it("should handle multiple bets correctly", () => {
             // Arrange
-            const settlementResult = { ...defaultSettlementResult, firstHalfHome: true, firstHalfOver: true };
-            const bet = { firstHalfHome: 100, firstHalfOver: 50, freeBet: false };
+            const settlementResult = { ...defaultSettlementResult, [BET_CHOICES.home]: true, [BET_CHOICES.over]: true };
+            const bet = { [BET_CHOICES.home]: 100, [BET_CHOICES.over]: 50, freeBet: false };
 
             // Act
             const result = settleGameRoundConsumer.calculateBetResult(settlementResult, bet, odds);
@@ -190,14 +192,14 @@ describe("SettleGameRoundConsumer", () => {
             expect(result.totalBetAmount).toBe(150);
             expect(result.totalWin).toBe(300);
             expect(result.netWin).toBe(150);
-            expect((result.winningByChoices as any).firstHalfHome).toEqual(200);
-            expect((result.winningByChoices as any).firstHalfOver).toEqual(100);
+            expect((result.winningByChoices as any)[BET_CHOICES.home]).toEqual(200);
+            expect((result.winningByChoices as any)[BET_CHOICES.over]).toEqual(100);
         });
 
         it("should round results to 2 decimal places", () => {
             // Arrange
-            const settlementResult = { ...defaultSettlementResult, firstHalfHome: true };
-            const bet = { firstHalfHome: 100, freeBet: false };
+            const settlementResult = { ...defaultSettlementResult, [BET_CHOICES.home]: true };
+            const bet = { [BET_CHOICES.home]: 100, freeBet: false };
 
             // Act
             const result = settleGameRoundConsumer.calculateBetResult(settlementResult, bet, odds);

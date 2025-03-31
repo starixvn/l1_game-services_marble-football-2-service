@@ -1,6 +1,6 @@
 import { Core } from "sc-game-base";
 import GameDefinition from "../game-definition";
-import { FIRST_HALF_BET_CHOICES, SECOND_HALF_BET_CHOICES } from "../constants";
+import { PRE_MATCH_BET_CHOICES, LIVE_BET_CHOICES } from "../constants";
 import { helpers } from "sc-common";
 import { isWithinBettingTime, isWithinFirstHalfBettingTime, isWithinSecondHalfBettingTime } from "../helpers/game-timing";
 import { CurrencyGroupGames } from "sc-game-management-client";
@@ -93,11 +93,11 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
     }
 
     private isFirstHalfBetChoice(betChoice: string) {
-        return Object.hasOwn(FIRST_HALF_BET_CHOICES, betChoice);
+        return Object.hasOwn(PRE_MATCH_BET_CHOICES, betChoice);
     }
 
     private isSecondHalfBetChoice(betChoice: string) {
-        return Object.hasOwn(SECOND_HALF_BET_CHOICES, betChoice);
+        return Object.hasOwn(LIVE_BET_CHOICES, betChoice);
     }
 
     private getMaxBetPerChoice(player: any, betChoice: string,settings?: CurrencyGroupGames) {

@@ -106,7 +106,7 @@ export const calculateBetOdds = (probabilities: Record<string, number>, margins:
 
 export const probabilityToBetOdds = (prob: number, margin = 0): number => {
     const odds = (1 - margin) / prob;
-    return roundToPrecision(odds);
+    return odds > 20 ? Math.floor(odds) : roundToPrecision(odds);
 };
 
 export const calculatePreMatchOdds = (matchConfig: MatchConfigType, margins: Record<string, number>[] = []) => {

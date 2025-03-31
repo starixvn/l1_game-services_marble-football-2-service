@@ -1,4 +1,4 @@
-import { FIRST_HALF_BET_CHOICES, SECOND_HALF_BET_CHOICES } from "./../constants";
+import { PRE_MATCH_BET_CHOICES, LIVE_BET_CHOICES } from "./../constants";
 import { firstHalfConfig, secondHalfConfigs } from "./../match-configs";
 import { Table } from "sc-game-base";
 import GameData from "../game-data";
@@ -242,13 +242,13 @@ export default class GameCron extends Table.Crons.TableGameCron {
     calculateAndPublishOddsPreMatch() {
         const preMatchOdds = calculatePreMatchOdds(this.gameData.matchConfig, this.gameData.gameConfigs?.margin ?? []);
         const odds = {
-            [FIRST_HALF_BET_CHOICES.firstHalfHome]: preMatchOdds.home,
-            [FIRST_HALF_BET_CHOICES.firstHalfAway]: preMatchOdds.away,
-            [FIRST_HALF_BET_CHOICES.firstHalfDraw]: preMatchOdds.draw,
-            [FIRST_HALF_BET_CHOICES.firstHalfOver]: preMatchOdds.over,
-            [FIRST_HALF_BET_CHOICES.firstHalfUnder]: preMatchOdds.under,
-            [FIRST_HALF_BET_CHOICES.firstHalfEven]: preMatchOdds.even,
-            [FIRST_HALF_BET_CHOICES.firstHalfOdd]: preMatchOdds.odd,
+            [PRE_MATCH_BET_CHOICES.home]: preMatchOdds.home,
+            [PRE_MATCH_BET_CHOICES.away]: preMatchOdds.away,
+            [PRE_MATCH_BET_CHOICES.draw]: preMatchOdds.draw,
+            [PRE_MATCH_BET_CHOICES.over]: preMatchOdds.over,
+            [PRE_MATCH_BET_CHOICES.under]: preMatchOdds.under,
+            [PRE_MATCH_BET_CHOICES.even]: preMatchOdds.even,
+            [PRE_MATCH_BET_CHOICES.odd]: preMatchOdds.odd,
         };
 
         this.saveOddToGameDataAndPublish(odds);
@@ -258,13 +258,13 @@ export default class GameCron extends Table.Crons.TableGameCron {
         const { firstHalf } = this.gameData.result;
         const liveOdds = calculateLiveOdds(this.gameData.matchConfig.secondHalfConfig, firstHalf, this.gameData.gameConfigs.margin ?? []);
         const odds = {
-            [SECOND_HALF_BET_CHOICES.secondHalfHome]: liveOdds.home,
-            [SECOND_HALF_BET_CHOICES.secondHalfAway]: liveOdds.away,
-            [SECOND_HALF_BET_CHOICES.secondHalfDraw]: liveOdds.draw,
-            [SECOND_HALF_BET_CHOICES.secondHalfOver]: liveOdds.over,
-            [SECOND_HALF_BET_CHOICES.secondHalfUnder]: liveOdds.under,
-            [SECOND_HALF_BET_CHOICES.secondHalfEven]: liveOdds.even,
-            [SECOND_HALF_BET_CHOICES.secondHalfOdd]: liveOdds.odd,
+            [LIVE_BET_CHOICES.homeLive]: liveOdds.home,
+            [LIVE_BET_CHOICES.awayLive]: liveOdds.away,
+            [LIVE_BET_CHOICES.drawLive]: liveOdds.draw,
+            [LIVE_BET_CHOICES.overLive]: liveOdds.over,
+            [LIVE_BET_CHOICES.underLive]: liveOdds.under,
+            [LIVE_BET_CHOICES.evenLive]: liveOdds.even,
+            [LIVE_BET_CHOICES.oddLive]: liveOdds.odd,
         };
 
         this.saveOddToGameDataAndPublish(odds);

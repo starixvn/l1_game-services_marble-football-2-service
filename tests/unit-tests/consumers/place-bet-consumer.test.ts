@@ -1,7 +1,7 @@
 import { Core } from "sc-game-base";
 import PlaceBetConsumer from "../../../src/consumers/place-bet-consumer";
 import GameDefinition from "../../../src/game-definition";
-import { SECOND_HALF_BET_CHOICES } from "../../../src/constants";
+import { BET_CHOICES, LIVE_BET_CHOICES } from "../../../src/constants";
 
 describe("PlaceBetConsumer", () => {
     let placeBetConsumer: PlaceBetConsumer;
@@ -212,7 +212,7 @@ describe("PlaceBetConsumer", () => {
                 it("right before placingBetsFirstHalf, should NOT validate first half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 131;
-                    const betChoice = "firstHalfHome";
+                    const betChoice = BET_CHOICES.home;
 
                     // Act
                     const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
@@ -225,7 +225,7 @@ describe("PlaceBetConsumer", () => {
                 it("right before placingBetsFirstHalf, should NOT validate second half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 131;
-                    const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
+                    const betChoice = LIVE_BET_CHOICES.homeLive;
 
                     // Act
                     const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
@@ -238,7 +238,7 @@ describe("PlaceBetConsumer", () => {
                 it("exactly at placingBetsFirstHalf, should NOT validate first half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 130;
-                    const betChoice = "firstHalfHome";
+                    const betChoice = BET_CHOICES.home;
 
                     // Act
                     const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
@@ -250,7 +250,7 @@ describe("PlaceBetConsumer", () => {
                 it("exactly at placingBetsFirstHalf, should NOT validate second half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 130;
-                    const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
+                    const betChoice = LIVE_BET_CHOICES.homeLive;
 
                     // Act
                     const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
@@ -263,7 +263,7 @@ describe("PlaceBetConsumer", () => {
                 it("right after placingBetsFirstHalf, should pass validation for first half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 129;
-                    const betChoice = "firstHalfHome";
+                    const betChoice = BET_CHOICES.home;
 
                     // Act
                     const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
@@ -275,7 +275,7 @@ describe("PlaceBetConsumer", () => {
                 it("right after placingBetsFirstHalf, should fail validation for second half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 129;
-                    const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
+                    const betChoice = LIVE_BET_CHOICES.homeLive;
 
                     // Act
                     const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
@@ -290,7 +290,7 @@ describe("PlaceBetConsumer", () => {
                 it("right before lockingBetFirstHalf, should pass validation for first half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 101;
-                    const betChoice = "firstHalfHome";
+                    const betChoice = BET_CHOICES.home;
 
                     // Act
                     const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
@@ -302,7 +302,7 @@ describe("PlaceBetConsumer", () => {
                 it("right before lockingBetFirstHalf, should fail validation for second half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 101;
-                    const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
+                    const betChoice = LIVE_BET_CHOICES.homeLive;
 
                     // Act
                     const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
@@ -315,7 +315,7 @@ describe("PlaceBetConsumer", () => {
                 it("exactly at lockingBetFirstHalf, should pass validation for first half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 100;
-                    const betChoice = "firstHalfHome";
+                    const betChoice = BET_CHOICES.home;
 
                     // Act
                     const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
@@ -327,7 +327,7 @@ describe("PlaceBetConsumer", () => {
                 it("exactly at lockingBetFirstHalf, should fail validation for second half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 100;
-                    const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
+                    const betChoice = LIVE_BET_CHOICES.homeLive;
 
                     // Act
                     const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
@@ -340,7 +340,7 @@ describe("PlaceBetConsumer", () => {
                 it("right after lockingBetFirstHalf, should NOT validate first half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 99;
-                    const betChoice = "firstHalfHome";
+                    const betChoice = BET_CHOICES.home;
 
                     // Act
                     const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
@@ -353,7 +353,7 @@ describe("PlaceBetConsumer", () => {
                 it("right after lockingBetFirstHalf, should NOT validate second half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 99;
-                    const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
+                    const betChoice = LIVE_BET_CHOICES.homeLive;
 
                     // Act
                     const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
@@ -370,7 +370,7 @@ describe("PlaceBetConsumer", () => {
                 it("right before placingBetsSecondHalf, should NOT validate first half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 81;
-                    const betChoice = "firstHalfHome";
+                    const betChoice = BET_CHOICES.home;
 
                     // Act
                     const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
@@ -383,7 +383,7 @@ describe("PlaceBetConsumer", () => {
                 it("right before placingBetsSecondHalf, should NOT validate second half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 81;
-                    const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
+                    const betChoice = LIVE_BET_CHOICES.homeLive;
 
                     // Act
                     const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
@@ -396,7 +396,7 @@ describe("PlaceBetConsumer", () => {
                 it("exactly at placingBetsSecondHalf, should NOT validate first half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 80;
-                    const betChoice = "firstHalfHome";
+                    const betChoice = BET_CHOICES.home;
 
                     // Act
                     const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
@@ -409,7 +409,7 @@ describe("PlaceBetConsumer", () => {
                 it("exactly at placingBetsSecondHalf, should NOT validate second half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 80;
-                    const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
+                    const betChoice = LIVE_BET_CHOICES.homeLive;
 
                     // Act
                     const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
@@ -421,7 +421,7 @@ describe("PlaceBetConsumer", () => {
                 it("right after placingBetsSecondHalf, should fail validation for first half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 79;
-                    const betChoice = "firstHalfHome";
+                    const betChoice = BET_CHOICES.home;
 
                     // Act
                     const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
@@ -434,7 +434,7 @@ describe("PlaceBetConsumer", () => {
                 it("right after placingBetsSecondHalf, should pass validation for second half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 79;
-                    const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
+                    const betChoice = LIVE_BET_CHOICES.homeLive;
 
                     // Act
                     const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
@@ -448,7 +448,7 @@ describe("PlaceBetConsumer", () => {
                 it("right before lockingBetSecondHalf, should fail validation for first half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 61;
-                    const betChoice = "firstHalfHome";
+                    const betChoice = BET_CHOICES.home;
 
                     // Act
                     const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
@@ -461,7 +461,7 @@ describe("PlaceBetConsumer", () => {
                 it("right before lockingBetSecondHalf, should pass validation for second half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 61;
-                    const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
+                    const betChoice = LIVE_BET_CHOICES.homeLive;
 
                     // Act
                     const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
@@ -473,7 +473,7 @@ describe("PlaceBetConsumer", () => {
                 it("exactly at lockingBetSecondHalf, should fail validation for first half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 60;
-                    const betChoice = "firstHalfHome";
+                    const betChoice = BET_CHOICES.home;
 
                     // Act
                     const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
@@ -486,7 +486,7 @@ describe("PlaceBetConsumer", () => {
                 it("exactly at lockingBetSecondHalf, should pass validation for second half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 60;
-                    const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
+                    const betChoice = LIVE_BET_CHOICES.homeLive;
 
                     // Act
                     const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
@@ -498,7 +498,7 @@ describe("PlaceBetConsumer", () => {
                 it("right after lockingBetSecondHalf, should NOT validate first half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 59;
-                    const betChoice = "firstHalfHome";
+                    const betChoice = BET_CHOICES.home;
 
                     // Act
                     const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
@@ -511,7 +511,7 @@ describe("PlaceBetConsumer", () => {
                 it("right after lockingBetSecondHalf, should NOT validate second half bet choice", () => {
                     // Arrange
                     mockGameData.remainingTime = 59;
-                    const betChoice = SECOND_HALF_BET_CHOICES.secondHalfHome;
+                    const betChoice = LIVE_BET_CHOICES.homeLive;
 
                     // Act
                     const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);

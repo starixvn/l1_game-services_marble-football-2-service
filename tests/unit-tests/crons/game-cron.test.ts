@@ -20,7 +20,7 @@ import GameDefinition from "../../../src/game-definition";
 import axios from "axios";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import crypto from "crypto";
-import { FIRST_HALF_BET_CHOICES, SECOND_HALF_BET_CHOICES } from "../../../src/constants";
+import { PRE_MATCH_BET_CHOICES, LIVE_BET_CHOICES } from "../../../src/constants";
 jest.mock("../../../src/timelines/video-timelines", () => ({
     "22841ea360fc3c3676a38502aa9a90a1ae1fbdac1d937746358efe559d349b6f_0": [],
     "53e5fe7054fb5c4867e0277e8867c0c08f9ca8be43fdac0d3b6c6ea5c7d656a2_AAAA": [1.8, 19.033333333333335, 33.8, 42.43333333333333],
@@ -705,13 +705,13 @@ describe("GameCron", () => {
 
             // Assert
             expect(gameStatusPublisher.publishOdds).toHaveBeenCalledWith({
-                [FIRST_HALF_BET_CHOICES.firstHalfHome]: mockOdds.home,
-                [FIRST_HALF_BET_CHOICES.firstHalfAway]: mockOdds.away,
-                [FIRST_HALF_BET_CHOICES.firstHalfDraw]: mockOdds.draw,
-                [FIRST_HALF_BET_CHOICES.firstHalfOver]: mockOdds.over,
-                [FIRST_HALF_BET_CHOICES.firstHalfUnder]: mockOdds.under,
-                [FIRST_HALF_BET_CHOICES.firstHalfEven]: mockOdds.even,
-                [FIRST_HALF_BET_CHOICES.firstHalfOdd]: mockOdds.odd,
+                [PRE_MATCH_BET_CHOICES.home]: mockOdds.home,
+                [PRE_MATCH_BET_CHOICES.away]: mockOdds.away,
+                [PRE_MATCH_BET_CHOICES.draw]: mockOdds.draw,
+                [PRE_MATCH_BET_CHOICES.over]: mockOdds.over,
+                [PRE_MATCH_BET_CHOICES.under]: mockOdds.under,
+                [PRE_MATCH_BET_CHOICES.even]: mockOdds.even,
+                [PRE_MATCH_BET_CHOICES.odd]: mockOdds.odd,
             });
         });
 
@@ -765,13 +765,13 @@ describe("GameCron", () => {
 
             // Assert
             expect(gameStatusPublisher.publishOdds).toHaveBeenCalledWith({
-                [SECOND_HALF_BET_CHOICES.secondHalfHome]: mockOdds.home,
-                [SECOND_HALF_BET_CHOICES.secondHalfAway]: mockOdds.away,
-                [SECOND_HALF_BET_CHOICES.secondHalfDraw]: mockOdds.draw,
-                [SECOND_HALF_BET_CHOICES.secondHalfOver]: mockOdds.over,
-                [SECOND_HALF_BET_CHOICES.secondHalfUnder]: mockOdds.under,
-                [SECOND_HALF_BET_CHOICES.secondHalfEven]: mockOdds.even,
-                [SECOND_HALF_BET_CHOICES.secondHalfOdd]: mockOdds.odd,
+                [LIVE_BET_CHOICES.homeLive]: mockOdds.home,
+                [LIVE_BET_CHOICES.awayLive]: mockOdds.away,
+                [LIVE_BET_CHOICES.drawLive]: mockOdds.draw,
+                [LIVE_BET_CHOICES.overLive]: mockOdds.over,
+                [LIVE_BET_CHOICES.underLive]: mockOdds.under,
+                [LIVE_BET_CHOICES.evenLive]: mockOdds.even,
+                [LIVE_BET_CHOICES.oddLive]: mockOdds.odd,
             });
         });
 

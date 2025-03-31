@@ -70,20 +70,20 @@ export const getSettlementResult = (roundResult: ResultType): SettlementResultTy
     const even = !isOdd;
 
     return {
-        firstHalfHome: home,
-        firstHalfAway: away,
-        firstHalfDraw: draw,
-        firstHalfOver: over,
-        firstHalfUnder: under,
-        firstHalfOdd: odd,
-        firstHalfEven: even,
-        secondHalfHome: home,
-        secondHalfAway: away,
-        secondHalfDraw: draw,
-        secondHalfEven: even,
-        secondHalfOdd: odd,
-        secondHalfOver: over,
-        secondHalfUnder: under,
+        home: home,
+        away: away,
+        draw: draw,
+        over: over,
+        under: under,
+        odd: odd,
+        even: even,
+        homeLive: home,
+        awayLive: away,
+        drawLive: draw,
+        evenLive: even,
+        oddLive: odd,
+        overLive: over,
+        underLive: under,
     };
 };
 

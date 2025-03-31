@@ -1,26 +1,26 @@
-export const SECOND_HALF_BET_CHOICES = {
-    secondHalfHome: "secondHalfHome",
-    secondHalfAway: "secondHalfAway",
-    secondHalfDraw: "secondHalfDraw",
-    secondHalfOver: "secondHalfOver",
-    secondHalfUnder: "secondHalfUnder",
-    secondHalfOdd: "secondHalfOdd",
-    secondHalfEven: "secondHalfEven",
+export const PRE_MATCH_BET_CHOICES = {
+    home: "home",
+    away: "away",
+    draw: "draw",
+    over: "over",
+    under: "under",
+    odd: "odd",
+    even: "even",
 };
 
-export const FIRST_HALF_BET_CHOICES = {
-    firstHalfHome: "firstHalfHome",
-    firstHalfAway: "firstHalfAway",
-    firstHalfDraw: "firstHalfDraw",
-    firstHalfOver: "firstHalfOver",
-    firstHalfUnder: "firstHalfUnder",
-    firstHalfOdd: "firstHalfOdd",
-    firstHalfEven: "firstHalfEven",
+export const LIVE_BET_CHOICES = {
+    homeLive: "homeLive",
+    awayLive: "awayLive",
+    drawLive: "drawLive",
+    overLive: "overLive",
+    underLive: "underLive",
+    oddLive: "oddLive",
+    evenLive: "evenLive",
 };
 
 export const BET_CHOICES = {
-    ...FIRST_HALF_BET_CHOICES,
-    ...SECOND_HALF_BET_CHOICES,
+    ...PRE_MATCH_BET_CHOICES,
+    ...LIVE_BET_CHOICES,
 };
 
 export const ODDS_TYPE = {
@@ -28,20 +28,20 @@ export const ODDS_TYPE = {
 };
 
 export const BET_CHOICE_ENUM = {
-    firstHalfHome: 1,
-    firstHalfAway: 2,
-    firstHalfDraw: 3,
-    firstHalfOver: 4,
-    firstHalfUnder: 5,
-    firstHalfOdd: 6,
-    firstHalfEven: 7,
-    secondHalfHome: 8,
-    secondHalfAway: 9,
-    secondHalfDraw: 10,
-    secondHalfOver: 11,
-    secondHalfUnder: 12,
-    secondHalfOdd: 13,
-    secondHalfEven: 14,
+    home: 1,
+    away: 2,
+    draw: 3,
+    over: 4,
+    under: 5,
+    odd: 6,
+    even: 7,
+    homeLive: 8,
+    awayLive: 9,
+    drawLive: 10,
+    overLive: 11,
+    underLive: 12,
+    oddLive: 13,
+    evenLive: 14,
 };
 
 export const DEFAULT_MARGIN = 0.02;
