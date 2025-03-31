@@ -17,6 +17,7 @@ describe("gameSettings", () => {
     it("durations should be in the correct order", () => {
         const {
             wholeRound,
+            startingRound,
             placingBetsFirstHalf,
             lockingBetFirstHalf,
             streamingVideoFirstHalf,
@@ -25,17 +26,18 @@ describe("gameSettings", () => {
             streamingVideoSecondHalf,
         } = gameSettings.durations;
 
-        expect(wholeRound).toBeGreaterThan(placingBetsFirstHalf);
+        expect(wholeRound).toBeGreaterThan(startingRound);
+        expect(startingRound).toBeGreaterThan(placingBetsFirstHalf);
         expect(placingBetsFirstHalf).toBeGreaterThan(lockingBetFirstHalf);
         expect(lockingBetFirstHalf).toBeGreaterThan(streamingVideoFirstHalf);
-        expect(wholeRound).toBe(124);
-        expect(placingBetsFirstHalf).toBe(107);
-        expect(lockingBetFirstHalf).toBe(90);
-        expect(streamingVideoFirstHalf).toBe(89);
+        expect(wholeRound).toBe(126);
+        expect(startingRound).toBe(116);
+        expect(placingBetsFirstHalf).toBe(111);
+        expect(lockingBetFirstHalf).toBe(89);
+        expect(streamingVideoFirstHalf).toBe(86);
         expect(wholeRound).toBeGreaterThan(placingBetsSecondHalf);
         expect(placingBetsSecondHalf).toBeGreaterThan(lockingBetSecondHalf);
         expect(lockingBetSecondHalf).toBeGreaterThan(streamingVideoSecondHalf);
-        expect(wholeRound).toBe(124);
         expect(placingBetsSecondHalf).toBe(54);
         expect(lockingBetSecondHalf).toBe(37);
         expect(streamingVideoSecondHalf).toBe(36);
