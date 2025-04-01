@@ -749,13 +749,13 @@ describe("GameCron", () => {
         it("should calculate live odds and publish them", () => {
             // Arrange
             const mockOdds = {
-                home: 2.5,
-                away: 2.8,
-                draw: 3.2,
-                over: 1.85,
-                under: 1.95,
-                even: 1.92,
-                odd: 1.92,
+                [LIVE_BET_CHOICES.homeLive]: 2.5,
+                [LIVE_BET_CHOICES.awayLive]: 2.8,
+                [LIVE_BET_CHOICES.drawLive]: 3.2,
+                [LIVE_BET_CHOICES.overLive]: 1.85,
+                [LIVE_BET_CHOICES.underLive]: 1.95,
+                [LIVE_BET_CHOICES.evenLive]: 1.92,
+                [LIVE_BET_CHOICES.oddLive]: 1.92,
             };
 
             jest.spyOn(require("../../../src/helpers/odds-helper"), "calculateLiveOdds").mockReturnValue(mockOdds);
@@ -765,13 +765,13 @@ describe("GameCron", () => {
 
             // Assert
             expect(gameStatusPublisher.publishOdds).toHaveBeenCalledWith({
-                [LIVE_BET_CHOICES.homeLive]: mockOdds.home,
-                [LIVE_BET_CHOICES.awayLive]: mockOdds.away,
-                [LIVE_BET_CHOICES.drawLive]: mockOdds.draw,
-                [LIVE_BET_CHOICES.overLive]: mockOdds.over,
-                [LIVE_BET_CHOICES.underLive]: mockOdds.under,
-                [LIVE_BET_CHOICES.evenLive]: mockOdds.even,
-                [LIVE_BET_CHOICES.oddLive]: mockOdds.odd,
+                [LIVE_BET_CHOICES.homeLive]: mockOdds[LIVE_BET_CHOICES.homeLive],
+                [LIVE_BET_CHOICES.awayLive]: mockOdds[LIVE_BET_CHOICES.awayLive],
+                [LIVE_BET_CHOICES.drawLive]: mockOdds[LIVE_BET_CHOICES.drawLive],
+                [LIVE_BET_CHOICES.overLive]: mockOdds[LIVE_BET_CHOICES.overLive],
+                [LIVE_BET_CHOICES.underLive]: mockOdds[LIVE_BET_CHOICES.underLive],
+                [LIVE_BET_CHOICES.evenLive]: mockOdds[LIVE_BET_CHOICES.evenLive],
+                [LIVE_BET_CHOICES.oddLive]: mockOdds[LIVE_BET_CHOICES.oddLive],
             });
         });
 

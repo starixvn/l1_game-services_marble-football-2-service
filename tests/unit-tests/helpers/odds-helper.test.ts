@@ -1,3 +1,4 @@
+import { BET_CHOICES, LIVE_BET_CHOICES, PRE_MATCH_BET_CHOICES } from "../../../src/constants";
 import {
     parseScore,
     roundToPrecision,
@@ -31,9 +32,9 @@ describe("odds-helper", () => {
 
     describe("roundToPrecision", () => {
         it("should round numbers to specified precision", () => {
-            expect(roundToPrecision(1.23456789)).toBe(1.23456);
+            expect(roundToPrecision(1.23456789)).toBe(1.23457);
             expect(roundToPrecision(2.5)).toBe(2.5);
-            expect(roundToPrecision(3.14159, 1000)).toBe(3.141);
+            expect(roundToPrecision(3.14159, 1000)).toBe(3.142);
         });
     });
 
@@ -117,8 +118,10 @@ describe("odds-helper", () => {
 
     describe("calculateBetOdds", () => {
         const mockProbabilities = {
-            home: 0.5,
-            away: 0.05,
+            [BET_CHOICES.home]: 0.5,
+            [BET_CHOICES.away]: 0.05,
+            [BET_CHOICES.homeLive]: 0.5,
+            [BET_CHOICES.awayLive]: 0.05,
         };
 
         afterEach(() => {
@@ -146,13 +149,15 @@ describe("odds-helper", () => {
 
             // Act
             calculateBetOdds(mockProbabilities, [
-                { max: 5, home: 0.02, away: 0.02 },
-                { max: 99, home: 0.05, away: 0.05 },
+                { max: 5, Home: 0.02, Away: 0.02, Home_Live: 0.02, Away_Live: 0.02 },
+                { max: 99, Home: 0.05, Away: 0.05, Home_Live: 0.05, Away_Live: 0.05 },
             ]);
 
             // Assert
             expect(calculateMarginSpy).toHaveBeenNthCalledWith(1, 2, 0.02);
             expect(calculateMarginSpy).toHaveBeenNthCalledWith(2, 20, 0.05);
+            expect(calculateMarginSpy).toHaveBeenNthCalledWith(3, 2, 0.02);
+            expect(calculateMarginSpy).toHaveBeenNthCalledWith(4, 20, 0.05);
         });
     });
 
@@ -213,13 +218,13 @@ describe("odds-helper", () => {
 
             console.log(result);
 
-            expect(result.home).toBeCloseTo(4);
-            expect(result.away).toBeCloseTo(4);
-            expect(result.draw).toBeCloseTo(2);
-            expect(result.over).toBe(0);
-            expect(result.under).toBe(0);
-            expect(result.even).toBe(0);
-            expect(result.odd).toBe(0);
+            expect(result[PRE_MATCH_BET_CHOICES.home]).toBeCloseTo(4);
+            expect(result[PRE_MATCH_BET_CHOICES.away]).toBeCloseTo(4);
+            expect(result[PRE_MATCH_BET_CHOICES.draw]).toBeCloseTo(2);
+            expect(result[PRE_MATCH_BET_CHOICES.over]).toBe(0);
+            expect(result[PRE_MATCH_BET_CHOICES.under]).toBe(0);
+            expect(result[PRE_MATCH_BET_CHOICES.even]).toBe(0);
+            expect(result[PRE_MATCH_BET_CHOICES.odd]).toBe(0);
         });
     });
 
@@ -234,15 +239,15 @@ describe("odds-helper", () => {
         };
 
         it("should return odds correctly for all bet choices", () => {
-            const result = calculateLiveOdds(mockHalfConfig, "H", []);
+            const result = calculateLiveOdds(mockHalfConfig, "H", []) as any;
 
-            expect(result.home).toBeCloseTo(2);
-            expect(result.away).toBeCloseTo(5);
-            expect(result.draw).toBeCloseTo(3.33);
-            expect(result.over).toBeCloseTo(10);
-            expect(result.under).toBeCloseTo(1.11);
-            expect(result.even).toBeCloseTo(1.43);
-            expect(result.odd).toBeCloseTo(3.33);
+            expect(result[LIVE_BET_CHOICES.homeLive]).toBeCloseTo(2);
+            expect(result[LIVE_BET_CHOICES.awayLive]).toBeCloseTo(5);
+            expect(result[LIVE_BET_CHOICES.drawLive]).toBeCloseTo(3.33);
+            expect(result[LIVE_BET_CHOICES.overLive]).toBeCloseTo(10);
+            expect(result[LIVE_BET_CHOICES.underLive]).toBeCloseTo(1.11);
+            expect(result[LIVE_BET_CHOICES.evenLive]).toBeCloseTo(1.43);
+            expect(result[LIVE_BET_CHOICES.oddLive]).toBeCloseTo(3.33);
         });
     });
 });

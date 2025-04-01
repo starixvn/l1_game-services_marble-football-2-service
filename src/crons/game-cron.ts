@@ -240,32 +240,14 @@ export default class GameCron extends Table.Crons.TableGameCron {
     }
 
     calculateAndPublishOddsPreMatch() {
-        const preMatchOdds = calculatePreMatchOdds(this.gameData.matchConfig, this.gameData.gameConfigs?.margin ?? []);
-        const odds = {
-            [PRE_MATCH_BET_CHOICES.home]: preMatchOdds.home,
-            [PRE_MATCH_BET_CHOICES.away]: preMatchOdds.away,
-            [PRE_MATCH_BET_CHOICES.draw]: preMatchOdds.draw,
-            [PRE_MATCH_BET_CHOICES.over]: preMatchOdds.over,
-            [PRE_MATCH_BET_CHOICES.under]: preMatchOdds.under,
-            [PRE_MATCH_BET_CHOICES.even]: preMatchOdds.even,
-            [PRE_MATCH_BET_CHOICES.odd]: preMatchOdds.odd,
-        };
+        const odds = calculatePreMatchOdds(this.gameData.matchConfig, this.gameData.gameConfigs?.margin ?? []);
 
         this.saveOddToGameDataAndPublish(odds);
     }
 
     calculateAndPublishOddsLive() {
         const { firstHalf } = this.gameData.result;
-        const liveOdds = calculateLiveOdds(this.gameData.matchConfig.secondHalfConfig, firstHalf, this.gameData.gameConfigs.margin ?? []);
-        const odds = {
-            [LIVE_BET_CHOICES.homeLive]: liveOdds.home,
-            [LIVE_BET_CHOICES.awayLive]: liveOdds.away,
-            [LIVE_BET_CHOICES.drawLive]: liveOdds.draw,
-            [LIVE_BET_CHOICES.overLive]: liveOdds.over,
-            [LIVE_BET_CHOICES.underLive]: liveOdds.under,
-            [LIVE_BET_CHOICES.evenLive]: liveOdds.even,
-            [LIVE_BET_CHOICES.oddLive]: liveOdds.odd,
-        };
+        const odds = calculateLiveOdds(this.gameData.matchConfig.secondHalfConfig, firstHalf, this.gameData.gameConfigs.margin ?? []);
 
         this.saveOddToGameDataAndPublish(odds);
     }

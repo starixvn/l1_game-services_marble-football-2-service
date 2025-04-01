@@ -23,7 +23,7 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
         player: any,
         betChoice: string,
         amount: number,
-        freeBet: boolean,
+        freeBet: boolean
     ): { failure: boolean; notice: string }[] {
         const settings = this.gameData.currencyGroupGames.find((x) => x.groupId.toString() === player.session.currencyGroupId);
         const configs = this.gameData.gameConfigs;
@@ -97,11 +97,11 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
     }
 
     private isFirstHalfBetChoice(betChoice: string) {
-        return Object.hasOwn(PRE_MATCH_BET_CHOICES, betChoice);
+        return Object.values(PRE_MATCH_BET_CHOICES).includes(betChoice);
     }
 
     private isSecondHalfBetChoice(betChoice: string) {
-        return Object.hasOwn(LIVE_BET_CHOICES, betChoice);
+        return Object.values(LIVE_BET_CHOICES).includes(betChoice);
     }
 
     private getMaxBetPerChoice(player: any, betChoice: string, settings?: any) {

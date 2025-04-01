@@ -1,15 +1,5 @@
-import { DEFAULT_MARGIN_BASE, OVER_UNDER_VALUE } from "../constants";
+import { ADMIN_BET_CHOICES_MAPPER, DEFAULT_MARGIN_BASE, LIVE_BET_CHOICES, OVER_UNDER_VALUE, PRE_MATCH_BET_CHOICES } from "../constants";
 import { HalfConfigType, MatchConfigType } from "../match-configs";
-
-export type GeneratingOdds = {
-    home: number;
-    away: number;
-    draw: number;
-    over: number;
-    under: number;
-    even: number;
-    odd: number;
-};
 
 export const parseScore = (score: string): [number, number] => {
     const [home, away] = score.split("-").map(Number);
@@ -17,7 +7,7 @@ export const parseScore = (score: string): [number, number] => {
 };
 
 export const roundToPrecision = (value: number, precision = 100000) => {
-    return Math.floor(value * precision) / precision;
+    return Math.round(value * precision) / precision;
 };
 
 export const calculateFullTimeScoreRates = (firstHalf: HalfConfigType, secondHalf: HalfConfigType): Record<string, number> => {
@@ -98,19 +88,19 @@ export const calculateMarginFromOdds = (odds: number, marginBase: number) => {
     return Math.min(margin, 1);
 };
 
-export const calculateBetOdds = (probabilities: Record<string, number>, margins: Record<string, number>[] = []): GeneratingOdds => {
+export const calculateBetOdds = (probabilities: Record<string, number>, margins: Record<string, number>[] = []): Record<string, number> => {
     const sortedMargins = margins.toSorted((a, b) => a.max - b.max);
 
     const odds = Object.keys(probabilities).reduce((result, betChoice) => {
         const prob = probabilities[betChoice];
         const originalOdds = probabilityToBetOdds(prob);
-        const marginBase = sortedMargins.find((m) => originalOdds <= m.max)?.[betChoice] || DEFAULT_MARGIN_BASE;
+        const marginBase = sortedMargins.find((m) => originalOdds <= m.max)?.[ADMIN_BET_CHOICES_MAPPER[betChoice]] || DEFAULT_MARGIN_BASE;
         const margin = calculateMarginFromOdds(originalOdds, marginBase);
         result[betChoice] = probabilityToBetOdds(prob, margin);
         return result;
     }, {} as Record<string, number>);
 
-    return odds as GeneratingOdds;
+    return odds;
 };
 
 export const probabilityToBetOdds = (prob: number, margin = 0): number => {
@@ -119,14 +109,24 @@ export const probabilityToBetOdds = (prob: number, margin = 0): number => {
     }
 
     const odds = (1 - margin) / prob;
-    return odds > 20 ? Math.floor(odds) : roundToPrecision(odds);
+    return odds > 20 ? Math.floor(odds) : roundToPrecision(odds, 100);
 };
 
 export const calculatePreMatchOdds = (matchConfig: MatchConfigType, margins: Record<string, number>[] = []) => {
     const fullTimeScoreRates = calculateFullTimeScoreRates(matchConfig.firstHalfConfig, matchConfig.secondHalfConfig);
     const { probabilities } = calculateProbabilitiesForBetChoices(fullTimeScoreRates);
 
-    return calculateBetOdds(probabilities, margins);
+    const preMatchProbabilities = {
+        [PRE_MATCH_BET_CHOICES.home]: probabilities.home,
+        [PRE_MATCH_BET_CHOICES.away]: probabilities.away,
+        [PRE_MATCH_BET_CHOICES.draw]: probabilities.draw,
+        [PRE_MATCH_BET_CHOICES.over]: probabilities.over,
+        [PRE_MATCH_BET_CHOICES.under]: probabilities.under,
+        [PRE_MATCH_BET_CHOICES.even]: probabilities.even,
+        [PRE_MATCH_BET_CHOICES.odd]: probabilities.odd,
+    };
+
+    return calculateBetOdds(preMatchProbabilities, margins);
 };
 
 export const calculateLiveOdds = (halfConfig: HalfConfigType, firstHalfResult = "0", margins: Record<string, number>[] = []) => {
@@ -136,5 +136,15 @@ export const calculateLiveOdds = (halfConfig: HalfConfigType, firstHalfResult = 
 
     const { probabilities } = calculateProbabilitiesForBetChoices(halfConfig.scoreRate, addingScore);
 
-    return calculateBetOdds(probabilities, margins);
+    const liveProbabilities = {
+        [LIVE_BET_CHOICES.homeLive]: probabilities.home,
+        [LIVE_BET_CHOICES.awayLive]: probabilities.away,
+        [LIVE_BET_CHOICES.drawLive]: probabilities.draw,
+        [LIVE_BET_CHOICES.overLive]: probabilities.over,
+        [LIVE_BET_CHOICES.underLive]: probabilities.under,
+        [LIVE_BET_CHOICES.evenLive]: probabilities.even,
+        [LIVE_BET_CHOICES.oddLive]: probabilities.odd,
+    };
+
+    return calculateBetOdds(liveProbabilities, margins);
 };

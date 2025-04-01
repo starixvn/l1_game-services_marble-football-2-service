@@ -23,25 +23,42 @@ export const BET_CHOICES = {
     ...LIVE_BET_CHOICES,
 };
 
+export const ADMIN_BET_CHOICES_MAPPER = {
+    [BET_CHOICES.home]: "Home",
+    [BET_CHOICES.away]: "Away",
+    [BET_CHOICES.draw]: "Draw",
+    [BET_CHOICES.over]: "Over",
+    [BET_CHOICES.under]: "Under",
+    [BET_CHOICES.odd]: "Odd",
+    [BET_CHOICES.even]: "Even",
+    [BET_CHOICES.homeLive]: "Home_Live",
+    [BET_CHOICES.awayLive]: "Away_Live",
+    [BET_CHOICES.drawLive]: "Draw_Live",
+    [BET_CHOICES.overLive]: "Over_Live",
+    [BET_CHOICES.underLive]: "Under_Live",
+    [BET_CHOICES.oddLive]: "Odd_Live",
+    [BET_CHOICES.evenLive]: "Even_Live",
+};
+
 export const ODDS_TYPE = {
     ...BET_CHOICES,
 };
 
 export const BET_CHOICE_ENUM = {
-    home: 1,
-    away: 2,
-    draw: 3,
-    over: 4,
-    under: 5,
-    odd: 6,
-    even: 7,
-    homeLive: 8,
-    awayLive: 9,
-    drawLive: 10,
-    overLive: 11,
-    underLive: 12,
-    oddLive: 13,
-    evenLive: 14,
+    [PRE_MATCH_BET_CHOICES.home]: 1,
+    [PRE_MATCH_BET_CHOICES.away]: 2,
+    [PRE_MATCH_BET_CHOICES.draw]: 3,
+    [PRE_MATCH_BET_CHOICES.over]: 4,
+    [PRE_MATCH_BET_CHOICES.under]: 5,
+    [PRE_MATCH_BET_CHOICES.odd]: 6,
+    [PRE_MATCH_BET_CHOICES.even]: 7,
+    [LIVE_BET_CHOICES.homeLive]: 8,
+    [LIVE_BET_CHOICES.awayLive]: 9,
+    [LIVE_BET_CHOICES.drawLive]: 10,
+    [LIVE_BET_CHOICES.overLive]: 11,
+    [LIVE_BET_CHOICES.underLive]: 12,
+    [LIVE_BET_CHOICES.oddLive]: 13,
+    [LIVE_BET_CHOICES.evenLive]: 14,
 };
 
 export const DEFAULT_MARGIN_BASE = 0.02;
