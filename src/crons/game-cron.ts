@@ -1,4 +1,3 @@
-import { PRE_MATCH_BET_CHOICES, LIVE_BET_CHOICES } from "./../constants";
 import { firstHalfConfig, secondHalfConfigs } from "./../match-configs";
 import { Table } from "sc-game-base";
 import GameData from "../game-data";
