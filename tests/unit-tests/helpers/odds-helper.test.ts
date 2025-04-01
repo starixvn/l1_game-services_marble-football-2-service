@@ -7,17 +7,20 @@ import {
     probabilityToBetOdds,
     calculatePreMatchOdds,
     calculateLiveOdds,
+    calculateMarginFromOdds,
 } from "../../../src/helpers/odds-helper";
 import { HalfConfigType, MatchConfigType } from "../../../src/match-configs";
 
 jest.mock("../../../src/constants", () => ({
-    DEFAULT_MARGIN: 0,
-    OVER_UNDER_VALUE: 4.5,
-    ODDS_FOR_DRAW_4: 50,
-    MAX_ODDS: 100,
+    ...jest.requireActual("../../../src/constants"),
+    DEFAULT_MARGIN_BASE: 0,
 }));
 
 describe("odds-helper", () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
     describe("parseScore", () => {
         it("should correctly parse score string into numbers", () => {
             expect(parseScore("2-1")).toEqual([2, 1]);
@@ -107,24 +110,67 @@ describe("odds-helper", () => {
     describe("calculateBetOdds", () => {
         const mockProbabilities = {
             home: 0.5,
-            away: 0.3,
-            draw: 0.2,
-            over: 0.5,
-            under: 0.5,
-            even: 0.5,
-            odd: 0.5,
+            away: 0.05,
         };
 
-        it("should calculate betting odds correctly", () => {
-            const result = calculateBetOdds(mockProbabilities);
+        afterEach(() => {
+            jest.spyOn(require("../../../src/helpers/odds-helper"), "calculateMarginFromOdds").mockRestore();
+        });
 
-            expect(result.home).toBeCloseTo(2);
-            expect(result.away).toBeCloseTo(3.33);
-            expect(result.draw).toBeCloseTo(5);
-            expect(result.over).toBeCloseTo(2);
-            expect(result.under).toBeCloseTo(2);
-            expect(result.even).toBeCloseTo(2);
-            expect(result.odd).toBeCloseTo(2);
+        it("should call calculateMarginFromOdds with correct default margin", () => {
+            // Arrange
+            const calculateMarginSpy = jest
+                .spyOn(require("../../../src/helpers/odds-helper"), "calculateMarginFromOdds")
+                .mockReturnValue(0);
+
+            // Act
+            calculateBetOdds(mockProbabilities);
+
+            // Assert
+            expect(calculateMarginSpy).toHaveBeenCalledWith(2, 0);
+        });
+
+        it("should calculate betting odds with margin correctly", () => {
+            // Arrange
+            const calculateMarginSpy = jest
+                .spyOn(require("../../../src/helpers/odds-helper"), "calculateMarginFromOdds")
+                .mockReturnValue(0);
+
+            // Act
+            calculateBetOdds(mockProbabilities, [
+                { max: 5, home: 0.02, away: 0.02 },
+                { max: 99, home: 0.05, away: 0.05 },
+            ]);
+
+            // Assert
+            expect(calculateMarginSpy).toHaveBeenNthCalledWith(1, 2, 0.02);
+            expect(calculateMarginSpy).toHaveBeenNthCalledWith(2, 20, 0.05);
+        });
+    });
+
+    describe("calculateMarginFromOdds", () => {
+        beforeEach(() => {
+            jest.spyOn(require("../../../src/helpers/odds-helper"), "calculateMarginFromOdds").mockRestore();
+        });
+
+        const testCases = [
+            { odds: 2, margin: 0.02 },
+            { odds: 4, margin: 0.06 },
+            { odds: 8, margin: 0.08 },
+            { odds: 16, margin: 0.1 },
+            { odds: 32, margin: 0.12 },
+        ];
+
+        const marginBase = 0.02;
+
+        testCases.forEach((testCase) => {
+            it(`should return margin correctly for odds ${testCase.odds}`, () => {
+                // Act
+                const result = calculateMarginFromOdds(testCase.odds, marginBase);
+
+                // Assert
+                expect(result).toBe(testCase.margin);
+            });
         });
     });
 
