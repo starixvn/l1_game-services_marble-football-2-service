@@ -3,7 +3,6 @@ import GameDefinition from "../game-definition";
 import { PRE_MATCH_BET_CHOICES, LIVE_BET_CHOICES } from "../constants";
 import { helpers } from "sc-common";
 import { isWithinBettingTime, isWithinFirstHalfBettingTime, isWithinSecondHalfBettingTime } from "../helpers/game-timing";
-import { CurrencyGroupGames } from "sc-game-management-client";
 import GameData from "../game-data";
 
 export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetConsumer {
@@ -20,7 +19,12 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
         ];
     }
 
-    composeBetAmountValidationCriteria(player: any, betChoice: string, amount: number, freeBet: boolean): { failure: boolean; notice: string; }[] {
+    composeBetAmountValidationCriteria(
+        player: any,
+        betChoice: string,
+        amount: number,
+        freeBet: boolean,
+    ): { failure: boolean; notice: string }[] {
         const settings = this.gameData.currencyGroupGames.find((x) => x.groupId.toString() === player.session.currencyGroupId);
         const configs = this.gameData.gameConfigs;
         const { betTracks } = this.gameData.ingame[player.profile.name] || { betTracks: {} };
@@ -50,7 +54,7 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
                 failure: totalAmount > maxBet,
                 notice: this.getNoticeObj(helpers.noticeHelper.maxBet, { maxBet }),
             },
-        ]; 
+        ];
     }
 
     composeBettingTimeValidationCriteria(roundId: number): { failure: boolean; notice: string }[] {
@@ -100,25 +104,25 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
         return Object.hasOwn(LIVE_BET_CHOICES, betChoice);
     }
 
-    private getMaxBetPerChoice(player: any, betChoice: string,settings?: CurrencyGroupGames) {
+    private getMaxBetPerChoice(player: any, betChoice: string, settings?: any) {
         if (this.isFirstHalfBetChoice(betChoice)) {
-            return Math.min(player.profile.maxBet, settings?.maxBetPerChoice[betChoice] || Infinity);
+            return Math.min(player.profile.maxBet, settings?.maxBetPerChoices[betChoice] || Infinity);
         }
 
         return this.getMaxBetPerChoiceWithOdds(player, betChoice, settings);
     }
 
-    private getMaxBetPerChoiceWithOdds(player: any, betChoice: string ,settings?: CurrencyGroupGames) {
+    private getMaxBetPerChoiceWithOdds(player: any, betChoice: string, settings?: any) {
         const maxBet = player.profile.maxBet ?? Infinity;
-        const configuredMaxBetByBetChoice = settings?.maxBetPerChoice[betChoice] ?? Infinity;
+        const configuredMaxBetByBetChoice = settings?.maxBetPerChoices[betChoice] ?? Infinity;
         const maxBetByOdds = this.getMaxBetByOdds(betChoice, maxBet);
-        
+
         return Math.min(maxBet, configuredMaxBetByBetChoice, maxBetByOdds);
     }
 
     private getMaxBetByOdds(betChoice: string, maxBet: number) {
         const odds = this.gameData?.dynamicOdds;
         const betChoiceOdds = odds?.[betChoice] ?? 1;
-        return Math.round(maxBet / (Math.abs(betChoiceOdds - 1)));
+        return Math.round(maxBet / Math.abs(betChoiceOdds - 1));
     }
 }
