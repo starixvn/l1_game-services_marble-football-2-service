@@ -5,6 +5,8 @@ import { InGameConsumer } from "../../../src/consumers";
 import GameDefinition from "../../../src/game-definition";
 import { gameManagementApiClientFactory, publisher, roundQuery } from "../global-stubs";
 import * as helper from "../../../src/helpers/bet-percentage";
+import * as gameTimingHelper from "../../../src/helpers/game-timing";
+import { LIVE_BET_CHOICES, PRE_MATCH_BET_CHOICES } from "../../../src/constants";
 
 describe("InGameConsumer test", () => {
     let consumer: InGameConsumer;
@@ -32,6 +34,89 @@ describe("InGameConsumer test", () => {
         expect(consumer instanceof TableInGameConsumer).toBeTruthy();
     });
 
+    describe("consume", () => {
+        it("should call super.consume and publishOddsToPlayer", async () => {
+            // arrange
+            const realPlayer = { UID: "player123" };
+            const superConsumeSpy = jest.spyOn(TableInGameConsumer.prototype, "consume").mockResolvedValue();
+            const publishOddsToPlayerSpy = jest.spyOn(consumer, "publishOddsToPlayer").mockReturnValue(undefined);
+
+            // act
+            await consumer.consume(realPlayer);
+
+            // assert
+            expect(superConsumeSpy).toHaveBeenCalledWith(realPlayer);
+            expect(publishOddsToPlayerSpy).toHaveBeenCalledWith("player123");
+        });
+    });
+
+    describe("publishOddsToPlayer", () => {
+        const UID = "player123";
+        const dynamicOdds = {
+            home: 1.5,
+            away: 2.5,
+            draw: 3.0,
+            over: 1.8,
+            under: 2.0,
+            even: 1.9,
+            odd: 2.1,
+            homeLive: 1.6,
+            awayLive: 2.6,
+            drawLive: 3.1,
+            overLive: 1.9,
+            underLive: 2.1,
+            evenLive: 2.0,
+            oddLive: 2.2,
+        };
+
+        beforeEach(() => {
+            gameData.dynamicOdds = dynamicOdds;
+            publisher.publishToUser = jest.fn();
+        });
+
+        it("should publish first half odds when in first half", () => {
+            // arrange
+            jest.spyOn(gameTimingHelper, "isFirstHalfOddsActive").mockReturnValue(true);
+            const expectedOdds = {
+                [PRE_MATCH_BET_CHOICES.home]: dynamicOdds.home,
+                [PRE_MATCH_BET_CHOICES.away]: dynamicOdds.away,
+                [PRE_MATCH_BET_CHOICES.draw]: dynamicOdds.draw,
+                [PRE_MATCH_BET_CHOICES.over]: dynamicOdds.over,
+                [PRE_MATCH_BET_CHOICES.under]: dynamicOdds.under,
+                [PRE_MATCH_BET_CHOICES.even]: dynamicOdds.even,
+                [PRE_MATCH_BET_CHOICES.odd]: dynamicOdds.odd,
+            };
+
+            // act
+            consumer.publishOddsToPlayer(UID);
+
+            // assert
+            expect(gameTimingHelper.isFirstHalfOddsActive).toHaveBeenCalledWith(gameData.remainingTime, definition.durations);
+            expect(publisher.publishToUser).toHaveBeenCalledWith(UID, { odds: expectedOdds });
+        });
+
+        it("should publish second half odds when in second half", () => {
+            // arrange
+            jest.spyOn(gameTimingHelper, "isFirstHalfOddsActive").mockReturnValue(false);
+            const expectedOdds = {
+                [LIVE_BET_CHOICES.homeLive]: dynamicOdds.homeLive,
+                [LIVE_BET_CHOICES.awayLive]: dynamicOdds.awayLive,
+                [LIVE_BET_CHOICES.drawLive]: dynamicOdds.drawLive,
+                [LIVE_BET_CHOICES.overLive]: dynamicOdds.overLive,
+                [LIVE_BET_CHOICES.underLive]: dynamicOdds.underLive,
+                [LIVE_BET_CHOICES.evenLive]: dynamicOdds.evenLive,
+                [LIVE_BET_CHOICES.oddLive]: dynamicOdds.oddLive,
+            };
+
+            // act
+            consumer.publishOddsToPlayer(UID);
+
+            // assert
+            expect(gameTimingHelper.isFirstHalfOddsActive).toHaveBeenCalledWith(gameData.remainingTime, definition.durations);
+            expect(publisher.publishToUser).toHaveBeenCalledWith(UID, { odds: expectedOdds });
+        });
+    });
+
     describe("getCurrentVideoResult", () => {
         const fullVideoFirstHalfResult = {
             firstHalfVideo: "video1.mp4",
@@ -43,11 +128,6 @@ describe("InGameConsumer test", () => {
             secondHalfVideo: "video2.mp4",
             secondHalfTimeline: [4, 5, 6],
             secondHalf: "HA",
-        };
-
-        const timelineFirstHalfResult = {
-            firstHalfTimeline: [1, 2, 3],
-            firstHalf: "AH",
         };
 
         const timelineSecondHalfResult = {
