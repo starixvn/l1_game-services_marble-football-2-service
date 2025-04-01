@@ -1,4 +1,4 @@
-import { DEFAULT_MARGIN, MAX_ODDS, OVER_UNDER_VALUE } from "../constants";
+import { DEFAULT_MARGIN_BASE, OVER_UNDER_VALUE } from "../constants";
 import { HalfConfigType, MatchConfigType } from "../match-configs";
 
 export type GeneratingOdds = {
@@ -88,15 +88,24 @@ export const calculateProbabilitiesForBetChoices = (scoreRates: Record<string, n
     };
 };
 
-export const calculateMarginFromOdds = (odds: number) => {
-    return (Math.log2(Math.min(odds, MAX_ODDS)) + 1) * DEFAULT_MARGIN;
+export const calculateMarginFromOdds = (odds: number, marginBase: number) => {
+    if (odds === 0) {
+        return 0;
+    }
+
+    const margin = Math.max(Math.log2(odds) * marginBase, marginBase);
+
+    return Math.min(margin, 1);
 };
 
 export const calculateBetOdds = (probabilities: Record<string, number>, margins: Record<string, number>[] = []): GeneratingOdds => {
+    const sortedMargins = margins.toSorted((a, b) => a.max - b.max);
+
     const odds = Object.keys(probabilities).reduce((result, betChoice) => {
         const prob = probabilities[betChoice];
         const originalOdds = probabilityToBetOdds(prob);
-        const margin = Math.max(DEFAULT_MARGIN, calculateMarginFromOdds(originalOdds));
+        const marginBase = sortedMargins.find((m) => originalOdds <= m.max)?.[betChoice] || DEFAULT_MARGIN_BASE;
+        const margin = calculateMarginFromOdds(originalOdds, marginBase);
         result[betChoice] = probabilityToBetOdds(prob, margin);
         return result;
     }, {} as Record<string, number>);
@@ -105,6 +114,10 @@ export const calculateBetOdds = (probabilities: Record<string, number>, margins:
 };
 
 export const probabilityToBetOdds = (prob: number, margin = 0): number => {
+    if (prob <= 0 || prob >= 1) {
+        return 0;
+    }
+
     const odds = (1 - margin) / prob;
     return odds > 20 ? Math.floor(odds) : roundToPrecision(odds);
 };

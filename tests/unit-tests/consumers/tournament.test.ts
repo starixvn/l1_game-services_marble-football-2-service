@@ -8,6 +8,7 @@ import { DEFAULT_TOURNAMENT_CODES } from "../../../src/constants";
 describe(TournamentConsumer.name, () => {
     let consumer: TournamentConsumer;
     const gameData = stub<GameData>();
+    gameData.gameConfigs.tournamentConfig = DEFAULT_TOURNAMENT_CODES;
 
     roundsRepository.updateOne = jest.fn();
 
