@@ -24,20 +24,20 @@ export const BET_CHOICES = {
 };
 
 export const ADMIN_BET_CHOICES_MAPPER = {
-    [BET_CHOICES.home]: "Home",
-    [BET_CHOICES.away]: "Away",
-    [BET_CHOICES.draw]: "Draw",
-    [BET_CHOICES.over]: "Over",
-    [BET_CHOICES.under]: "Under",
-    [BET_CHOICES.odd]: "Odd",
-    [BET_CHOICES.even]: "Even",
-    [BET_CHOICES.homeLive]: "Home_Live",
-    [BET_CHOICES.awayLive]: "Away_Live",
-    [BET_CHOICES.drawLive]: "Draw_Live",
-    [BET_CHOICES.overLive]: "Over_Live",
-    [BET_CHOICES.underLive]: "Under_Live",
-    [BET_CHOICES.oddLive]: "Odd_Live",
-    [BET_CHOICES.evenLive]: "Even_Live",
+    [BET_CHOICES.home]: "home",
+    [BET_CHOICES.away]: "away",
+    [BET_CHOICES.draw]: "draw",
+    [BET_CHOICES.over]: "over",
+    [BET_CHOICES.under]: "under",
+    [BET_CHOICES.odd]: "odd",
+    [BET_CHOICES.even]: "even",
+    [BET_CHOICES.homeLive]: "home_live",
+    [BET_CHOICES.awayLive]: "away_live",
+    [BET_CHOICES.drawLive]: "draw_live",
+    [BET_CHOICES.overLive]: "over_live",
+    [BET_CHOICES.underLive]: "under_live",
+    [BET_CHOICES.oddLive]: "odd_live",
+    [BET_CHOICES.evenLive]: "even_live",
 };
 
 export const ODDS_TYPE = {
