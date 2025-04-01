@@ -46,12 +46,6 @@ export const BET_CHOICE_ENUM = {
 
 export const DEFAULT_MARGIN_BASE = 0.02;
 
-export const ODDS_FOR_DRAW_4 = 50;
-
-export const MAX_ODDS = 100;
-
-export const MIN_ODDS = 2;
-
 export const OVER_UNDER_VALUE = 4.5;
 
 export const IS_DEV_ENV = process.env.NODE_ENV === "development";

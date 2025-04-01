@@ -103,7 +103,11 @@ describe("odds-helper", () => {
         });
 
         it("should floor odds above 20", () => {
-            expect(probabilityToBetOdds(0.04)).toBe(25);
+            expect(probabilityToBetOdds(0.039)).toBe(25);
+        });
+
+        it("should return 0 for probability <= 0", () => {
+            expect(probabilityToBetOdds(0)).toBe(0);
         });
     });
 
@@ -155,10 +159,10 @@ describe("odds-helper", () => {
 
         const testCases = [
             { odds: 2, margin: 0.02 },
-            { odds: 4, margin: 0.06 },
-            { odds: 8, margin: 0.08 },
-            { odds: 16, margin: 0.1 },
-            { odds: 32, margin: 0.12 },
+            { odds: 4, margin: 0.04 },
+            { odds: 8, margin: 0.06 },
+            { odds: 16, margin: 0.08 },
+            { odds: 32, margin: 0.1 },
         ];
 
         const marginBase = 0.02;
@@ -171,6 +175,16 @@ describe("odds-helper", () => {
                 // Assert
                 expect(result).toBe(testCase.margin);
             });
+        });
+
+        it("should return 0 for odds === 0", () => {
+            const result = calculateMarginFromOdds(0, marginBase);
+            expect(result).toBe(0);
+        });
+
+        it("should return 1 for when calculated margin is greater than 1", () => {
+            const result = calculateMarginFromOdds(2000, 0.1);
+            expect(result).toBe(1);
         });
     });
 
@@ -198,10 +212,10 @@ describe("odds-helper", () => {
             expect(result.home).toBeCloseTo(4);
             expect(result.away).toBeCloseTo(4);
             expect(result.draw).toBeCloseTo(2);
-            expect(result.over).toBe(Infinity);
+            expect(result.over).toBe(0);
             expect(result.under).toBeCloseTo(1);
             expect(result.even).toBeCloseTo(1);
-            expect(result.odd).toBe(Infinity);
+            expect(result.odd).toBe(0);
         });
     });
 
