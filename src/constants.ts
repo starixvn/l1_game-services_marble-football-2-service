@@ -44,7 +44,7 @@ export const BET_CHOICE_ENUM = {
     evenLive: 14,
 };
 
-export const DEFAULT_MARGIN_BASE = 0.01;
+export const DEFAULT_MARGIN_BASE = 0.02;
 
 export const ODDS_FOR_DRAW_4 = 50;
 
