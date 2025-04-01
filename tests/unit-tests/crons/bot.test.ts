@@ -4,7 +4,6 @@ import GameData from "../../../src/game-data";
 import GameDefinition from "../../../src/game-definition";
 import { gameManagementApiClientFactory, publisher, tempBetsRepository } from "../global-stubs";
 import { helpers } from "sc-common";
-import { FIRST_HALF_BET_CHOICES, SECOND_HALF_BET_CHOICES } from "../../../src/constants";
 import * as gameTimingHelpers from "../../../src/helpers/game-timing";
 
 // Mock sc-common to control shuffle behavior
@@ -26,8 +25,8 @@ describe("Bot", () => {
     let mockPickone: jest.Mock;
 
     const definition = stub<GameDefinition>({
-        choices: ["firstHalfHome", "firstHalfAway", "secondHalfHome", "secondHalfAway"] as any,
-        hedgeBetGroups: [["firstHalfHome", "firstHalfAway"], ["secondHalfHome", "secondHalfAway"]],
+        choices: ["home", "away", "homeLive", "secondHalfAway"] as any,
+        hedgeBetGroups: [["home", "away"], ["homeLive", "secondHalfAway"]],
         durations: {
             placingBetsFirstHalf: 300,
             lockingBetFirstHalf: 60,
@@ -38,7 +37,7 @@ describe("Bot", () => {
     const gameData = stub<GameData>({
         players: {},
         playerBetCount: {
-            firstHalfHome: [],
+            home: [],
             invalidChoice: [],
         },
         remainingTime: 100,
@@ -66,7 +65,7 @@ describe("Bot", () => {
     describe("updateBalanceAndPublishBetPayload", () => {
         it("should update the balance and call updatePlayerBetCount", () => {
             const botId = "bot1";
-            const choice = "firstHalfHome";
+            const choice = "home";
             const amount = 100;
             const balance = 500;
 
@@ -86,7 +85,7 @@ describe("Bot", () => {
     describe("updatePlayerBetCount", () => {
         it("should update player bet count for a valid choice", () => {
             const playerId = "player1";
-            const choice = "firstHalfHome";
+            const choice = "home";
 
             botInstance.updatePlayerBetCount(playerId, choice);
 
@@ -104,7 +103,7 @@ describe("Bot", () => {
 
         it("should initialize playerBetCount array if it doesn't exist", () => {
             const playerId = "player1";
-            const choice = "firstHalfAway";
+            const choice = "away";
 
             delete gameData.playerBetCount[choice];
 
@@ -115,7 +114,7 @@ describe("Bot", () => {
 
         it("should not add duplicate player IDs to playerBetCount", () => {
             const playerId = "player1";
-            const choice = "firstHalfHome";
+            const choice = "home";
 
             gameData.playerBetCount[choice] = [playerId];
 
@@ -135,73 +134,73 @@ describe("Bot", () => {
 
             it("should return a choice from underRatio groups when available", () => {
                 // Bot has both choices from the hedge bet group
-                const bot = { choices: ["firstHalfHome", "firstHalfAway"] };
-                const underRatioGroups = [{ underBetRatio: true, group: ["firstHalfHome"] }];
+                const bot = { choices: ["home", "away"] };
+                const underRatioGroups = [{ underBetRatio: true, group: ["home"] }];
                 
                 // Mock getBetChoicesRatios to return our prepared data
                 (botInstance as any).getBetChoicesRatios.mockReturnValue(underRatioGroups);
                 
-                // Force pickone to return firstHalfHome
+                // Force pickone to return home
                 mockPickone.mockImplementation((arr) => 
-                    arr === underRatioGroups[0].group ? "firstHalfHome" : arr[0]
+                    arr === underRatioGroups[0].group ? "home" : arr[0]
                 );
                 
                 const result = botInstance.getBetChoice(bot);
                 
-                // It should choose firstHalfAway since firstHalfHome was picked initially
+                // It should choose away since home was picked initially
                 // and the bot has both options available
-                expect(result).toBe("firstHalfAway");
+                expect(result).toBe("away");
                 expect(helpers.arrayHelper.shuffle).toHaveBeenCalledWith(underRatioGroups);
             });
 
             it("should return a random choice when no underRatio groups are available", () => {
                 // Bot has both choices from the hedge bet group
-                const bot = { choices: ["firstHalfHome", "firstHalfAway"] };
+                const bot = { choices: ["home", "away"] };
                 
-                // Force pickone to return firstHalfHome for this test
+                // Force pickone to return home for this test
                 mockPickone.mockImplementation((arr) => {
-                    if (arr.includes("firstHalfHome")) return "firstHalfHome";
+                    if (arr.includes("home")) return "home";
                     return arr[0];
                 });
                 
                 const result = botInstance.getBetChoice(bot);
                 
-                // It should choose firstHalfAway since firstHalfHome was picked initially
+                // It should choose away since home was picked initially
                 // and the bot has both options available
-                expect(result).toBe("firstHalfAway");
+                expect(result).toBe("away");
             });
 
             it("should return original choice when bot doesn't have the opposite choice in hedge bet group", () => {
                 // Bot only has the initial choice, not the opposite
-                const bot = { choices: ["firstHalfHome"] };
+                const bot = { choices: ["home"] };
                 
-                // Force pickone to return firstHalfHome
+                // Force pickone to return home
                 mockPickone.mockImplementation((arr) => {
-                    if (arr.includes("firstHalfHome")) return "firstHalfHome";
+                    if (arr.includes("home")) return "home";
                     return arr[0];
                 });
                 
                 const result = botInstance.getBetChoice(bot);
                 
-                // It should keep firstHalfHome since the bot doesn't have firstHalfAway available
-                expect(result).toBe("firstHalfHome");
+                // It should keep home since the bot doesn't have away available
+                expect(result).toBe("home");
             });
 
             it("should return opposite choice when bot has it in hedge bet group", () => {
                 // Bot only has the opposite choice
-                const bot = { choices: ["firstHalfAway"] };
+                const bot = { choices: ["away"] };
                 
-                // Force pickone to return firstHalfHome initially
+                // Force pickone to return home initially
                 mockPickone.mockImplementation((arr) => {
-                    if (arr.includes("firstHalfHome")) return "firstHalfHome";
+                    if (arr.includes("home")) return "home";
                     return arr[0];
                 });
                 
                 const result = botInstance.getBetChoice(bot);
                 
-                // It should choose firstHalfAway since that's the opposite of firstHalfHome
+                // It should choose away since that's the opposite of home
                 // and the bot has it available
-                expect(result).toBe("firstHalfAway");
+                expect(result).toBe("away");
             });
         });
 
@@ -213,17 +212,17 @@ describe("Bot", () => {
 
             it("should return a second half choice from available options", () => {
                 // Bot has both choices from the hedge bet group
-                const bot = { choices: ["secondHalfHome", "secondHalfAway"] };
+                const bot = { choices: ["homeLive", "secondHalfAway"] };
                 
-                // Force pickone to return secondHalfHome for this test
+                // Force pickone to return homeLive for this test
                 mockPickone.mockImplementation((arr) => {
-                    if (arr.includes("secondHalfHome")) return "secondHalfHome";
+                    if (arr.includes("homeLive")) return "homeLive";
                     return arr[0];
                 });
                 
                 const result = botInstance.getBetChoice(bot);
                 
-                // It should choose secondHalfAway since secondHalfHome was picked initially
+                // It should choose secondHalfAway since homeLive was picked initially
                 // and the bot has both options available
                 expect(result).toBe("secondHalfAway");
             });
