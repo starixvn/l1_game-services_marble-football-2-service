@@ -34,7 +34,7 @@ const appConfigs = {
     },
     sentry: {
         sentryUrl: "https://3711f3082699411a8716a3221ca1fd9e@sentry.lumigame.com/89",
-        logIdentifier: "MarbleFootBall-Dev",
+        logIdentifier: "MarbleFootBall2-Dev",
         env: "DEV",
     },
     authenticateSettings: {
@@ -63,11 +63,7 @@ const appConfigs = {
         enabled: true,
         endpoint: "http://10.10.50.69:4318/v1/traces",
     },
-    tournament: {
-        code: "UCL",
-        teams: ["MCI", "RMA", "BAR", "LIV", "ARS", "FCB", "INT", "LEV", "AVL", "ATA", "BVB", "JUV", "PSG", "SCP", "ATM", "MIL"],
-    },
-    liveStreamServer: "https://d1aof1lwumql9k.cloudfront.net/104_STAGING/",
+    liveStreamServer: "https://d1aof1lwumql9k.cloudfront.net/114_STAGING/",
     gameResultSettings: {
         baseUrl: "https://l1-result1.lumigame.com",
         id: "Game Service",
