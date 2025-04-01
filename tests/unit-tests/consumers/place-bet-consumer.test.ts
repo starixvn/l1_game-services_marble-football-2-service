@@ -533,31 +533,31 @@ describe("PlaceBetConsumer", () => {
                 profile: {
                     name: "testPlayer",
                     minBet: 10,
-                    maxBet: 1000
+                    maxBet: 1000,
                 },
                 session: {
-                    currencyGroupId: "1"
-                }
+                    currencyGroupId: "1",
+                },
             };
 
             mockSettings = {
                 groupId: "1",
                 minBet: 20,
                 maxBet: 2000,
-                maxBetPerChoice: {
+                maxBetPerChoices: {
                     firstHalfHome: 500,
-                    secondHalfHome: 600
-                }
+                    secondHalfHome: 600,
+                },
             };
 
             mockGameData.currencyGroupGames = [mockSettings];
             mockGameData.gameConfigs = {
-                enableFreeBet: true
+                enableFreeBet: true,
             };
             mockGameData.ingame = {
                 testPlayer: {
-                    betTracks: {}
-                }
+                    betTracks: {},
+                },
             };
 
             // Add mock choices to game definition
@@ -567,7 +567,7 @@ describe("PlaceBetConsumer", () => {
                 "firstHalfDraw",
                 "secondHalfHome",
                 "secondHalfAway",
-                "secondHalfDraw"
+                "secondHalfDraw",
             ];
         });
 
@@ -620,7 +620,7 @@ describe("PlaceBetConsumer", () => {
             it("should fail validation when bet amount plus existing bet exceeds max bet per choice", () => {
                 // Arrange
                 mockGameData.ingame.testPlayer.betTracks = {
-                    firstHalfHome: 300
+                    firstHalfHome: 300,
                 };
                 const betChoice = "firstHalfHome";
                 const amount = 300;
@@ -637,7 +637,7 @@ describe("PlaceBetConsumer", () => {
             it("should limit max bet based on odds for second half bets", () => {
                 // Arrange
                 mockGameData.dynamicOdds = {
-                    secondHalfHome: 2.5
+                    secondHalfHome: 2.5,
                 };
                 const betChoice = "secondHalfHome";
                 const amount = 1000;
@@ -655,7 +655,7 @@ describe("PlaceBetConsumer", () => {
             it("should limit max bet based on odds when odds-based calculation is smaller than configured max bet", () => {
                 // Arrange
                 mockGameData.dynamicOdds = {
-                    secondHalfHome: 3.0  // Higher odds will result in smaller max bet
+                    secondHalfHome: 3.0, // Higher odds will result in smaller max bet
                 };
                 const betChoice = "secondHalfHome";
                 const amount = 1000;
@@ -705,7 +705,7 @@ describe("PlaceBetConsumer", () => {
             it("should fail validation when total bet amount exceeds max bet", () => {
                 // Arrange
                 mockGameData.ingame.testPlayer.betTracks = {
-                    firstHalfHome: 600
+                    firstHalfHome: 600,
                 };
                 const betChoice = "firstHalfAway";
                 const amount = 500;
@@ -724,7 +724,7 @@ describe("PlaceBetConsumer", () => {
                 mockGameData.ingame.testPlayer.betTracks = {
                     firstHalfHome: 300,
                     firstHalfAway: 400,
-                    secondHalfHome: 200
+                    secondHalfHome: 200,
                 };
                 const betChoice = "secondHalfAway";
                 const amount = 200;
