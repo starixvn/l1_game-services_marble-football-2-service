@@ -86,7 +86,7 @@ export default class TournamentConsumer {
     }
 
     async getTournamentConfigs() {
-        if (!this.gameData.gameConfigs.tournamentConfig.code || !this.gameData.gameConfigs.tournamentConfig.teams?.length) {
+        if (!this.gameData.gameConfigs?.tournamentConfig?.code || !this.gameData.gameConfigs?.tournamentConfig?.teams?.length) {
             return DEFAULT_TOURNAMENT_CODES;
         }
 
