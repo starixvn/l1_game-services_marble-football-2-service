@@ -159,7 +159,7 @@ describe(TournamentConsumer.name, () => {
                 { id: 0 },
                 {
                     match: matches[0],
-                },
+                }
             );
         });
         it("should update the match result and proceed to the next match", async () => {
@@ -311,7 +311,7 @@ describe(TournamentConsumer.name, () => {
                     currentMatch: 1,
                     ended: false,
                 },
-                { new: true },
+                { new: true }
             );
         });
 
@@ -520,7 +520,7 @@ describe(TournamentConsumer.name, () => {
                     currentMatch: 15,
                     ended: true,
                 },
-                { new: true },
+                { new: true }
             );
         });
     });
@@ -542,6 +542,47 @@ describe(TournamentConsumer.name, () => {
 
             // Assert
             expect(result).toEqual(tournament);
+        });
+    });
+
+    describe("getTournamentConfigs", () => {
+        it("should return default tournament configs if tournament config code is not set", async () => {
+            // Arrange
+            gameData.gameConfigs.tournamentConfig = {
+                code: null,
+                teams: null,
+            } as any;
+
+            // Act
+            const result = await consumer.getTournamentConfigs();
+
+            // Assert
+            expect(result).toEqual(DEFAULT_TOURNAMENT_CODES);
+        });
+
+        it("should return default tournament configs if tournament config teams is not set", async () => {
+            // Arrange
+            gameData.gameConfigs.tournamentConfig = {
+                code: "test",
+                teams: null,
+            } as any;
+
+            // Act
+            const result = await consumer.getTournamentConfigs();
+
+            // Assert
+            expect(result).toEqual(DEFAULT_TOURNAMENT_CODES);
+        });
+
+        it("should return tournament configs if tournament config is set", async () => {
+            // Arrange
+            gameData.gameConfigs.tournamentConfig = { code: "test", teams: ["INT", "MCI"] };
+
+            // Act
+            const result = await consumer.getTournamentConfigs();
+
+            // Assert
+            expect(result).toEqual(gameData.gameConfigs.tournamentConfig);
         });
     });
 });

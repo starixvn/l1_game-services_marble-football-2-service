@@ -85,8 +85,12 @@ export default class TournamentConsumer {
         });
     }
 
-    private async getTournamentConfigs() {
-        return this.gameData.gameConfigs.tournamentConfig || DEFAULT_TOURNAMENT_CODES;
+    async getTournamentConfigs() {
+        if (!this.gameData.gameConfigs.tournamentConfig.code || !this.gameData.gameConfigs.tournamentConfig.teams?.length) {
+            return DEFAULT_TOURNAMENT_CODES;
+        }
+
+        return this.gameData.gameConfigs.tournamentConfig;
     }
 
     private async updateMatchInRound(match: MatchType, roundId: number) {
