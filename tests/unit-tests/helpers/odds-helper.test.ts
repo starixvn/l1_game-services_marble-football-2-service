@@ -109,6 +109,10 @@ describe("odds-helper", () => {
         it("should return 0 for probability <= 0", () => {
             expect(probabilityToBetOdds(0)).toBe(0);
         });
+
+        it("should return 0 for probability >= 1", () => {
+            expect(probabilityToBetOdds(1)).toBe(0);
+        });
     });
 
     describe("calculateBetOdds", () => {
@@ -213,8 +217,8 @@ describe("odds-helper", () => {
             expect(result.away).toBeCloseTo(4);
             expect(result.draw).toBeCloseTo(2);
             expect(result.over).toBe(0);
-            expect(result.under).toBeCloseTo(1);
-            expect(result.even).toBeCloseTo(1);
+            expect(result.under).toBe(0);
+            expect(result.even).toBe(0);
             expect(result.odd).toBe(0);
         });
     });

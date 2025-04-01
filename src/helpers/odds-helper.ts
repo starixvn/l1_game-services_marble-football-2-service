@@ -114,7 +114,7 @@ export const calculateBetOdds = (probabilities: Record<string, number>, margins:
 };
 
 export const probabilityToBetOdds = (prob: number, margin = 0): number => {
-    if (prob <= 0) {
+    if (prob <= 0 || prob >= 1) {
         return 0;
     }
 
