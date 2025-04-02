@@ -23,23 +23,6 @@ export const BET_CHOICES = {
     ...LIVE_BET_CHOICES,
 };
 
-export const ADMIN_BET_CHOICES_MAPPER = {
-    [BET_CHOICES.home]: "home",
-    [BET_CHOICES.away]: "away",
-    [BET_CHOICES.draw]: "draw",
-    [BET_CHOICES.over]: "over",
-    [BET_CHOICES.under]: "under",
-    [BET_CHOICES.odd]: "odd",
-    [BET_CHOICES.even]: "even",
-    [BET_CHOICES.homeLive]: "home_live",
-    [BET_CHOICES.awayLive]: "away_live",
-    [BET_CHOICES.drawLive]: "draw_live",
-    [BET_CHOICES.overLive]: "over_live",
-    [BET_CHOICES.underLive]: "under_live",
-    [BET_CHOICES.oddLive]: "odd_live",
-    [BET_CHOICES.evenLive]: "even_live",
-};
-
 export const ODDS_TYPE = {
     ...BET_CHOICES,
 };

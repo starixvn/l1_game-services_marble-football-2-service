@@ -1,6 +1,6 @@
 import { Core } from "sc-game-base";
 import GameDefinition from "../game-definition";
-import { PRE_MATCH_BET_CHOICES, LIVE_BET_CHOICES, ADMIN_BET_CHOICES_MAPPER } from "../constants";
+import { PRE_MATCH_BET_CHOICES, LIVE_BET_CHOICES } from "../constants";
 import { helpers } from "sc-common";
 import { isWithinBettingTime, isWithinFirstHalfBettingTime, isWithinSecondHalfBettingTime } from "../helpers/game-timing";
 import GameData from "../game-data";
@@ -130,7 +130,7 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
 
     private getMaxBetPerChoiceWithOdds(player: any, betChoice: string, settings?: any) {
         const maxBet = player.profile.maxBet ?? Infinity;
-        const configuredMaxBetByBetChoice = settings?.maxBetPerChoices[ADMIN_BET_CHOICES_MAPPER[betChoice]] ?? Infinity;
+        const configuredMaxBetByBetChoice = settings?.maxBetPerChoices[betChoice] ?? Infinity;
         const maxBetByOdds = this.getMaxBetByOdds(betChoice, maxBet);
 
         return Math.min(maxBet, configuredMaxBetByBetChoice, maxBetByOdds);

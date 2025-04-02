@@ -149,8 +149,8 @@ describe("odds-helper", () => {
 
             // Act
             calculateBetOdds(mockProbabilities, [
-                { max: 5, home: 0.02, away: 0.02, home_live: 0.02, away_live: 0.02 },
-                { max: 99, home: 0.05, away: 0.05, home_live: 0.05, away_live: 0.05 },
+                { max: 5, home: 0.02, away: 0.02, homeLive: 0.02, awayLive: 0.02 },
+                { max: 99, home: 0.05, away: 0.05, homeLive: 0.05, awayLive: 0.05 },
             ]);
 
             // Assert

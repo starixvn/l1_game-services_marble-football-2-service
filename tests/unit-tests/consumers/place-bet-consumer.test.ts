@@ -80,7 +80,7 @@ describe("PlaceBetConsumer", () => {
             maxBet: 2000,
             maxBetPerChoices: {
                 home: 500,
-                home_live: 600,
+                homeLive: 600,
             },
         };
 

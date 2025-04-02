@@ -1,4 +1,4 @@
-import { ADMIN_BET_CHOICES_MAPPER, DEFAULT_MARGIN_BASE, LIVE_BET_CHOICES, OVER_UNDER_VALUE, PRE_MATCH_BET_CHOICES } from "../constants";
+import { DEFAULT_MARGIN_BASE, LIVE_BET_CHOICES, OVER_UNDER_VALUE, PRE_MATCH_BET_CHOICES } from "../constants";
 import { HalfConfigType, MatchConfigType } from "../match-configs";
 
 export const parseScore = (score: string): [number, number] => {
@@ -94,7 +94,7 @@ export const calculateBetOdds = (probabilities: Record<string, number>, margins:
     return Object.keys(probabilities).reduce((result, betChoice) => {
         const prob = probabilities[betChoice];
         const originalOdds = probabilityToBetOdds(prob);
-        const marginBase = sortedMargins.find((m) => originalOdds <= m.max)?.[ADMIN_BET_CHOICES_MAPPER[betChoice]] || DEFAULT_MARGIN_BASE;
+        const marginBase = sortedMargins.find((m) => originalOdds <= m.max)?.[betChoice] || DEFAULT_MARGIN_BASE;
         const margin = calculateMarginFromOdds(originalOdds, marginBase);
         result[betChoice] = probabilityToBetOdds(prob, margin);
         return result;
