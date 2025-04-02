@@ -74,6 +74,12 @@ describe("gameSettings", () => {
             [BET_CHOICES.homeLive, BET_CHOICES.awayLive],
             [BET_CHOICES.overLive, BET_CHOICES.underLive],
             [BET_CHOICES.oddLive, BET_CHOICES.evenLive],
+            [BET_CHOICES.home, BET_CHOICES.awayLive],
+            [BET_CHOICES.away, BET_CHOICES.homeLive],
+            [BET_CHOICES.over, BET_CHOICES.underLive],
+            [BET_CHOICES.under, BET_CHOICES.overLive],
+            [BET_CHOICES.odd, BET_CHOICES.evenLive],
+            [BET_CHOICES.even, BET_CHOICES.oddLive],
         ]);
     });
 
