@@ -1,6 +1,6 @@
 import { Core } from "sc-game-base";
 import GameDefinition from "../game-definition";
-import { PRE_MATCH_BET_CHOICES, LIVE_BET_CHOICES } from "../constants";
+import { PRE_MATCH_BET_CHOICES, LIVE_BET_CHOICES, ADMIN_BET_CHOICES_MAPPER } from "../constants";
 import { helpers } from "sc-common";
 import { isWithinBettingTime, isWithinFirstHalfBettingTime, isWithinSecondHalfBettingTime } from "../helpers/game-timing";
 import GameData from "../game-data";
@@ -76,6 +76,22 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
         ];
     }
 
+    composeHedgeBetValidationCriteria(betChoice: string, player: any): { failure: boolean; notice: string }[] {
+        const { betTracks } = this.gameData.ingame[player.profile.name] || { betTracks: {} };
+        const hedgeBetGroups = this.definition.hedgeBetGroups.filter((group) => group.includes(betChoice));
+
+        const isInvalid = Object.keys(betTracks).some(
+            (betKey) => betTracks[betKey] && hedgeBetGroups.some((group) => group.includes(betKey)) && betKey !== betChoice
+        );
+
+        return [
+            {
+                failure: isInvalid,
+                notice: this.getNoticeObj(helpers.noticeHelper.disallowHedgeBet, { hedgeBetGroup: hedgeBetGroups }),
+            },
+        ];
+    }
+
     private isBetChoiceBanned(betChoice: string) {
         return this.isBetChoiceBannedOnSecondHalf(betChoice) || this.isBetChoiceBannedOnFirstHalf(betChoice);
     }
@@ -114,7 +130,7 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
 
     private getMaxBetPerChoiceWithOdds(player: any, betChoice: string, settings?: any) {
         const maxBet = player.profile.maxBet ?? Infinity;
-        const configuredMaxBetByBetChoice = settings?.maxBetPerChoices[betChoice] ?? Infinity;
+        const configuredMaxBetByBetChoice = settings?.maxBetPerChoices[ADMIN_BET_CHOICES_MAPPER[betChoice]] ?? Infinity;
         const maxBetByOdds = this.getMaxBetByOdds(betChoice, maxBet);
 
         return Math.min(maxBet, configuredMaxBetByBetChoice, maxBetByOdds);

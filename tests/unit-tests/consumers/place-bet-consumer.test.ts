@@ -8,6 +8,8 @@ describe("PlaceBetConsumer", () => {
     let mockGameDefinition: GameDefinition;
     let mockGameData: any;
     let mockEventPublisher: any;
+    let mockPlayer: any;
+    let mockSettings: any;
 
     const DURATIONS = {
         placingBetsFirstHalf: 130,
@@ -33,6 +35,21 @@ describe("PlaceBetConsumer", () => {
 
         mockGameDefinition = {
             durations: DURATIONS,
+            choices: Object.values(BET_CHOICES),
+            hedgeBetGroups: [
+                [BET_CHOICES.home, BET_CHOICES.away],
+                [BET_CHOICES.over, BET_CHOICES.under],
+                [BET_CHOICES.odd, BET_CHOICES.even],
+                [BET_CHOICES.homeLive, BET_CHOICES.awayLive],
+                [BET_CHOICES.overLive, BET_CHOICES.underLive],
+                [BET_CHOICES.oddLive, BET_CHOICES.evenLive],
+                [BET_CHOICES.home, BET_CHOICES.awayLive],
+                [BET_CHOICES.away, BET_CHOICES.homeLive],
+                [BET_CHOICES.over, BET_CHOICES.underLive],
+                [BET_CHOICES.under, BET_CHOICES.overLive],
+                [BET_CHOICES.odd, BET_CHOICES.evenLive],
+                [BET_CHOICES.even, BET_CHOICES.oddLive],
+            ],
         } as GameDefinition;
 
         mockEventPublisher = {
@@ -44,6 +61,37 @@ describe("PlaceBetConsumer", () => {
             publishToUsers: jest.fn(),
             publishToTable: jest.fn(),
             publishToTableExcept: jest.fn(),
+        };
+
+        mockPlayer = {
+            profile: {
+                name: "testPlayer",
+                minBet: 10,
+                maxBet: 1000,
+            },
+            session: {
+                currencyGroupId: "1",
+            },
+        };
+
+        mockSettings = {
+            groupId: "1",
+            minBet: 20,
+            maxBet: 2000,
+            maxBetPerChoices: {
+                home: 500,
+                home_live: 600,
+            },
+        };
+
+        mockGameData.currencyGroupGames = [mockSettings];
+        mockGameData.gameConfigs = {
+            enableFreeBet: true,
+        };
+        mockGameData.ingame = {
+            testPlayer: {
+                betTracks: {},
+            },
         };
 
         placeBetConsumer = new PlaceBetConsumer(mockGameDefinition, mockGameData, mockEventPublisher);
@@ -525,57 +573,11 @@ describe("PlaceBetConsumer", () => {
     });
 
     describe("composeBetAmountValidationCriteria", () => {
-        let mockPlayer: any;
-        let mockSettings: any;
-
-        beforeEach(() => {
-            mockPlayer = {
-                profile: {
-                    name: "testPlayer",
-                    minBet: 10,
-                    maxBet: 1000,
-                },
-                session: {
-                    currencyGroupId: "1",
-                },
-            };
-
-            mockSettings = {
-                groupId: "1",
-                minBet: 20,
-                maxBet: 2000,
-                maxBetPerChoices: {
-                    firstHalfHome: 500,
-                    secondHalfHome: 600,
-                },
-            };
-
-            mockGameData.currencyGroupGames = [mockSettings];
-            mockGameData.gameConfigs = {
-                enableFreeBet: true,
-            };
-            mockGameData.ingame = {
-                testPlayer: {
-                    betTracks: {},
-                },
-            };
-
-            // Add mock choices to game definition
-            mockGameDefinition.choices = [
-                "firstHalfHome",
-                "firstHalfAway",
-                "firstHalfDraw",
-                "secondHalfHome",
-                "secondHalfAway",
-                "secondHalfDraw",
-            ];
-        });
-
         describe("free bet validation", () => {
             it("should fail validation when free bet is disabled", () => {
                 // Arrange
                 mockGameData.gameConfigs.enableFreeBet = false;
-                const betChoice = "firstHalfHome";
+                const betChoice = BET_CHOICES.home;
                 const amount = 100;
                 const freeBet = true;
 
@@ -590,7 +592,7 @@ describe("PlaceBetConsumer", () => {
             it("should pass validation when free bet is enabled", () => {
                 // Arrange
                 mockGameData.gameConfigs.enableFreeBet = true;
-                const betChoice = "firstHalfHome";
+                const betChoice = BET_CHOICES.home;
                 const amount = 100;
                 const freeBet = true;
 
@@ -605,7 +607,7 @@ describe("PlaceBetConsumer", () => {
         describe("max bet per choice validation", () => {
             it("should fail validation when bet amount exceeds max bet per choice for first half", () => {
                 // Arrange
-                const betChoice = "firstHalfHome";
+                const betChoice = BET_CHOICES.home;
                 const amount = 600;
                 const freeBet = false;
 
@@ -620,9 +622,9 @@ describe("PlaceBetConsumer", () => {
             it("should fail validation when bet amount plus existing bet exceeds max bet per choice", () => {
                 // Arrange
                 mockGameData.ingame.testPlayer.betTracks = {
-                    firstHalfHome: 300,
+                    [BET_CHOICES.home]: 300,
                 };
-                const betChoice = "firstHalfHome";
+                const betChoice = BET_CHOICES.home;
                 const amount = 300;
                 const freeBet = false;
 
@@ -637,9 +639,9 @@ describe("PlaceBetConsumer", () => {
             it("should limit max bet based on odds for second half bets", () => {
                 // Arrange
                 mockGameData.dynamicOdds = {
-                    secondHalfHome: 2.5,
+                    [BET_CHOICES.homeLive]: 2.5,
                 };
-                const betChoice = "secondHalfHome";
+                const betChoice = BET_CHOICES.homeLive;
                 const amount = 1000;
                 const freeBet = false;
 
@@ -655,9 +657,9 @@ describe("PlaceBetConsumer", () => {
             it("should limit max bet based on odds when odds-based calculation is smaller than configured max bet", () => {
                 // Arrange
                 mockGameData.dynamicOdds = {
-                    secondHalfHome: 3.0, // Higher odds will result in smaller max bet
+                    [BET_CHOICES.homeLive]: 3.0, // Higher odds will result in smaller max bet
                 };
-                const betChoice = "secondHalfHome";
+                const betChoice = BET_CHOICES.homeLive;
                 const amount = 1000;
                 const freeBet = false;
 
@@ -674,7 +676,7 @@ describe("PlaceBetConsumer", () => {
         describe("min bet validation", () => {
             it("should fail validation when bet amount is less than min bet", () => {
                 // Arrange
-                const betChoice = "firstHalfHome";
+                const betChoice = BET_CHOICES.home;
                 const amount = 5;
                 const freeBet = false;
 
@@ -690,7 +692,7 @@ describe("PlaceBetConsumer", () => {
         describe("max bet validation", () => {
             it("should fail validation when bet amount exceeds max bet", () => {
                 // Arrange
-                const betChoice = "firstHalfHome";
+                const betChoice = BET_CHOICES.home;
                 const amount = 2500;
                 const freeBet = false;
 
@@ -705,9 +707,9 @@ describe("PlaceBetConsumer", () => {
             it("should fail validation when total bet amount exceeds max bet", () => {
                 // Arrange
                 mockGameData.ingame.testPlayer.betTracks = {
-                    firstHalfHome: 600,
+                    [BET_CHOICES.home]: 600,
                 };
-                const betChoice = "firstHalfAway";
+                const betChoice = BET_CHOICES.homeLive;
                 const amount = 500;
                 const freeBet = false;
 
@@ -722,11 +724,11 @@ describe("PlaceBetConsumer", () => {
             it("should fail validation when total amount across multiple bet choices exceeds max bet", () => {
                 // Arrange
                 mockGameData.ingame.testPlayer.betTracks = {
-                    firstHalfHome: 300,
-                    firstHalfAway: 400,
-                    secondHalfHome: 200,
+                    [BET_CHOICES.home]: 300,
+                    [BET_CHOICES.away]: 400,
+                    [BET_CHOICES.homeLive]: 200,
                 };
-                const betChoice = "secondHalfAway";
+                const betChoice = BET_CHOICES.homeLive;
                 const amount = 200;
                 const freeBet = false;
 
@@ -736,6 +738,51 @@ describe("PlaceBetConsumer", () => {
                 // Assert
                 expect(result[4].failure).toBe(true);
                 expect(result[4].notice).toEqual({ errorCode: "SB1911", maxBet: 1000 });
+            });
+        });
+    });
+
+    describe("composeHedgeBetValidationCriteria", () => {
+        describe("when bet choice is violated hedge bet criteria", () => {
+            it("should return failure with hedge bet notice between first half", () => {
+                // Arrange
+                mockGameData.ingame.testPlayer.betTracks = {
+                    [BET_CHOICES.home]: 300,
+                };
+
+                // Act
+                const actualResult = placeBetConsumer.composeHedgeBetValidationCriteria(BET_CHOICES.away, mockPlayer);
+
+                // Assert
+                expect(!!actualResult[0].failure).toBe(true);
+            });
+
+            it("should return failure with hedge bet notice between first half and second half", () => {
+                // Arrange
+                mockGameData.ingame.testPlayer.betTracks = {
+                    [BET_CHOICES.home]: 300,
+                };
+
+                // Act
+                const actualResult = placeBetConsumer.composeHedgeBetValidationCriteria(BET_CHOICES.awayLive, mockPlayer);
+
+                // Assert
+                expect(!!actualResult[0].failure).toBe(true);
+            });
+        });
+
+        describe("when bet choice is NOT violated hedge bet criteria", () => {
+            it("should return NO failure with hedge bet notice", () => {
+                // Arrange
+                mockGameData.ingame.testPlayer.betTracks = {
+                    [BET_CHOICES.home]: 300,
+                };
+
+                // Act
+                const actualResult = placeBetConsumer.composeHedgeBetValidationCriteria(BET_CHOICES.draw, mockPlayer);
+
+                // Assert
+                expect(!!actualResult[0].failure).toBe(false);
             });
         });
     });
