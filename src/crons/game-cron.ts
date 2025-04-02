@@ -55,7 +55,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
         }
     }
 
-    async getVideoTimelineWithRetry(videoName: string, isFirstHalf: boolean) {
+    async getVideoTimelineWithRetry(videoName: string, videoResult: string, isFirstHalf: boolean) {
         const delay = 100;
         const retries = 3;
 
@@ -64,16 +64,24 @@ export default class GameCron extends Table.Crons.TableGameCron {
                 `In match ${this.gameData.roundId}, failed to fetch ${isFirstHalf ? "first half" : "second half"} timeline: ${error}`
             );
 
-            return this.getDefaultVideoTimeline(videoName, isFirstHalf);
+            return this.getDefaultVideoTimeline(videoResult, isFirstHalf);
         });
     }
 
     async getVideoTimelineForFirstHalf() {
-        this.gameData.result.firstHalfTimeline = await this.getVideoTimelineWithRetry(this.gameData.result.firstHalfVideo, true);
+        this.gameData.result.firstHalfTimeline = await this.getVideoTimelineWithRetry(
+            this.gameData.result.firstHalfVideo,
+            this.gameData.result.firstHalf,
+            true
+        );
     }
 
     async getVideoTimelineForSecondHalf() {
-        this.gameData.result.secondHalfTimeline = await this.getVideoTimelineWithRetry(this.gameData.result.secondHalfVideo, false);
+        this.gameData.result.secondHalfTimeline = await this.getVideoTimelineWithRetry(
+            this.gameData.result.secondHalfVideo,
+            this.gameData.result.secondHalf,
+            false
+        );
     }
 
     getDefaultVideoTimeline(result: string, isFirstHalf: boolean) {

@@ -471,7 +471,7 @@ describe("GameCron", () => {
             jest.spyOn(gameCron, "getVideoTimelineByVideoName").mockResolvedValueOnce(mockFirstHalfTimeline);
 
             // Act
-            const timeline = await gameCron.getVideoTimelineWithRetry("first-half-video", true);
+            const timeline = await gameCron.getVideoTimelineWithRetry("first-half-video", "0", true);
 
             // Assert
             expect(timeline).toEqual(mockFirstHalfTimeline);
@@ -481,18 +481,16 @@ describe("GameCron", () => {
             // Arrange
             const videoName = "test-video";
             const mockError = new Error("Network error");
-            const mockTimeline = [7, 8, 9];
             gameCron.gameData.roundId = 123;
 
             jest.spyOn(gameCron, "getVideoTimelineByVideoName").mockRejectedValue(mockError);
 
-            jest.spyOn(gameCron, "getDefaultVideoTimeline").mockReturnValue(mockTimeline);
             // Act
-            const result = await gameCron.getVideoTimelineWithRetry(videoName, true);
+            const result = await gameCron.getVideoTimelineWithRetry(videoName, "AAAA", true);
 
             // Assert
             expect(logService.logError).toHaveBeenCalledWith("In match 123, failed to fetch first half timeline: Error: Network error");
-            expect(result).toEqual(mockTimeline);
+            expect(result).toEqual([1.8, 19.033333333333335, 33.8, 42.43333333333333]);
         });
     });
 
@@ -504,6 +502,7 @@ describe("GameCron", () => {
             const mockTimeline = [7, 8, 9];
             gameCron.gameData.result = {
                 firstHalfVideo: videoName,
+                firstHalf: "0",
             } as any;
             jest.spyOn(gameCron, "getVideoTimelineWithRetry").mockResolvedValueOnce(mockTimeline);
 
@@ -511,7 +510,7 @@ describe("GameCron", () => {
             await gameCron.getVideoTimelineForFirstHalf();
 
             // Assert
-            expect(gameCron.getVideoTimelineWithRetry).toHaveBeenCalledWith(videoName, isFirstHalf);
+            expect(gameCron.getVideoTimelineWithRetry).toHaveBeenCalledWith(videoName, "0", isFirstHalf);
             expect(gameCron.gameData.result.firstHalfTimeline).toEqual(mockTimeline);
         });
     });
@@ -524,6 +523,7 @@ describe("GameCron", () => {
             const mockTimeline = [7, 8, 9];
             gameCron.gameData.result = {
                 secondHalfVideo: videoName,
+                secondHalf: "0",
             } as any;
             jest.spyOn(gameCron, "getVideoTimelineWithRetry").mockResolvedValueOnce(mockTimeline);
 
@@ -531,7 +531,7 @@ describe("GameCron", () => {
             await gameCron.getVideoTimelineForSecondHalf();
 
             // Assert
-            expect(gameCron.getVideoTimelineWithRetry).toHaveBeenCalledWith(videoName, isFirstHalf);
+            expect(gameCron.getVideoTimelineWithRetry).toHaveBeenCalledWith(videoName, "0", isFirstHalf);
             expect(gameCron.gameData.result.secondHalfTimeline).toEqual(mockTimeline);
         });
     });
