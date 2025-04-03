@@ -15,6 +15,10 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
                 failure: this.isBetChoiceBanned(betChoice),
                 notice: this.getNoticeObj(helpers.noticeHelper.invalidBet),
             },
+            {
+                failure: this.isBetChoiceOddZero(betChoice),    
+                notice: this.getNoticeObj(helpers.noticeHelper.invalidBet),
+            },
             ...super.composeBetChoiceValidationCriteria(betChoice),
         ];
     }
@@ -140,5 +144,10 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
         const odds = this.gameData?.dynamicOdds;
         const betChoiceOdds = odds?.[betChoice] ?? 1;
         return Math.round(maxBet / Math.abs(betChoiceOdds - 1));
+    }
+
+    private isBetChoiceOddZero(betChoice: string) {
+        const odds = this.gameData?.dynamicOdds?.[betChoice] ?? 0;
+        return odds === 0;
     }
 }
