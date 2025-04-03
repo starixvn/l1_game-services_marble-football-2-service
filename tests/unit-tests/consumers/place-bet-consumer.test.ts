@@ -570,6 +570,50 @@ describe("PlaceBetConsumer", () => {
                 });
             });
         });
+
+        describe("zero odds validation", () => {
+            it("should fail validation when the odds for the bet choice is zero", () => {
+                // Arrange
+                mockGameData.dynamicOdds = {
+                    [BET_CHOICES.home]: 0
+                };
+                const betChoice = BET_CHOICES.home;
+
+                // Act
+                const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
+
+                // Assert
+                expect(result[1].failure).toBe(true);
+                expect(result[1].notice).toEqual({ errorCode: "SB1935" });
+            });
+
+            it("should pass validation when the odds for the bet choice is not zero", () => {
+                // Arrange
+                mockGameData.dynamicOdds = {
+                    [BET_CHOICES.home]: 1.5
+                };
+                const betChoice = BET_CHOICES.home;
+
+                // Act
+                const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
+
+                // Assert
+                expect(result[1].failure).toBe(false);
+            });
+
+            it("should fail validation when the odds for the bet choice is undefined (defaults to zero)", () => {
+                // Arrange
+                mockGameData.dynamicOdds = {};
+                const betChoice = BET_CHOICES.home;
+
+                // Act
+                const result = placeBetConsumer.composeBetChoiceValidationCriteria(betChoice);
+
+                // Assert
+                expect(result[1].failure).toBe(true);
+                expect(result[1].notice).toEqual({ errorCode: "SB1935" });
+            });
+        });
     });
 
     describe("composeBetAmountValidationCriteria", () => {
