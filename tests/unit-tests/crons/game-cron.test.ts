@@ -142,6 +142,13 @@ describe("GameCron", () => {
             // assert
             expect(gameCron.gameData.playerBetCount).toEqual({});
         });
+        it("should reset dynamic odds for new round", () => {
+            // act
+            gameCron.resetForNewRound();
+
+            // assert
+            expect(gameCron.gameData.dynamicOdds).toEqual({});
+        });
 
         it("should generate round data and reset settlement result from admin", async () => {
             // act

@@ -37,6 +37,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
 
     override resetForNewRound() {
         super.resetForNewRound();
+        this.gameData.dynamicOdds = {};
         this.gameData.playerBetCount = {};
     }
 
