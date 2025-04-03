@@ -3,7 +3,7 @@ import GameData from "../game-data";
 import { getUserBetPercentage } from "../helpers/bet-percentage";
 import GameDefinition from "../game-definition";
 import { isFirstHalfOddsActive } from "../helpers/game-timing";
-import { LIVE_BET_CHOICES, PRE_MATCH_BET_CHOICES } from "../constants";
+import { BET_CHOICES, LIVE_BET_CHOICES, PRE_MATCH_BET_CHOICES } from "../constants";
 
 export default class InGameConsumer extends TableInGameConsumer {
     declare gameData: GameData;
@@ -15,7 +15,7 @@ export default class InGameConsumer extends TableInGameConsumer {
         roundQuery: any,
         publisher: any,
         getBalance: any,
-        gameManagementApiClientFactory: any,
+        gameManagementApiClientFactory: any
     ) {
         super(definition, gameData, roundQuery, publisher, getBalance, gameManagementApiClientFactory);
     }
@@ -27,70 +27,135 @@ export default class InGameConsumer extends TableInGameConsumer {
 
     override async buildPayload(realPlayer: any) {
         const payload = await super.buildPayload(realPlayer);
-        const { playerBetCount } = this.gameData;
-        const userBetPercentage = getUserBetPercentage(playerBetCount);
-        const videoResult = this.getCurrentVideoResult();
-        const liveStreamServer = this.gameData.liveStreamServer;
+        return {
+            ...payload,
+            userBetPercentage: this.getUserBetPercentage(),
+            liveStreamServer: this.gameData.liveStreamServer,
+            videoResult: this.getCurrentVideoResult(),
+            tournament: this.gameData.publishedTournament,
+        };
+    }
 
-        const tournament = this.gameData.publishedTournament;
-        return { ...payload, userBetPercentage, liveStreamServer, videoResult, tournament };
+    private getUserBetPercentage() {
+        const betChoices = this.getBetChoices();
+        const userBetPercentage = getUserBetPercentage(this.gameData.playerBetCount, betChoices);
+
+        return userBetPercentage;
+    }
+
+    getBetChoices(): string[] {
+        const firstHalfBetChoices = [BET_CHOICES.home, BET_CHOICES.away, BET_CHOICES.draw];
+        const secondHalfBetChoices = [LIVE_BET_CHOICES.homeLive, LIVE_BET_CHOICES.awayLive, LIVE_BET_CHOICES.drawLive];
+
+        if (this.isDuringFirstHalf()) {
+            return firstHalfBetChoices;
+        }
+
+        if (this.isDuringSecondHalf()) {
+            return secondHalfBetChoices;
+        }
+
+        return [...firstHalfBetChoices, ...secondHalfBetChoices];
     }
 
     getCurrentVideoResult() {
-        const { durations } = this.definition;
-        const remainingTime = this.gameData.remainingTime;
-
-        const isStreamingVideoFirstHalf =
-            remainingTime <= durations.streamingVideoFirstHalf && remainingTime > durations.placingBetsSecondHalf;
-        const isStreamingVideoSecondHalf = remainingTime <= durations.streamingVideoSecondHalf && remainingTime >= 0;
-        const isShowingResultFirstHalf = remainingTime <= durations.placingBetsSecondHalf && remainingTime > durations.lockingBetSecondHalf;
-        const isShowingResultSecondHalf = remainingTime <= durations.wholeRound && remainingTime > durations.startingRound;
-
-        if (isStreamingVideoFirstHalf) {
-            return {
-                firstHalfVideo: this.gameData.result?.firstHalfVideo,
-                firstHalfTimeline: this.gameData.result?.firstHalfTimeline,
-                firstHalf: this.gameData.result?.firstHalf,
-            };
+        if (this.isStreamingVideoFirstHalf()) {
+            return this.getFirstHalfStreamingResult();
         }
-
-        if (isStreamingVideoSecondHalf) {
-            return {
-                secondHalfVideo: this.gameData.result?.secondHalfVideo,
-                secondHalfTimeline: this.gameData.result?.secondHalfTimeline,
-                secondHalf: this.gameData.result?.secondHalf,
-            };
+        if (this.isStreamingVideoSecondHalf()) {
+            return this.getSecondHalfStreamingResult();
         }
-
-        if (isShowingResultFirstHalf) {
-            return {
-                firstHalfTimeline: this.gameData.result?.firstHalfTimeline,
-                firstHalf: this.gameData.result?.firstHalf,
-            };
+        if (this.isShowingResultFirstHalf()) {
+            return this.getFirstHalfResult();
         }
-
-        if (isShowingResultSecondHalf) {
-            return {
-                secondHalfTimeline: this.gameData.result?.secondHalfTimeline,
-                secondHalf: this.gameData.result?.secondHalf,
-            };
+        if (this.isShowingResultSecondHalf()) {
+            return this.getSecondHalfResult();
         }
-
         return {};
     }
 
-    publishOddsToPlayer(UID: any) {
+    private isStreamingVideoFirstHalf(): boolean {
+        const { durations } = this.definition;
+        const remainingTime = this.gameData.remainingTime;
+        return remainingTime <= durations.streamingVideoFirstHalf && remainingTime > durations.placingBetsSecondHalf;
+    }
+
+    private isStreamingVideoSecondHalf(): boolean {
+        const { durations } = this.definition;
+        const remainingTime = this.gameData.remainingTime;
+        return remainingTime <= durations.streamingVideoSecondHalf && remainingTime >= 0;
+    }
+
+    private isShowingResultFirstHalf(): boolean {
+        const { durations } = this.definition;
+        const remainingTime = this.gameData.remainingTime;
+        return remainingTime <= durations.placingBetsSecondHalf && remainingTime > durations.lockingBetSecondHalf;
+    }
+
+    private isShowingResultSecondHalf(): boolean {
+        const { durations } = this.definition;
+        const remainingTime = this.gameData.remainingTime;
+        return remainingTime <= durations.wholeRound && remainingTime > durations.startingRound;
+    }
+
+    private isDuringFirstHalf(): boolean {
+        const { durations } = this.definition;
+        const remainingTime = this.gameData.remainingTime;
+        return remainingTime <= durations.placingBetsFirstHalf && remainingTime > durations.placingBetsSecondHalf;
+    }
+
+    private isDuringSecondHalf(): boolean {
+        const { durations } = this.definition;
+        const remainingTime = this.gameData.remainingTime;
+        return remainingTime <= durations.placingBetsSecondHalf && remainingTime > 0;
+    }
+
+    private getFirstHalfStreamingResult() {
+        const { result } = this.gameData;
+        return {
+            firstHalfVideo: result?.firstHalfVideo,
+            firstHalfTimeline: result?.firstHalfTimeline,
+            firstHalf: result?.firstHalf,
+        };
+    }
+
+    private getSecondHalfStreamingResult() {
+        const { result } = this.gameData;
+        return {
+            secondHalfVideo: result?.secondHalfVideo,
+            secondHalfTimeline: result?.secondHalfTimeline,
+            secondHalf: result?.secondHalf,
+        };
+    }
+
+    private getFirstHalfResult() {
+        const { result } = this.gameData;
+        return {
+            firstHalfTimeline: result?.firstHalfTimeline,
+            firstHalf: result?.firstHalf,
+        };
+    }
+
+    private getSecondHalfResult() {
+        const { result } = this.gameData;
+        return {
+            secondHalfTimeline: result?.secondHalfTimeline,
+            secondHalf: result?.secondHalf,
+        };
+    }
+
+    publishOddsToPlayer(UID: string): void {
         const { durations } = this.definition;
         const remainingTime = this.gameData.remainingTime;
 
         if (isFirstHalfOddsActive(remainingTime, durations)) {
-            return this.publishFirstHalfOdds(UID);
+            this.publishFirstHalfOdds(UID);
+        } else {
+            this.publishSecondHalfOdds(UID);
         }
-
-        return this.publishSecondHalfOdds(UID);
     }
 
-    private publishFirstHalfOdds(UID: any) {
+    private publishFirstHalfOdds(UID: string): void {
         const dynamicOdds = this.gameData.dynamicOdds;
         const odds = {
             [PRE_MATCH_BET_CHOICES.home]: dynamicOdds?.home,
@@ -105,7 +170,7 @@ export default class InGameConsumer extends TableInGameConsumer {
         this.publisher.publishToUser(UID, { odds });
     }
 
-    private publishSecondHalfOdds(UID: any) {
+    private publishSecondHalfOdds(UID: string): void {
         const dynamicOdds = this.gameData.dynamicOdds;
         const odds = {
             [LIVE_BET_CHOICES.homeLive]: dynamicOdds?.homeLive,

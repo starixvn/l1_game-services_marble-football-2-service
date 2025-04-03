@@ -27,6 +27,13 @@ const bet = {
     under: { type: Number, default: 0 },
     odd: { type: Number, default: 0 },
     even: { type: Number, default: 0 },
+    homeLive: { type: Number, default: 0 },
+    awayLive: { type: Number, default: 0 },
+    drawLive: { type: Number, default: 0 },
+    overLive: { type: Number, default: 0 },
+    underLive: { type: Number, default: 0 },
+    oddLive: { type: Number, default: 0 },
+    evenLive: { type: Number, default: 0 },
 };
 
 const bets = mongoose.model(
@@ -35,7 +42,7 @@ const bets = mongoose.model(
         ...bet,
         currency: { type: String },
         rate: { type: Number, required: true },
-    }),
+    })
 );
 
 const tmpBets = mongoose.model(tmpModelName, new mongoose.Schema(bet));

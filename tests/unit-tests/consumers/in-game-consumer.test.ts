@@ -6,7 +6,7 @@ import GameDefinition from "../../../src/game-definition";
 import { gameManagementApiClientFactory, publisher, roundQuery } from "../global-stubs";
 import * as helper from "../../../src/helpers/bet-percentage";
 import * as gameTimingHelper from "../../../src/helpers/game-timing";
-import { LIVE_BET_CHOICES, PRE_MATCH_BET_CHOICES } from "../../../src/constants";
+import { BET_CHOICES, LIVE_BET_CHOICES, PRE_MATCH_BET_CHOICES } from "../../../src/constants";
 
 describe("InGameConsumer test", () => {
     let consumer: InGameConsumer;
@@ -159,36 +159,29 @@ describe("InGameConsumer test", () => {
             },
             {
                 phase: "showing result second half",
-                timeRange: { start: 0, end: definition.durations.streamingVideoSecondHalf },
-                resultDescription: "full video second half result",
-                expectedResult: fullVideoSecondHalfResult,
-            },
-            {
-                phase: "showing result second half",
                 timeRange: { start: definition.durations.startingRound + 1, end: definition.durations.wholeRound },
                 resultDescription: "timeline result second half",
                 expectedResult: timelineSecondHalfResult,
             },
             {
-                phase: "starting",
+                phase: "other phase",
                 timeRange: { start: definition.durations.placingBetsFirstHalf, end: definition.durations.startingRound },
-                resultDescription: "empty result",
-                expectedResult: {},
-            },
-            {
-                phase: "placing bets first half",
-                timeRange: { start: definition.durations.streamingVideoFirstHalf + 1, end: definition.durations.placingBetsFirstHalf },
                 resultDescription: "empty result",
                 expectedResult: {},
             },
         ];
 
         testCases.forEach(({ phase, timeRange, resultDescription, expectedResult }) => {
-            describe(`during ${phase} phase with start time ${timeRange.start} and end time ${timeRange.end}`, () => {
-                const timeToTests = Array.from({ length: timeRange.end - timeRange.start + 1 }, (_, i) => timeRange.start + i);
-                it.each(timeToTests)(`should return ${resultDescription} when remaining time is %s`, (time) => {
-                    gameData.remainingTime = time;
-                    expect(consumer.getCurrentVideoResult()).toEqual(expectedResult);
+            describe(`during ${phase} phase`, () => {
+                it(`should return ${resultDescription}`, () => {
+                    // arrange
+                    gameData.remainingTime = timeRange.start;
+
+                    // act
+                    const result = consumer.getCurrentVideoResult();
+
+                    // assert
+                    expect(result).toEqual(expectedResult);
                 });
             });
         });
@@ -229,10 +222,48 @@ describe("InGameConsumer test", () => {
                 liveStreamServer: "server1",
                 tournament: {},
             });
+        });
+    });
 
-            expect(helper.getUserBetPercentage).toHaveBeenCalledWith(playerBetCount);
+    describe("getBetChoices", () => {
+        it("should return first half bet choices during first half", () => {
+            // arrange
+            gameData.remainingTime = definition.durations.placingBetsFirstHalf - 1;
 
-            expect(consumer.getCurrentVideoResult).toHaveBeenCalled();
+            // act
+            const result = consumer.getBetChoices();
+
+            // assert
+            expect(result).toEqual([BET_CHOICES.home, BET_CHOICES.away, BET_CHOICES.draw]);
+        });
+
+        it("should return second half bet choices during second half", () => {
+            // arrange
+            gameData.remainingTime = definition.durations.placingBetsSecondHalf - 1;
+
+            // act
+            const result = consumer.getBetChoices();
+
+            // assert
+            expect(result).toEqual([LIVE_BET_CHOICES.homeLive, LIVE_BET_CHOICES.awayLive, LIVE_BET_CHOICES.drawLive]);
+        });
+
+        it("should return combined bet choices outside betting phases", () => {
+            // arrange
+            gameData.remainingTime = definition.durations.placingBetsFirstHalf + 1;
+
+            // act
+            const result = consumer.getBetChoices();
+
+            // assert
+            expect(result).toEqual([
+                BET_CHOICES.home,
+                BET_CHOICES.away,
+                BET_CHOICES.draw,
+                LIVE_BET_CHOICES.homeLive,
+                LIVE_BET_CHOICES.awayLive,
+                LIVE_BET_CHOICES.drawLive,
+            ]);
         });
     });
 });

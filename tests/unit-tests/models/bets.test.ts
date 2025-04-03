@@ -20,6 +20,13 @@ describe("Bets", () => {
                 under: 0,
                 odd: 0,
                 even: 0,
+                homeLive: 0,
+                awayLive: 0,
+                drawLive: 0,
+                overLive: 0,
+                underLive: 0,
+                oddLive: 0,
+                evenLive: 0,
             };
 
             // Act
@@ -38,7 +45,7 @@ describe("Bets", () => {
 
             // Assert
             expect(error.message).toBe(
-                `marblefootball2_bets validation failed: rate: Path \`rate\` is required., name: Path \`name\` is required., uid: Path \`uid\` is required., roundId: Path \`roundId\` is required.`,
+                `marblefootball2_bets validation failed: rate: Path \`rate\` is required., name: Path \`name\` is required., uid: Path \`uid\` is required., roundId: Path \`roundId\` is required.`
             );
         });
     });

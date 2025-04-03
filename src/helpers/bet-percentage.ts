@@ -1,5 +1,3 @@
-import { BET_CHOICES } from "../constants";
-
 export const calculatePlayerBetPercentage = (playerBetCount: Record<string, string[]>, betChoices: string[]): Record<string, number> => {
     const total = betChoices.reduce((t, choice) => t + (playerBetCount[choice]?.length || 0), 0);
 
@@ -9,13 +7,6 @@ export const calculatePlayerBetPercentage = (playerBetCount: Record<string, stri
     }, {} as Record<string, number>);
 };
 
-export const getUserBetPercentage = (playerBetCount: Record<string, string[]>) => {
-    return calculatePlayerBetPercentage(playerBetCount, [
-        BET_CHOICES.home,
-        BET_CHOICES.away,
-        BET_CHOICES.draw,
-        BET_CHOICES.homeLive,
-        BET_CHOICES.awayLive,
-        BET_CHOICES.drawLive,
-    ]);
+export const getUserBetPercentage = (playerBetCount: Record<string, string[]>, betChoices: string[] = []) => {
+    return calculatePlayerBetPercentage(playerBetCount, betChoices);
 };
