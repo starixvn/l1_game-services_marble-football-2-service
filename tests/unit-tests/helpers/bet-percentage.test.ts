@@ -1,5 +1,8 @@
 import { betPercentage } from "../../../src/helpers";
 import { BET_CHOICES } from "../../../src/constants";
+import { Duration } from "../../../src/game-definition";
+import { getPercentageBetChoices, getUserBetPercentage } from "../../../src/helpers/bet-percentage";
+import * as gameTimingHelper from "../../../src/helpers/game-timing";
 
 describe("betPercentage", () => {
     describe("calculateUserBetPercentage", () => {
@@ -148,6 +151,123 @@ describe("betPercentage", () => {
                 [BET_CHOICES.home]: 33,
                 [BET_CHOICES.draw]: 33,
                 [BET_CHOICES.away]: 33,
+            });
+        });
+    });
+
+    describe("getPercentageBetChoices", () => {
+        const mockDurations: Duration = {
+            wholeRound: 121,
+            startingRound: 118,
+            placingBetsFirstHalf: 115,
+            lockingBetFirstHalf: 99,
+            streamingVideoFirstHalf: 94,
+            placingBetsSecondHalf: 63,
+            lockingBetSecondHalf: 47,
+            streamingVideoSecondHalf: 42,
+            lockingBet: 0,
+            placingBets: 0,
+        };
+
+        beforeEach(() => {
+            jest.spyOn(gameTimingHelper, "isDuringFirstHalf").mockReturnValue(false);
+            jest.spyOn(gameTimingHelper, "isDuringSecondHalf").mockReturnValue(false);
+        });
+
+        it("should return first half bet choices during first half", () => {
+            // Arrange
+            jest.spyOn(gameTimingHelper, "isDuringFirstHalf").mockReturnValue(true);
+            const remainingTime = 100;
+
+            // Act
+            const result = getPercentageBetChoices(remainingTime, mockDurations);
+
+            // Assert
+            expect(gameTimingHelper.isDuringFirstHalf).toHaveBeenCalledWith(remainingTime, mockDurations);
+            expect(result).toEqual([BET_CHOICES.home, BET_CHOICES.away, BET_CHOICES.draw]);
+        });
+
+        it("should return second half bet choices during second half", () => {
+            // Arrange
+            jest.spyOn(gameTimingHelper, "isDuringSecondHalf").mockReturnValue(true);
+            const remainingTime = 50;
+
+            // Act
+            const result = getPercentageBetChoices(remainingTime, mockDurations);
+
+            // Assert
+            expect(gameTimingHelper.isDuringSecondHalf).toHaveBeenCalledWith(remainingTime, mockDurations);
+            expect(result).toEqual([BET_CHOICES.homeLive, BET_CHOICES.awayLive, BET_CHOICES.drawLive]);
+        });
+
+        it("should return combined bet choices outside betting phases", () => {
+            // Arrange
+            const remainingTime = 120;
+
+            // Act
+            const result = getPercentageBetChoices(remainingTime, mockDurations);
+
+            // Assert
+            expect(result).toEqual([
+                BET_CHOICES.home,
+                BET_CHOICES.away,
+                BET_CHOICES.draw,
+                BET_CHOICES.homeLive,
+                BET_CHOICES.awayLive,
+                BET_CHOICES.drawLive,
+            ]);
+        });
+    });
+
+    describe("getUserBetPercentage", () => {
+        it("should calculate bet percentages correctly", () => {
+            // Arrange
+            const playerBetCount = {
+                home: ["user1", "user2"],
+                away: ["user3"],
+                draw: [],
+            };
+            const betChoices = ["home", "away", "draw"];
+
+            // Act
+            const result = getUserBetPercentage(playerBetCount, betChoices);
+
+            // Assert
+            expect(result).toEqual({
+                home: 67,
+                away: 33,
+                draw: 0,
+            });
+        });
+
+        it("should handle empty bet choices", () => {
+            // Arrange
+            const playerBetCount = {
+                home: ["user1", "user2"],
+                away: ["user3"],
+                draw: [],
+            };
+
+            // Act
+            const result = getUserBetPercentage(playerBetCount);
+
+            // Assert
+            expect(result).toEqual({});
+        });
+
+        it("should handle empty player bet count", () => {
+            // Arrange
+            const playerBetCount = {};
+            const betChoices = ["home", "away", "draw"];
+
+            // Act
+            const result = getUserBetPercentage(playerBetCount, betChoices);
+
+            // Assert
+            expect(result).toEqual({
+                home: 0,
+                away: 0,
+                draw: 0,
             });
         });
     });

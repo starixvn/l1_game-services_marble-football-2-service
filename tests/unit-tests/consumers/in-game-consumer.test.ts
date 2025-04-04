@@ -6,7 +6,7 @@ import GameDefinition from "../../../src/game-definition";
 import { gameManagementApiClientFactory, publisher, roundQuery } from "../global-stubs";
 import * as helper from "../../../src/helpers/bet-percentage";
 import * as gameTimingHelper from "../../../src/helpers/game-timing";
-import { BET_CHOICES, LIVE_BET_CHOICES, PRE_MATCH_BET_CHOICES } from "../../../src/constants";
+import { LIVE_BET_CHOICES, PRE_MATCH_BET_CHOICES } from "../../../src/constants";
 
 describe("InGameConsumer test", () => {
     let consumer: InGameConsumer;
@@ -202,6 +202,7 @@ describe("InGameConsumer test", () => {
                 firstHalf: "AH",
                 secondHalf: "HA",
             };
+            const betChoices = ["home", "away", "draw"];
 
             gameData.publishedTournament = {} as any;
             gameData.liveStreamServer = "server1";
@@ -210,11 +211,14 @@ describe("InGameConsumer test", () => {
             jest.spyOn(TableInGameConsumer.prototype, "buildPayload").mockResolvedValue(basePayload);
             jest.spyOn(consumer, "getCurrentVideoResult").mockReturnValue(videoResult as any);
             jest.spyOn(helper, "getUserBetPercentage").mockReturnValue(userBetPercentage);
+            jest.spyOn(helper, "getPercentageBetChoices").mockReturnValue(betChoices);
 
             // act
             const result = await consumer.buildPayload(realPlayer);
 
             // assert
+            expect(helper.getPercentageBetChoices).toHaveBeenCalledWith(gameData.remainingTime, definition.durations);
+            expect(helper.getUserBetPercentage).toHaveBeenCalledWith(playerBetCount, betChoices);
             expect(result).toEqual({
                 ...basePayload,
                 userBetPercentage,
@@ -222,48 +226,6 @@ describe("InGameConsumer test", () => {
                 liveStreamServer: "server1",
                 tournament: {},
             });
-        });
-    });
-
-    describe("getBetChoices", () => {
-        it("should return first half bet choices during first half", () => {
-            // arrange
-            gameData.remainingTime = definition.durations.placingBetsFirstHalf - 1;
-
-            // act
-            const result = consumer.getBetChoices();
-
-            // assert
-            expect(result).toEqual([BET_CHOICES.home, BET_CHOICES.away, BET_CHOICES.draw]);
-        });
-
-        it("should return second half bet choices during second half", () => {
-            // arrange
-            gameData.remainingTime = definition.durations.placingBetsSecondHalf - 1;
-
-            // act
-            const result = consumer.getBetChoices();
-
-            // assert
-            expect(result).toEqual([LIVE_BET_CHOICES.homeLive, LIVE_BET_CHOICES.awayLive, LIVE_BET_CHOICES.drawLive]);
-        });
-
-        it("should return combined bet choices outside betting phases", () => {
-            // arrange
-            gameData.remainingTime = definition.durations.placingBetsFirstHalf + 1;
-
-            // act
-            const result = consumer.getBetChoices();
-
-            // assert
-            expect(result).toEqual([
-                BET_CHOICES.home,
-                BET_CHOICES.away,
-                BET_CHOICES.draw,
-                LIVE_BET_CHOICES.homeLive,
-                LIVE_BET_CHOICES.awayLive,
-                LIVE_BET_CHOICES.drawLive,
-            ]);
         });
     });
 });

@@ -1,9 +1,15 @@
 import { TableInGameConsumer } from "sc-game-base/src/table/event-consumers";
 import GameData from "../game-data";
-import { getUserBetPercentage } from "../helpers/bet-percentage";
+import { getPercentageBetChoices, getUserBetPercentage } from "../helpers/bet-percentage";
 import GameDefinition from "../game-definition";
 import { isFirstHalfOddsActive } from "../helpers/game-timing";
-import { BET_CHOICES, LIVE_BET_CHOICES, PRE_MATCH_BET_CHOICES } from "../constants";
+import { LIVE_BET_CHOICES, PRE_MATCH_BET_CHOICES } from "../constants";
+import {
+    isStreamingVideoFirstHalf,
+    isStreamingVideoSecondHalf,
+    isShowingResultFirstHalf,
+    isShowingResultSecondHalf,
+} from "../helpers/game-timing";
 
 export default class InGameConsumer extends TableInGameConsumer {
     declare gameData: GameData;
@@ -15,7 +21,7 @@ export default class InGameConsumer extends TableInGameConsumer {
         roundQuery: any,
         publisher: any,
         getBalance: any,
-        gameManagementApiClientFactory: any,
+        gameManagementApiClientFactory: any
     ) {
         super(definition, gameData, roundQuery, publisher, getBalance, gameManagementApiClientFactory);
     }
@@ -37,76 +43,28 @@ export default class InGameConsumer extends TableInGameConsumer {
     }
 
     private getUserBetPercentage() {
-        const betChoices = this.getBetChoices();
+        const betChoices = getPercentageBetChoices(this.gameData.remainingTime, this.definition.durations);
 
         return getUserBetPercentage(this.gameData.playerBetCount, betChoices);
     }
 
-    getBetChoices(): string[] {
-        const firstHalfBetChoices = [BET_CHOICES.home, BET_CHOICES.away, BET_CHOICES.draw];
-        const secondHalfBetChoices = [LIVE_BET_CHOICES.homeLive, LIVE_BET_CHOICES.awayLive, LIVE_BET_CHOICES.drawLive];
-
-        if (this.isDuringFirstHalf()) {
-            return firstHalfBetChoices;
-        }
-
-        if (this.isDuringSecondHalf()) {
-            return secondHalfBetChoices;
-        }
-
-        return [...firstHalfBetChoices, ...secondHalfBetChoices];
-    }
-
     getCurrentVideoResult() {
-        if (this.isStreamingVideoFirstHalf()) {
+        const { durations } = this.definition;
+        const { remainingTime } = this.gameData;
+
+        if (isStreamingVideoFirstHalf(remainingTime, durations)) {
             return this.getFirstHalfStreamingResult();
         }
-        if (this.isStreamingVideoSecondHalf()) {
+        if (isStreamingVideoSecondHalf(remainingTime, durations)) {
             return this.getSecondHalfStreamingResult();
         }
-        if (this.isShowingResultFirstHalf()) {
+        if (isShowingResultFirstHalf(remainingTime, durations)) {
             return this.getFirstHalfResult();
         }
-        if (this.isShowingResultSecondHalf()) {
+        if (isShowingResultSecondHalf(remainingTime, durations)) {
             return this.getSecondHalfResult();
         }
         return {};
-    }
-
-    private isStreamingVideoFirstHalf(): boolean {
-        const { durations } = this.definition;
-        const remainingTime = this.gameData.remainingTime;
-        return remainingTime <= durations.streamingVideoFirstHalf && remainingTime > durations.placingBetsSecondHalf;
-    }
-
-    private isStreamingVideoSecondHalf(): boolean {
-        const { durations } = this.definition;
-        const remainingTime = this.gameData.remainingTime;
-        return remainingTime <= durations.streamingVideoSecondHalf && remainingTime >= 0;
-    }
-
-    private isShowingResultFirstHalf(): boolean {
-        const { durations } = this.definition;
-        const remainingTime = this.gameData.remainingTime;
-        return remainingTime <= durations.placingBetsSecondHalf && remainingTime > durations.lockingBetSecondHalf;
-    }
-
-    private isShowingResultSecondHalf(): boolean {
-        const { durations } = this.definition;
-        const remainingTime = this.gameData.remainingTime;
-        return remainingTime <= durations.wholeRound && remainingTime > durations.startingRound;
-    }
-
-    private isDuringFirstHalf(): boolean {
-        const { durations } = this.definition;
-        const remainingTime = this.gameData.remainingTime;
-        return remainingTime <= durations.placingBetsFirstHalf && remainingTime > durations.placingBetsSecondHalf;
-    }
-
-    private isDuringSecondHalf(): boolean {
-        const { durations } = this.definition;
-        const remainingTime = this.gameData.remainingTime;
-        return remainingTime <= durations.placingBetsSecondHalf && remainingTime > 0;
     }
 
     private getFirstHalfStreamingResult() {
