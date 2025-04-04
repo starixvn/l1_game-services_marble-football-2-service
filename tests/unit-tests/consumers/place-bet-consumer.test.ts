@@ -799,6 +799,7 @@ describe("PlaceBetConsumer", () => {
 
                 // Assert
                 expect(!!actualResult[0].failure).toBe(true);
+                expect(actualResult[0].notice).toEqual({ errorCode: "SB1939", hedgeBetGroup: [BET_CHOICES.home, BET_CHOICES.away] });
             });
 
             it("should return failure with hedge bet notice between first half and second half", () => {
@@ -812,6 +813,7 @@ describe("PlaceBetConsumer", () => {
 
                 // Assert
                 expect(!!actualResult[0].failure).toBe(true);
+                expect(actualResult[0].notice).toEqual({ errorCode: "SB1939", hedgeBetGroup: [BET_CHOICES.home, BET_CHOICES.awayLive] });
             });
         });
 
@@ -827,6 +829,7 @@ describe("PlaceBetConsumer", () => {
 
                 // Assert
                 expect(!!actualResult[0].failure).toBe(false);
+                expect(actualResult[0].notice).toEqual({ errorCode: "SB1939", hedgeBetGroup: [] });
             });
         });
     });

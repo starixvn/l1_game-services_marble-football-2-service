@@ -38,9 +38,8 @@ export default class InGameConsumer extends TableInGameConsumer {
 
     private getUserBetPercentage() {
         const betChoices = this.getBetChoices();
-        const userBetPercentage = getUserBetPercentage(this.gameData.playerBetCount, betChoices);
 
-        return userBetPercentage;
+        return getUserBetPercentage(this.gameData.playerBetCount, betChoices);
     }
 
     getBetChoices(): string[] {
