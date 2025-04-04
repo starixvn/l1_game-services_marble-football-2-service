@@ -31,7 +31,7 @@ export default class ProcessBetQueue extends TableProcessBetQueue {
         }
     }
 
-    composeBettingTimeValidationCriteria(roundId: number): { failure: boolean; notice: { errorCode: string; }; }[] {
+    composeBettingTimeValidationCriteria(roundId: number): { failure: boolean; notice: { errorCode: string } }[] {
         return [
             {
                 failure: roundId !== this.gameData.roundId,
@@ -72,9 +72,9 @@ export default class ProcessBetQueue extends TableProcessBetQueue {
         await this.betsRepository.updateOne(
             existingBetFilter,
             { $inc: existingBetIncrement, $setOnInsert: newBet },
-            { upsert: true, setDefaultsOnInsert: true }
+            { upsert: true, setDefaultsOnInsert: true },
         );
 
         return newBet.time;
-    }    
+    }
 }

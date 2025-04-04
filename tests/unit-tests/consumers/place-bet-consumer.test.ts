@@ -575,7 +575,7 @@ describe("PlaceBetConsumer", () => {
             it("should fail validation when the odds for the bet choice is zero", () => {
                 // Arrange
                 mockGameData.dynamicOdds = {
-                    [BET_CHOICES.home]: 0
+                    [BET_CHOICES.home]: 0,
                 };
                 const betChoice = BET_CHOICES.home;
 
@@ -590,7 +590,7 @@ describe("PlaceBetConsumer", () => {
             it("should pass validation when the odds for the bet choice is not zero", () => {
                 // Arrange
                 mockGameData.dynamicOdds = {
-                    [BET_CHOICES.home]: 1.5
+                    [BET_CHOICES.home]: 1.5,
                 };
                 const betChoice = BET_CHOICES.home;
 

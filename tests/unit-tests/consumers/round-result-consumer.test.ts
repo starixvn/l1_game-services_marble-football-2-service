@@ -19,7 +19,7 @@ jest.mock("sc-game-base/src/core/event-consumers", () => {
             public readonly definition: object,
             public readonly roundResultPublisher: object,
             public readonly resultsRepository: object,
-            public readonly provablyFairConsumer: object
+            public readonly provablyFairConsumer: object,
         ) {}
 
         generateResult() {

@@ -42,7 +42,7 @@ describe("when placing a bet", () => {
                 inGameData.remainingTime,
                 gameSettings.durations.lockingBetFirstHalf,
                 gameSettings.durations.placingBetsFirstHalf,
-                gameSettings.durations.wholeRound
+                gameSettings.durations.wholeRound,
             );
 
             // Act
@@ -87,7 +87,7 @@ describe("when placing a bet", () => {
                 inGameData.remainingTime,
                 gameSettings.durations.lockingBetFirstHalf,
                 gameSettings.durations.placingBetsFirstHalf,
-                gameSettings.durations.wholeRound
+                gameSettings.durations.wholeRound,
             );
 
             // Act
@@ -107,7 +107,7 @@ describe("when placing a bet", () => {
                 inGameData.remainingTime,
                 gameSettings.durations.lockingBetSecondHalf,
                 gameSettings.durations.placingBetsSecondHalf,
-                gameSettings.durations.wholeRound
+                gameSettings.durations.wholeRound,
             );
 
             const betChoice = "homeLive";

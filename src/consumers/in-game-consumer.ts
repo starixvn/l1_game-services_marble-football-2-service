@@ -15,7 +15,7 @@ export default class InGameConsumer extends TableInGameConsumer {
         roundQuery: any,
         publisher: any,
         getBalance: any,
-        gameManagementApiClientFactory: any
+        gameManagementApiClientFactory: any,
     ) {
         super(definition, gameData, roundQuery, publisher, getBalance, gameManagementApiClientFactory);
     }

@@ -458,7 +458,7 @@ describe("GameCron", () => {
             // Act & Assert
             await expect(gameCron.getVideoTimelineByVideoName(videoName)).rejects.toThrow(mockError);
             expect(logService.logError).toHaveBeenCalledWith(
-                "In match 123, failed to get video timeline http://example.com/test-video.json with error: Error: Network error"
+                "In match 123, failed to get video timeline http://example.com/test-video.json with error: Error: Network error",
             );
         });
     });
@@ -793,7 +793,7 @@ describe("GameCron", () => {
             expect(calculateLiveOddsSpy).toHaveBeenCalledWith(
                 gameCron.gameData.matchConfig.secondHalfConfig,
                 gameCron.gameData.result.firstHalf,
-                gameCron.gameData.gameConfigs.margin
+                gameCron.gameData.gameConfigs.margin,
             );
         });
     });

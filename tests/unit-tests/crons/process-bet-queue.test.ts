@@ -117,7 +117,7 @@ describe("ProcessBetQueue", () => {
                 streamingVideoFirstHalf: 4,
                 placingBetsSecondHalf: 20,
                 lockingBetSecondHalf: 15,
-                streamingVideoSecondHalf: 14
+                streamingVideoSecondHalf: 14,
             };
             processBetQueue.definition.durations = mockDurations;
             processBetQueue.gameData.roundId = 1;
@@ -125,8 +125,7 @@ describe("ProcessBetQueue", () => {
 
             const expectedBettingTimeResult = true;
 
-            jest.spyOn(require("../../../src/helpers/game-timing"), "isWithinBettingTime")
-                .mockReturnValue(expectedBettingTimeResult);
+            jest.spyOn(require("../../../src/helpers/game-timing"), "isWithinBettingTime").mockReturnValue(expectedBettingTimeResult);
 
             // Act
             const criteria = processBetQueue.composeBettingTimeValidationCriteria(1);
@@ -156,14 +155,13 @@ describe("ProcessBetQueue", () => {
                 streamingVideoFirstHalf: 4,
                 placingBetsSecondHalf: 20,
                 lockingBetSecondHalf: 15,
-                streamingVideoSecondHalf: 14
+                streamingVideoSecondHalf: 14,
             };
             processBetQueue.definition.durations = mockDurations;
             processBetQueue.gameData.roundId = 1;
             processBetQueue.gameData.remainingTime = 8;
 
-            jest.spyOn(require("../../../src/helpers/game-timing"), "isWithinBettingTime")
-                .mockReturnValue(true);
+            jest.spyOn(require("../../../src/helpers/game-timing"), "isWithinBettingTime").mockReturnValue(true);
 
             // Act
             const criteria = processBetQueue.composeBettingTimeValidationCriteria(2);
@@ -186,22 +184,22 @@ describe("ProcessBetQueue", () => {
         beforeEach(() => {
             processBetQueue.gameData.dynamicOdds = { choice1: 1.5, choice2: 2.0 };
             processBetQueue.betsRepository = {
-                updateOne: jest.fn().mockResolvedValue({ modifiedCount: 1 })
+                updateOne: jest.fn().mockResolvedValue({ modifiedCount: 1 }),
             } as any;
         });
 
         it("should create a new bet when no existing bet is found", async () => {
             // Arrange
-            const player = { 
+            const player = {
                 UID: "player1",
-                profile: { name: "Test Player" }
+                profile: { name: "Test Player" },
             };
             const bet = {
                 amount: 100,
                 betChoice: "choice1",
                 roundId: 1,
                 clientSeed: new Date(),
-                freeBet: false
+                freeBet: false,
             };
             const rate = 1.5;
 
@@ -214,7 +212,7 @@ describe("ProcessBetQueue", () => {
                 {
                     $inc: {
                         [bet.betChoice]: bet.amount,
-                        totalAmount: bet.amount
+                        totalAmount: bet.amount,
                     },
                     $setOnInsert: expect.objectContaining({
                         uid: player.UID,
@@ -222,26 +220,26 @@ describe("ProcessBetQueue", () => {
                         odds: processBetQueue.gameData.dynamicOdds,
                         freeBet: bet.freeBet,
                         roundId: bet.roundId,
-                        clientSeed: bet.clientSeed
-                    })
+                        clientSeed: bet.clientSeed,
+                    }),
                 },
-                { upsert: true, setDefaultsOnInsert: true }
+                { upsert: true, setDefaultsOnInsert: true },
             );
             expect(result).toBeInstanceOf(Date);
         });
 
         it("should update existing bet when found", async () => {
             // Arrange
-            const player = { 
+            const player = {
                 UID: "player1",
-                profile: { name: "Test Player" }
+                profile: { name: "Test Player" },
             };
             const bet = {
                 amount: 100,
                 betChoice: "choice1",
                 roundId: 1,
                 clientSeed: new Date(),
-                freeBet: false
+                freeBet: false,
             };
             const rate = 1.5;
 
@@ -254,32 +252,32 @@ describe("ProcessBetQueue", () => {
                 {
                     $inc: {
                         [bet.betChoice]: bet.amount,
-                        totalAmount: bet.amount
+                        totalAmount: bet.amount,
                     },
-                    $setOnInsert: expect.any(Object)
+                    $setOnInsert: expect.any(Object),
                 },
-                { upsert: true, setDefaultsOnInsert: true }
+                { upsert: true, setDefaultsOnInsert: true },
             );
         });
 
         it("should include session information when player has session", async () => {
             // Arrange
-            const player = { 
+            const player = {
                 UID: "player1",
                 profile: { name: "Test Player" },
                 session: {
                     siteId: "site1",
                     currencyName: "USD",
                     operatorId: "op1",
-                    playerId: "pid1"
-                }
+                    playerId: "pid1",
+                },
             };
             const bet = {
                 amount: 100,
                 betChoice: "choice1",
                 roundId: 1,
                 clientSeed: new Date(),
-                freeBet: false
+                freeBet: false,
             };
             const rate = 1.5;
 
@@ -292,17 +290,17 @@ describe("ProcessBetQueue", () => {
                 {
                     $inc: {
                         [bet.betChoice]: bet.amount,
-                        totalAmount: bet.amount
+                        totalAmount: bet.amount,
                     },
                     $setOnInsert: expect.objectContaining({
                         siteId: player.session.siteId,
                         currency: player.session.currencyName,
                         rate: rate,
                         operatorId: player.session.operatorId,
-                        playerId: player.session.playerId
-                    })
+                        playerId: player.session.playerId,
+                    }),
                 },
-                { upsert: true, setDefaultsOnInsert: true }
+                { upsert: true, setDefaultsOnInsert: true },
             );
         });
     });

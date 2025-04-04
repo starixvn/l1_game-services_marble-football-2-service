@@ -9,7 +9,7 @@ import * as gameTimingHelpers from "../../../src/helpers/game-timing";
 jest.mock("sc-common", () => ({
     helpers: {
         arrayHelper: {
-            shuffle: jest.fn(arr => arr), // Return the array unchanged to make tests predictable
+            shuffle: jest.fn((arr) => arr), // Return the array unchanged to make tests predictable
         },
     },
 }));
@@ -24,13 +24,16 @@ describe("Bot", () => {
 
     const definition = stub<GameDefinition>({
         choices: ["home", "away", "homeLive", "secondHalfAway"] as any,
-        hedgeBetGroups: [["home", "away"], ["homeLive", "secondHalfAway"]],
+        hedgeBetGroups: [
+            ["home", "away"],
+            ["homeLive", "secondHalfAway"],
+        ],
         durations: {
             placingBetsFirstHalf: 300,
             lockingBetFirstHalf: 60,
             placingBetsSecondHalf: 200,
             lockingBetSecondHalf: 30,
-        }
+        },
     });
     const gameData = stub<GameData>({
         players: {},
@@ -43,18 +46,18 @@ describe("Bot", () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        
-        mockPickone = jest.fn(arr => arr[0]);
-        
+
+        mockPickone = jest.fn((arr) => arr[0]);
+
         botInstance = new Bot(definition, gameData, publisher, gameManagementApiClientFactory, tempBetsRepository);
-        
-        Object.defineProperty(botInstance, 'chance', {
+
+        Object.defineProperty(botInstance, "chance", {
             value: {
                 pickone: mockPickone,
-            }
+            },
         });
 
-        jest.spyOn(botInstance as any, 'getBetChoicesRatios').mockReturnValue([]);
+        jest.spyOn(botInstance as any, "getBetChoicesRatios").mockReturnValue([]);
     });
 
     describe("updateBalanceAndPublishBetPayload", () => {
@@ -142,16 +145,14 @@ describe("Bot", () => {
                 // Arrange
                 const bot = { choices: ["home", "away"] };
                 const underRatioGroups = [{ underBetRatio: true, group: ["home"] }];
-                
+
                 (botInstance as any).getBetChoicesRatios.mockReturnValue(underRatioGroups);
-                
-                mockPickone.mockImplementation((arr) => 
-                    arr === underRatioGroups[0].group ? "home" : arr[0]
-                );
-                
+
+                mockPickone.mockImplementation((arr) => (arr === underRatioGroups[0].group ? "home" : arr[0]));
+
                 // Act
                 const result = botInstance.getBetChoice(bot);
-                
+
                 // Assert
                 expect(result).toBe("away");
                 expect(helpers.arrayHelper.shuffle).toHaveBeenCalledWith(underRatioGroups);
@@ -160,15 +161,15 @@ describe("Bot", () => {
             it("should return a random choice when no underRatio groups are available", () => {
                 // Arrange
                 const bot = { choices: ["home", "away"] };
-                
+
                 mockPickone.mockImplementation((arr) => {
                     if (arr.includes("home")) return "home";
                     return arr[0];
                 });
-                
+
                 // Act
                 const result = botInstance.getBetChoice(bot);
-                
+
                 // Assert
                 expect(result).toBe("away");
             });
@@ -176,15 +177,15 @@ describe("Bot", () => {
             it("should return original choice when bot doesn't have the opposite choice in hedge bet group", () => {
                 // Arrange
                 const bot = { choices: ["home"] };
-                
+
                 mockPickone.mockImplementation((arr) => {
                     if (arr.includes("home")) return "home";
                     return arr[0];
                 });
-                
+
                 // Act
                 const result = botInstance.getBetChoice(bot);
-                
+
                 // Assert
                 expect(result).toBe("home");
             });
@@ -192,15 +193,15 @@ describe("Bot", () => {
             it("should return opposite choice when bot has it in hedge bet group", () => {
                 // Arrange
                 const bot = { choices: ["away"] };
-                
+
                 mockPickone.mockImplementation((arr) => {
                     if (arr.includes("home")) return "home";
                     return arr[0];
                 });
-                
+
                 // Act
                 const result = botInstance.getBetChoice(bot);
-                
+
                 // Assert
                 expect(result).toBe("away");
             });
@@ -214,16 +215,16 @@ describe("Bot", () => {
             it("should return a second half choice from available options", () => {
                 // Arrange
                 const bot = { choices: ["homeLive", "secondHalfAway"] };
-                
+
                 // Force pickone to return homeLive for this test
                 mockPickone.mockImplementation((arr) => {
                     if (arr.includes("homeLive")) return "homeLive";
                     return arr[0];
                 });
-                
+
                 // Act
                 const result = botInstance.getBetChoice(bot);
-                
+
                 // Assert
                 expect(result).toBe("secondHalfAway");
             });

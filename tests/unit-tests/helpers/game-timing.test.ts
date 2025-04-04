@@ -9,16 +9,16 @@ import {
 describe("Game Timing Helpers", () => {
     // Arrange
     const mockDurations: Duration = {
-        placingBets: 300,           
-        lockingBet: 60,             
-        wholeRound: 1800,           
-        placingBetsFirstHalf: 300,  
-        lockingBetFirstHalf: 60,    
-        startingRound: 1800,        
-        streamingVideoFirstHalf: 120, 
-        placingBetsSecondHalf: 300, 
-        lockingBetSecondHalf: 60,   
-        streamingVideoSecondHalf: 120, 
+        placingBets: 300,
+        lockingBet: 60,
+        wholeRound: 1800,
+        placingBetsFirstHalf: 300,
+        lockingBetFirstHalf: 60,
+        startingRound: 1800,
+        streamingVideoFirstHalf: 120,
+        placingBetsSecondHalf: 300,
+        lockingBetSecondHalf: 60,
+        streamingVideoSecondHalf: 120,
     };
 
     describe("isFirstHalfOddsActive", () => {

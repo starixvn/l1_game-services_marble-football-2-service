@@ -16,7 +16,7 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
                 notice: this.getNoticeObj(helpers.noticeHelper.invalidBet),
             },
             {
-                failure: this.isBetChoiceOddZero(betChoice),    
+                failure: this.isBetChoiceOddZero(betChoice),
                 notice: this.getNoticeObj(helpers.noticeHelper.invalidBet),
             },
             ...super.composeBetChoiceValidationCriteria(betChoice),
@@ -27,7 +27,7 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
         player: any,
         betChoice: string,
         amount: number,
-        freeBet: boolean
+        freeBet: boolean,
     ): { failure: boolean; notice: string }[] {
         const settings = this.gameData.currencyGroupGames.find((x) => x.groupId.toString() === player.session.currencyGroupId);
         const configs = this.gameData.gameConfigs;
@@ -85,7 +85,7 @@ export default class PlaceBetConsumer extends Core.BaseEventConsumers.PlaceBetCo
         const hedgeBetGroups = this.definition.hedgeBetGroups.filter((group) => group.includes(betChoice));
 
         const isInvalid = Object.keys(betTracks).some(
-            (betKey) => betTracks[betKey] && hedgeBetGroups.some((group) => group.includes(betKey)) && betKey !== betChoice
+            (betKey) => betTracks[betKey] && hedgeBetGroups.some((group) => group.includes(betKey)) && betKey !== betChoice,
         );
 
         return [

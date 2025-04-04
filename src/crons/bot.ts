@@ -42,10 +42,8 @@ export default class Bot extends TableGameConfigBot {
         const remainingTime = this.gameData.remainingTime;
         const durations = this.definition.durations;
         const isFirstHalf = isWithinFirstHalfBettingTime(remainingTime, durations);
-        const acceptedBetChoices = isFirstHalf
-            ? PRE_MATCH_BET_CHOICES
-            : LIVE_BET_CHOICES;
-        
+        const acceptedBetChoices = isFirstHalf ? PRE_MATCH_BET_CHOICES : LIVE_BET_CHOICES;
+
         return betOptions.filter((choice) => Object.hasOwn(acceptedBetChoices, choice));
     }
 }
