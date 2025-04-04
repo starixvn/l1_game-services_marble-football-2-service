@@ -13,12 +13,13 @@ import GameStatusPublisher from "../publishers/game-status-publisher";
 
 import { calculatePreMatchOdds, calculateLiveOdds } from "../helpers/odds-helper";
 import { securePickOne } from "sc-core-rng";
-
+import RunningRoundInfoPublisher from "../publishers/running-round-info-publisher";
 export default class GameCron extends Table.Crons.TableGameCron {
     declare gameData: GameData;
     declare definition: GameDefinition;
     declare appConfigs: typeof AppConfigs;
     declare gameStatusPublisher: GameStatusPublisher;
+    declare runningRoundInfoPublisher: RunningRoundInfoPublisher;
 
     tournamentConsumer: TournamentConsumer;
 
@@ -62,7 +63,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
 
         return retry(() => this.getVideoTimelineByVideoName(videoName), retries, delay).catch((error) => {
             this.logService.logError(
-                `In match ${this.gameData.roundId}, failed to fetch ${isFirstHalf ? "first half" : "second half"} timeline: ${error}`,
+                `In match ${this.gameData.roundId}, failed to fetch ${isFirstHalf ? "first half" : "second half"} timeline: ${error}`
             );
 
             return this.getDefaultVideoTimeline(videoResult, isFirstHalf);
@@ -73,7 +74,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
         this.gameData.result.firstHalfTimeline = await this.getVideoTimelineWithRetry(
             this.gameData.result.firstHalfVideo,
             this.gameData.result.firstHalf,
-            true,
+            true
         );
     }
 
@@ -81,7 +82,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
         this.gameData.result.secondHalfTimeline = await this.getVideoTimelineWithRetry(
             this.gameData.result.secondHalfVideo,
             this.gameData.result.secondHalf,
-            false,
+            false
         );
     }
 
@@ -189,6 +190,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
         if (remainingTime < 0) {
             this.gameData.remainingTime = durations.wholeRound;
             await this.settleGameRoundConsumer.settleRound();
+            this.runningRoundInfoPublisher.publishBetPercentage();
         }
     }
 
