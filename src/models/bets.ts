@@ -1,8 +1,16 @@
 import mongoose from "mongoose";
-import { MODEL_NAME_PREFIX } from "../constants";
+import { MODEL_NAME_PREFIX, BET_CHOICES } from "../constants";
 
 const modelName = `${MODEL_NAME_PREFIX}_bets`;
 const tmpModelName = `${MODEL_NAME_PREFIX}_tmpbets`;
+
+const betChoices = Object.keys(BET_CHOICES).reduce(
+    (acc, key) => {
+        acc[key] = { type: Number, default: 0 };
+        return acc;
+    },
+    {} as Record<string, { type: NumberConstructor; default: number }>,
+);
 
 const bet = {
     roundId: { type: Number, required: true },
@@ -19,21 +27,7 @@ const bet = {
     currency: { type: String, required: false },
     rate: { type: Number, required: false },
     paid: { type: Boolean, default: false },
-
-    home: { type: Number, default: 0 },
-    away: { type: Number, default: 0 },
-    draw: { type: Number, default: 0 },
-    over: { type: Number, default: 0 },
-    under: { type: Number, default: 0 },
-    odd: { type: Number, default: 0 },
-    even: { type: Number, default: 0 },
-    homeLive: { type: Number, default: 0 },
-    awayLive: { type: Number, default: 0 },
-    drawLive: { type: Number, default: 0 },
-    overLive: { type: Number, default: 0 },
-    underLive: { type: Number, default: 0 },
-    oddLive: { type: Number, default: 0 },
-    evenLive: { type: Number, default: 0 },
+    ...betChoices,
 };
 
 const bets = mongoose.model(
@@ -42,7 +36,7 @@ const bets = mongoose.model(
         ...bet,
         currency: { type: String },
         rate: { type: Number, required: true },
-    })
+    }),
 );
 
 const tmpBets = mongoose.model(tmpModelName, new mongoose.Schema(bet));
