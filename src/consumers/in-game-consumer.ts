@@ -2,13 +2,13 @@ import { TableInGameConsumer } from "sc-game-base/src/table/event-consumers";
 import GameData from "../game-data";
 import { getPercentageBetChoices, getUserBetPercentage } from "../helpers/bet-percentage";
 import GameDefinition from "../game-definition";
-import { isFirstHalfOddsActive } from "../helpers/game-timing";
 import { LIVE_BET_CHOICES, PRE_MATCH_BET_CHOICES } from "../constants";
 import {
     isStreamingVideoFirstHalf,
     isStreamingVideoSecondHalf,
     isShowingResultFirstHalf,
     isShowingResultSecondHalf,
+    isFirstHalfOddsActive,
 } from "../helpers/game-timing";
 
 export default class InGameConsumer extends TableInGameConsumer {

@@ -20,7 +20,7 @@ export default class RunningRoundInfoPublisher extends RunningRoundInfoPublisher
     }
 
     publishBetPercentage() {
-        const { playerBetCount } = this.gameData as GameData;
+        const { playerBetCount } = this.gameData;
 
         const choices = getPercentageBetChoices(this.gameData.remainingTime, this.definition.durations);
         const userBetPercentage = getUserBetPercentage(playerBetCount, choices);
