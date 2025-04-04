@@ -49,7 +49,6 @@ export default class ProcessBetQueue extends TableProcessBetQueue {
             uid: player.UID,
             name: player.profile.name,
             time: new Date(),
-            odds: this.gameData.dynamicOdds,
             freeBet: bet.freeBet,
             roundId,
             clientSeed: bet.clientSeed,
@@ -68,10 +67,13 @@ export default class ProcessBetQueue extends TableProcessBetQueue {
             newBet.operatorId = player.session.operatorId;
             newBet.playerId = player.session.playerId;
         }
-
         await this.betsRepository.updateOne(
             existingBetFilter,
-            { $inc: existingBetIncrement, $setOnInsert: newBet },
+            {
+                $inc: existingBetIncrement,
+                $setOnInsert: newBet,
+                $set: { odds: this.gameData.dynamicOdds },
+            },
             { upsert: true, setDefaultsOnInsert: true },
         );
 
