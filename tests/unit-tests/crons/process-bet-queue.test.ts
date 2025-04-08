@@ -215,7 +215,7 @@ describe("ProcessBetQueue", () => {
                         totalAmount: bet.amount,
                     },
                     $set: {
-                        odds: processBetQueue.gameData.dynamicOdds
+                        odds: processBetQueue.gameData.dynamicOdds,
                     },
                     $setOnInsert: expect.objectContaining({
                         uid: player.UID,
@@ -257,7 +257,7 @@ describe("ProcessBetQueue", () => {
                         totalAmount: bet.amount,
                     },
                     $set: {
-                        odds: processBetQueue.gameData.dynamicOdds
+                        odds: processBetQueue.gameData.dynamicOdds,
                     },
                     $setOnInsert: expect.any(Object),
                 },
@@ -298,7 +298,7 @@ describe("ProcessBetQueue", () => {
                         totalAmount: bet.amount,
                     },
                     $set: {
-                        odds: processBetQueue.gameData.dynamicOdds
+                        odds: processBetQueue.gameData.dynamicOdds,
                     },
                     $setOnInsert: expect.objectContaining({
                         siteId: player.session.siteId,

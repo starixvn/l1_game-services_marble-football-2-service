@@ -63,7 +63,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
 
         return retry(() => this.getVideoTimelineByVideoName(videoName), retries, delay).catch((error) => {
             this.logService.logError(
-                `In match ${this.gameData.roundId}, failed to fetch ${isFirstHalf ? "first half" : "second half"} timeline: ${error}`
+                `In match ${this.gameData.roundId}, failed to fetch ${isFirstHalf ? "first half" : "second half"} timeline: ${error}`,
             );
 
             return this.getDefaultVideoTimeline(videoResult, isFirstHalf);
@@ -74,7 +74,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
         this.gameData.result.firstHalfTimeline = await this.getVideoTimelineWithRetry(
             this.gameData.result.firstHalfVideo,
             this.gameData.result.firstHalf,
-            true
+            true,
         );
     }
 
@@ -82,7 +82,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
         this.gameData.result.secondHalfTimeline = await this.getVideoTimelineWithRetry(
             this.gameData.result.secondHalfVideo,
             this.gameData.result.secondHalf,
-            false
+            false,
         );
     }
 
@@ -169,6 +169,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
         }
 
         if (this.isLockingBetFirstHalf(remainingTime) || this.isLockingBetSecondHalf(remainingTime)) {
+            console.log("Chip on lock bet ", this.gameData.chips);
             this.gameStatusPublisher.publishEndPlacingBetStatus();
         }
 
