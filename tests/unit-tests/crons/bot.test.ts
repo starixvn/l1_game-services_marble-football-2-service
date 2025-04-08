@@ -248,20 +248,20 @@ describe("Bot", () => {
 
         it("should insert a new bet when currentBet is null", async () => {
             // Arrange
-            const bot = {
-                id: "bot123",
-                name: "TestBot",
+            const bot = { 
+                id: "bot123", 
+                name: "TestBot", 
                 clientSeed: "seed123",
             };
             const choice = "home";
             const amount = 100;
             const currentBet = null;
             const mockDate = new Date("2023-01-01T12:00:00Z");
-
+            
             jest.spyOn(global, "Date").mockImplementation(() => mockDate as any);
             gameData.roundId = 123;
             gameData.dynamicOdds = { home: 1.5, away: 2.5 };
-
+            
             // Act
             const result = await botInstance.insertOrUpdateBet(bot, choice, amount, currentBet);
 
@@ -269,7 +269,10 @@ describe("Bot", () => {
             expect(tempBetsUpdateOneSpy).toHaveBeenCalledWith(
                 { uid: "bot123", roundId: 123 },
                 {
-                    $set: { home: 100 },
+                    $set: { 
+                        home: 100,
+                        odds: gameData.dynamicOdds
+                    },
                     $setOnInsert: {
                         uid: "bot123",
                         name: "TestBot",
@@ -278,32 +281,31 @@ describe("Bot", () => {
                         currency: " ",
                         operatorId: " ",
                         clientSeed: "seed123",
-                        odds: gameData.dynamicOdds,
                     },
                 },
                 { upsert: true, setDefaultsOnInsert: true },
             );
             expect(result).toEqual(mockDate);
-
+            
             jest.spyOn(global, "Date").mockRestore();
         });
 
         it("should update an existing bet when currentBet exists", async () => {
             // Arrange
-            const bot = {
-                id: "bot123",
-                name: "TestBot",
+            const bot = { 
+                id: "bot123", 
+                name: "TestBot", 
                 clientSeed: "seed123",
             };
             const choice = "home";
             const amount = 100;
             const currentBet = { home: 50 };
             const mockDate = new Date("2023-01-01T12:00:00Z");
-
+            
             jest.spyOn(global, "Date").mockImplementation(() => mockDate as any);
             gameData.roundId = 123;
             gameData.dynamicOdds = { home: 1.5, away: 2.5 };
-
+            
             // Act
             const result = await botInstance.insertOrUpdateBet(bot, choice, amount, currentBet);
 
@@ -311,7 +313,10 @@ describe("Bot", () => {
             expect(tempBetsUpdateOneSpy).toHaveBeenCalledWith(
                 { uid: "bot123", roundId: 123 },
                 {
-                    $set: { home: 150 },
+                    $set: { 
+                        home: 150,
+                        odds: gameData.dynamicOdds
+                    },
                     $setOnInsert: {
                         uid: "bot123",
                         name: "TestBot",
@@ -320,32 +325,31 @@ describe("Bot", () => {
                         currency: " ",
                         operatorId: " ",
                         clientSeed: "seed123",
-                        odds: gameData.dynamicOdds,
                     },
                 },
                 { upsert: true, setDefaultsOnInsert: true },
             );
             expect(result).toEqual(mockDate);
-
+            
             jest.spyOn(global, "Date").mockRestore();
         });
 
         it("should handle different bet choices correctly", async () => {
             // Arrange
-            const bot = {
-                id: "bot123",
-                name: "TestBot",
+            const bot = { 
+                id: "bot123", 
+                name: "TestBot", 
                 clientSeed: "seed123",
             };
             const choice = "away";
             const amount = 200;
             const currentBet = null;
             const mockDate = new Date("2023-01-01T12:00:00Z");
-
+            
             jest.spyOn(global, "Date").mockImplementation(() => mockDate as any);
             gameData.roundId = 123;
             gameData.dynamicOdds = { home: 1.5, away: 2.5 };
-
+            
             // Act
             const result = await botInstance.insertOrUpdateBet(bot, choice, amount, currentBet);
 
@@ -353,7 +357,10 @@ describe("Bot", () => {
             expect(tempBetsUpdateOneSpy).toHaveBeenCalledWith(
                 { uid: "bot123", roundId: 123 },
                 {
-                    $set: { away: 200 },
+                    $set: { 
+                        away: 200,
+                        odds: gameData.dynamicOdds
+                    },
                     $setOnInsert: {
                         uid: "bot123",
                         name: "TestBot",
@@ -362,13 +369,12 @@ describe("Bot", () => {
                         currency: " ",
                         operatorId: " ",
                         clientSeed: "seed123",
-                        odds: gameData.dynamicOdds,
                     },
                 },
                 { upsert: true, setDefaultsOnInsert: true },
             );
             expect(result).toEqual(mockDate);
-
+            
             jest.spyOn(global, "Date").mockRestore();
         });
     });

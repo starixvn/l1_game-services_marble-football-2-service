@@ -55,7 +55,7 @@ export default class Bot extends TableGameConfigBot {
 
     async insertOrUpdateBet(bot: any, choice: string, amount: number, currentBet: any) {
         const currentAmount = currentBet ? currentBet[choice] : 0;
-        const update = { [choice]: amount + currentAmount };
+        const update = { [choice]: amount + currentAmount, odds: this.gameData.dynamicOdds };
         const create = {
             uid: bot.id,
             name: bot.name,
@@ -64,7 +64,7 @@ export default class Bot extends TableGameConfigBot {
             currency: " ",
             operatorId: " ",
             clientSeed: bot.clientSeed,
-            odds: this.gameData.dynamicOdds,
+            
         };
 
         await this.tempBetsRepository.updateOne(
