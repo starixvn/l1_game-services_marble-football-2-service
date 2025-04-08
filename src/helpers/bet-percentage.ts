@@ -1,5 +1,4 @@
 import { BET_CHOICES } from "../constants";
-import { Duration } from "../game-definition";
 
 export const calculatePlayerBetPercentage = (playerBetCount: Record<string, string[]>, betChoices: string[]): Record<string, number> => {
     const total = betChoices.reduce((t, choice) => t + (playerBetCount[choice]?.length || 0), 0);
