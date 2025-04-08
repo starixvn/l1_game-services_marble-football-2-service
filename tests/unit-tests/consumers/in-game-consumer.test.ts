@@ -217,7 +217,6 @@ describe("InGameConsumer test", () => {
             const result = await consumer.buildPayload(realPlayer);
 
             // assert
-            expect(helper.getPercentageBetChoices).toHaveBeenCalledWith(gameData.remainingTime, definition.durations);
             expect(helper.getUserBetPercentage).toHaveBeenCalledWith(playerBetCount, betChoices);
             expect(result).toEqual({
                 ...basePayload,

@@ -3,16 +3,14 @@ import GameData from "../../../src/game-data";
 import { RunningRoundInfoPublisher } from "../../../src/publishers";
 import * as helper from "../../../src/helpers/bet-percentage";
 import { RunningRoundInfoPublisher as RunningRoundInfoPublisherBase } from "sc-game-base/src/core/event-publishers";
-import GameDefinition from "../../../src/game-definition";
 
 describe("RunningRoundInfoPublisher", () => {
     let publisher: RunningRoundInfoPublisher;
 
     const gameData = stub<GameData>();
-    const definition = stub<GameDefinition>();
 
     beforeEach(() => {
-        publisher = new RunningRoundInfoPublisher(definition, gameData, "marbleFootball2");
+        publisher = new RunningRoundInfoPublisher("marbleFootball2", gameData);
         publisher.publishToAllUsers = jest.fn();
     });
 
@@ -42,7 +40,6 @@ describe("RunningRoundInfoPublisher", () => {
         publisher.publishBetPercentage();
 
         // Assert
-        expect(helper.getPercentageBetChoices).toHaveBeenCalledWith(mockGameData.remainingTime, definition.durations);
         expect(helper.getUserBetPercentage).toHaveBeenCalledWith(mockGameData.playerBetCount, mockBetChoices);
     });
 

@@ -1,6 +1,5 @@
 import { BET_CHOICES } from "../constants";
 import { Duration } from "../game-definition";
-import { isDuringFirstHalf, isDuringSecondHalf } from "./game-timing";
 
 export const calculatePlayerBetPercentage = (playerBetCount: Record<string, string[]>, betChoices: string[]): Record<string, number> => {
     const total = betChoices.reduce((t, choice) => t + (playerBetCount[choice]?.length || 0), 0);
@@ -15,17 +14,6 @@ export const getUserBetPercentage = (playerBetCount: Record<string, string[]>, b
     return calculatePlayerBetPercentage(playerBetCount, betChoices);
 };
 
-export const getPercentageBetChoices = (remainingTime: number, durations: Duration) => {
-    const firstHalfBetChoices = [BET_CHOICES.home, BET_CHOICES.away, BET_CHOICES.draw];
-    const secondHalfBetChoices = [BET_CHOICES.homeLive, BET_CHOICES.awayLive, BET_CHOICES.drawLive];
-
-    if (isDuringFirstHalf(remainingTime, durations)) {
-        return firstHalfBetChoices;
-    }
-
-    if (isDuringSecondHalf(remainingTime, durations)) {
-        return secondHalfBetChoices;
-    }
-
-    return [...firstHalfBetChoices, ...secondHalfBetChoices];
+export const getPercentageBetChoices = () => {
+    return [BET_CHOICES.home, BET_CHOICES.away, BET_CHOICES.draw, BET_CHOICES.homeLive, BET_CHOICES.awayLive, BET_CHOICES.drawLive];
 };

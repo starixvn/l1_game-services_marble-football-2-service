@@ -2,16 +2,9 @@ import { RunningRoundInfoPublisher as RunningRoundInfoPublisherBase } from "sc-g
 
 import GameData from "../game-data";
 import { getPercentageBetChoices, getUserBetPercentage } from "../helpers/bet-percentage";
-import GameDefinition from "../game-definition";
 
 export default class RunningRoundInfoPublisher extends RunningRoundInfoPublisherBase {
-    declare definition: GameDefinition;
     declare gameData: GameData;
-
-    constructor(definition: GameDefinition, gameData: GameData, gameName: string) {
-        super(gameName, gameData);
-        this.definition = definition;
-    }
 
     publish() {
         super.publish();
@@ -22,7 +15,7 @@ export default class RunningRoundInfoPublisher extends RunningRoundInfoPublisher
     publishBetPercentage() {
         const { playerBetCount } = this.gameData;
 
-        const choices = getPercentageBetChoices(this.gameData.remainingTime, this.definition.durations);
+        const choices = getPercentageBetChoices();
         const userBetPercentage = getUserBetPercentage(playerBetCount, choices);
 
         if (choices.some((choice) => playerBetCount[choice])) {
