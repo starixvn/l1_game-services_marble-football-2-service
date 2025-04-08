@@ -9,7 +9,7 @@ import * as gameTimingHelpers from "../../../src/helpers/game-timing";
 jest.mock("sc-common", () => ({
     helpers: {
         arrayHelper: {
-            shuffle: jest.fn((arr) => arr), // Return the array unchanged to make tests predictable
+            shuffle: jest.fn((arr) => arr),
         },
     },
 }));
@@ -138,18 +138,42 @@ describe("Bot", () => {
     describe("getBetChoice", () => {
         describe("during first half betting period", () => {
             beforeEach(() => {
-                // Set up for first half betting period
                 (gameTimingHelpers.isWithinFirstHalfBettingTime as jest.Mock).mockReturnValue(true);
+                
+                Object.defineProperty(botInstance, "PRE_MATCH_BET_CHOICES", {
+                    value: {
+                        home: "home",
+                        away: "away"
+                    }
+                });
+                
+                Object.defineProperty(botInstance, "LIVE_BET_CHOICES", {
+                    value: {
+                        homeLive: "homeLive",
+                        awayLive: "awayLive"
+                    }
+                });
+                
+                Object.defineProperty(botInstance, "gameData", {
+                    value: {
+                        ...gameData,
+                        dynamicOdds: {
+                            home: 1.5,
+                            away: 2.0,
+                            homeLive: 0,
+                            awayLive: 0
+                        }
+                    },
+                    writable: true
+                });
             });
 
             it("should return a choice from underRatio groups when available", () => {
                 // Arrange
                 const bot = { choices: ["home", "away"] };
                 const underRatioGroups = [{ underBetRatio: true, group: ["home"] }];
-
                 (botInstance as any).getBetChoicesRatios.mockReturnValue(underRatioGroups);
-
-                mockPickone.mockImplementation((arr) => (arr === underRatioGroups[0].group ? "home" : arr[0]));
+                mockPickone.mockImplementationOnce((arr) => "home");
 
                 // Act
                 const result = botInstance.getBetChoice(bot);
@@ -162,11 +186,8 @@ describe("Bot", () => {
             it("should return a random choice when no underRatio groups are available", () => {
                 // Arrange
                 const bot = { choices: ["home", "away"] };
-
-                mockPickone.mockImplementation((arr) => {
-                    if (arr.includes("home")) return "home";
-                    return arr[0];
-                });
+                (botInstance as any).getBetChoicesRatios.mockReturnValue([]);
+                mockPickone.mockImplementationOnce((arr) => "home");
 
                 // Act
                 const result = botInstance.getBetChoice(bot);
@@ -178,12 +199,16 @@ describe("Bot", () => {
             it("should return original choice when bot doesn't have the opposite choice in hedge bet group", () => {
                 // Arrange
                 const bot = { choices: ["home"] };
-
-                mockPickone.mockImplementation((arr) => {
-                    if (arr.includes("home")) return "home";
-                    return arr[0];
+                (botInstance as any).getBetChoicesRatios.mockReturnValue([]);
+                mockPickone.mockImplementationOnce((arr) => "home");
+                Object.defineProperty(botInstance, "definition", {
+                    value: {
+                        ...definition,
+                        hedgeBetGroups: [["home", "away"]],
+                    },
+                    writable: true
                 });
-
+                
                 // Act
                 const result = botInstance.getBetChoice(bot);
 
@@ -193,13 +218,17 @@ describe("Bot", () => {
 
             it("should return opposite choice when bot has it in hedge bet group", () => {
                 // Arrange
-                const bot = { choices: ["away"] };
-
-                mockPickone.mockImplementation((arr) => {
-                    if (arr.includes("home")) return "home";
-                    return arr[0];
+                const bot = { choices: ["home", "away"] };
+                (botInstance as any).getBetChoicesRatios.mockReturnValue([]);
+                mockPickone.mockImplementationOnce((arr) => "home");
+                Object.defineProperty(botInstance, "definition", {
+                    value: {
+                        ...definition,
+                        hedgeBetGroups: [["home", "away"]],
+                    },
+                    writable: true
                 });
-
+                
                 // Act
                 const result = botInstance.getBetChoice(bot);
 
@@ -211,18 +240,47 @@ describe("Bot", () => {
         describe("during second half betting period", () => {
             beforeEach(() => {
                 (gameTimingHelpers.isWithinFirstHalfBettingTime as jest.Mock).mockReturnValue(false);
+                
+                Object.defineProperty(botInstance, "PRE_MATCH_BET_CHOICES", {
+                    value: {
+                        home: "home",
+                        away: "away"
+                    }
+                });
+                
+                Object.defineProperty(botInstance, "LIVE_BET_CHOICES", {
+                    value: {
+                        homeLive: "homeLive",
+                        secondHalfAway: "secondHalfAway" 
+                    }
+                });
+                
+                Object.defineProperty(botInstance, "gameData", {
+                    value: {
+                        ...gameData,
+                        dynamicOdds: {
+                            home: 0,
+                            away: 0,
+                            homeLive: 1.8,
+                            secondHalfAway: 2.2
+                        }
+                    },
+                    writable: true
+                });
             });
 
             it("should return a second half choice from available options", () => {
                 // Arrange
                 const bot = { choices: ["homeLive", "secondHalfAway"] };
-
-                // Force pickone to return homeLive for this test
-                mockPickone.mockImplementation((arr) => {
-                    if (arr.includes("homeLive")) return "homeLive";
-                    return arr[0];
+                mockPickone.mockImplementationOnce((arr) => "homeLive");
+                Object.defineProperty(botInstance, "definition", {
+                    value: {
+                        ...definition,
+                        hedgeBetGroups: [["homeLive", "secondHalfAway"]],
+                    },
+                    writable: true
                 });
-
+                
                 // Act
                 const result = botInstance.getBetChoice(bot);
 
@@ -438,6 +496,120 @@ describe("Bot", () => {
             // Assert
             expect(result).toBe(false);
             expect(gameTimingHelpers.isWithinBettingTime).toHaveBeenCalledWith(gameData.remainingTime, definition.durations);
+        });
+    });
+
+    describe("filterBetChoice", () => {
+        beforeEach(() => {
+            (gameTimingHelpers.isWithinFirstHalfBettingTime as jest.Mock).mockReset();
+        });
+
+        it("should filter out invalid bet choices during first half", () => {
+            // Arrange
+            const betOptions = ["home", "away", "homeLive", "awayLive"];
+            (gameTimingHelpers.isWithinFirstHalfBettingTime as jest.Mock).mockReturnValue(true);
+            Object.defineProperty(botInstance, "gameData", {
+                value: {
+                    ...gameData,
+                    dynamicOdds: {
+                        home: 1.5,
+                        away: 2.0,
+                        homeLive: 0,
+                        awayLive: 0
+                    }
+                },
+                writable: true
+            });
+            Object.defineProperty(botInstance, "PRE_MATCH_BET_CHOICES", {
+                value: {
+                    home: "home",
+                    away: "away"
+                }
+            });
+            Object.defineProperty(botInstance, "LIVE_BET_CHOICES", {
+                value: {
+                    homeLive: "homeLive",
+                    awayLive: "awayLive"
+                }
+            });
+
+            // Act
+            const result = botInstance.filterBetChoice(betOptions);
+
+            // Assert
+            expect(result).toEqual(["home", "away"]);
+        });
+
+        it("should filter out invalid bet choices during second half", () => {
+            // Arrange
+            const betOptions = ["home", "away", "homeLive", "awayLive"];
+            (gameTimingHelpers.isWithinFirstHalfBettingTime as jest.Mock).mockReturnValue(false);
+            Object.defineProperty(botInstance, "gameData", {
+                value: {
+                    ...gameData,
+                    dynamicOdds: {
+                        home: 0,
+                        away: 0,
+                        homeLive: 1.8,
+                        awayLive: 2.2
+                    }
+                },
+                writable: true
+            });
+            Object.defineProperty(botInstance, "PRE_MATCH_BET_CHOICES", {
+                value: {
+                    home: "home",
+                    away: "away"
+                }
+            });
+            Object.defineProperty(botInstance, "LIVE_BET_CHOICES", {
+                value: {
+                    homeLive: "homeLive",
+                    awayLive: "awayLive"
+                }
+            });
+
+            // Act
+            const result = botInstance.filterBetChoice(betOptions);
+
+            // Assert
+            expect(result).toEqual(["homeLive", "awayLive"]);
+        });
+
+        it("should return empty array when all choices have invalid odds", () => {
+            // Arrange
+            const betOptions = ["home", "away", "homeLive", "awayLive"];
+            (gameTimingHelpers.isWithinFirstHalfBettingTime as jest.Mock).mockReturnValue(true);
+            Object.defineProperty(botInstance, "gameData", {
+                value: {
+                    ...gameData,
+                    dynamicOdds: {
+                        home: 0,
+                        away: 0,
+                        homeLive: 0,
+                        awayLive: 0
+                    }
+                },
+                writable: true
+            });
+            Object.defineProperty(botInstance, "PRE_MATCH_BET_CHOICES", {
+                value: {
+                    home: "home",
+                    away: "away"
+                }
+            });
+            Object.defineProperty(botInstance, "LIVE_BET_CHOICES", {
+                value: {
+                    homeLive: "homeLive",
+                    awayLive: "awayLive"
+                }
+            });
+
+            // Act
+            const result = botInstance.filterBetChoice(betOptions);
+
+            // Assert
+            expect(result).toEqual([]);
         });
     });
 });

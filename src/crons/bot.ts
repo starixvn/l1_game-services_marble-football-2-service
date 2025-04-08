@@ -32,10 +32,8 @@ export default class Bot extends TableGameConfigBot {
 
         if (hedgeBetGroup) {
             const oppositeChoice = choice === hedgeBetGroup[0] ? hedgeBetGroup[1] : hedgeBetGroup[0];
-            console.log("Choice", bot.choices.includes(oppositeChoice) ? oppositeChoice : choice);
             return bot.choices.includes(oppositeChoice) ? oppositeChoice : choice;
         } else {
-            console.log("Choice", choice);
             return choice;
         }
     }
@@ -76,11 +74,19 @@ export default class Bot extends TableGameConfigBot {
         return create.time;
     }
 
-    private filterBetChoice(betOptions: string[]) {
+    filterBetChoice(betOptions: string[]) {
+        return betOptions.filter((choice) =>  this.isBetChoiceValid(choice));
+    }
+
+    private isBetChoiceValid(choice: string) {
         const remainingTime = this.gameData.remainingTime;
         const durations = this.definition.durations;
         const isFirstHalf = isWithinFirstHalfBettingTime(remainingTime, durations);
         const acceptedBetChoices = isFirstHalf ? PRE_MATCH_BET_CHOICES : LIVE_BET_CHOICES;
-        return betOptions.filter((choice) => Object.hasOwn(acceptedBetChoices, choice));
+        return Object.hasOwn(acceptedBetChoices, choice) && this.isOddOfBetChoiceValid(choice)
+    }
+
+    private isOddOfBetChoiceValid(choice: string) {
+        return this.gameData?.dynamicOdds?.[choice] && this.gameData?.dynamicOdds?.[choice] !== 0;
     }
 }
