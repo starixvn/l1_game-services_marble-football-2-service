@@ -125,12 +125,16 @@ describe("InGameConsumer test", () => {
         };
 
         const fullVideoSecondHalfResult = {
+            firstHalf: "AH",
+            firstHalfTimeline: [1, 2, 3],
             secondHalfVideo: "video2.mp4",
             secondHalfTimeline: [4, 5, 6],
             secondHalf: "HA",
         };
 
         const timelineSecondHalfResult = {
+            firstHalf: "AH",
+            firstHalfTimeline: [1, 2, 3],
             secondHalfTimeline: [4, 5, 6],
             secondHalf: "HA",
         };

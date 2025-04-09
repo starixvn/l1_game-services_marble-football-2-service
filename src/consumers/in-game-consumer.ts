@@ -21,7 +21,7 @@ export default class InGameConsumer extends TableInGameConsumer {
         roundQuery: any,
         publisher: any,
         getBalance: any,
-        gameManagementApiClientFactory: any,
+        gameManagementApiClientFactory: any
     ) {
         super(definition, gameData, roundQuery, publisher, getBalance, gameManagementApiClientFactory);
     }
@@ -79,6 +79,8 @@ export default class InGameConsumer extends TableInGameConsumer {
     private getSecondHalfStreamingResult() {
         const { result } = this.gameData;
         return {
+            firstHalfTimeline: result?.firstHalfTimeline,
+            firstHalf: result?.firstHalf,
             secondHalfVideo: result?.secondHalfVideo,
             secondHalfTimeline: result?.secondHalfTimeline,
             secondHalf: result?.secondHalf,
@@ -96,6 +98,8 @@ export default class InGameConsumer extends TableInGameConsumer {
     private getSecondHalfResult() {
         const { result } = this.gameData;
         return {
+            firstHalfTimeline: result?.firstHalfTimeline,
+            firstHalf: result?.firstHalf,
             secondHalfTimeline: result?.secondHalfTimeline,
             secondHalf: result?.secondHalf,
         };
