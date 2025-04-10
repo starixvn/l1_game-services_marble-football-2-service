@@ -12,6 +12,11 @@ describe("RunningRoundInfoPublisher", () => {
     beforeEach(() => {
         publisher = new RunningRoundInfoPublisher("marbleFootball2", gameData);
         publisher.publishToAllUsers = jest.fn();
+        jest.clearAllMocks();
+    });
+
+    afterEach(() => {
+        jest.clearAllMocks();
     });
 
     it("should call super.publish() when publish() is invoked", () => {
@@ -32,15 +37,13 @@ describe("RunningRoundInfoPublisher", () => {
         } as any;
         publisher.gameData = mockGameData;
 
-        const mockBetChoices = ["home", "away", "draw"];
-        jest.spyOn(helper, "getPercentageBetChoices").mockReturnValue(mockBetChoices);
         jest.spyOn(helper, "getUserBetPercentage");
 
         // Act
         publisher.publishBetPercentage();
 
         // Assert
-        expect(helper.getUserBetPercentage).toHaveBeenCalledWith(mockGameData.playerBetCount, mockBetChoices);
+        expect(helper.getUserBetPercentage).toHaveBeenCalledWith(mockGameData.playerBetCount);
     });
 
     it("should publish userBetPercentage to all users when at least one bet exists", () => {
@@ -51,10 +54,8 @@ describe("RunningRoundInfoPublisher", () => {
         } as any;
         publisher.gameData = mockGameData;
 
-        const mockBetChoices = ["A", "B", "C"];
         const mockUserBetPercentage = { A: 66.67, B: 0, C: 33.33 };
 
-        jest.spyOn(helper, "getPercentageBetChoices").mockReturnValue(mockBetChoices);
         jest.spyOn(helper, "getUserBetPercentage").mockReturnValue(mockUserBetPercentage);
 
         // Act
@@ -64,7 +65,7 @@ describe("RunningRoundInfoPublisher", () => {
         expect(publisher.publishToAllUsers).toHaveBeenCalledWith({ userBetPercentage: mockUserBetPercentage });
     });
 
-    it("should not publish anything if all playerBetCount values are zero", () => {
+    it("should not publish anything if all percentage values are zero", () => {
         // Arrange
         const mockGameData = {
             playerBetCount: { A: 0, B: 0, C: 0 },
@@ -72,8 +73,9 @@ describe("RunningRoundInfoPublisher", () => {
         } as any;
         publisher.gameData = mockGameData;
 
-        const mockBetChoices = ["A", "B", "C"];
-        jest.spyOn(helper, "getPercentageBetChoices").mockReturnValue(mockBetChoices);
+        const mockUserBetPercentage = { A: 0, B: 0, C: 0 };
+
+        jest.spyOn(helper, "getUserBetPercentage").mockReturnValue(mockUserBetPercentage);
 
         // Act
         publisher.publishBetPercentage();

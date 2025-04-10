@@ -206,7 +206,6 @@ describe("InGameConsumer test", () => {
                 firstHalf: "AH",
                 secondHalf: "HA",
             };
-            const betChoices = ["home", "away", "draw"];
 
             gameData.publishedTournament = {} as any;
             gameData.liveStreamServer = "server1";
@@ -215,13 +214,12 @@ describe("InGameConsumer test", () => {
             jest.spyOn(TableInGameConsumer.prototype, "buildPayload").mockResolvedValue(basePayload);
             jest.spyOn(consumer, "getCurrentVideoResult").mockReturnValue(videoResult as any);
             jest.spyOn(helper, "getUserBetPercentage").mockReturnValue(userBetPercentage);
-            jest.spyOn(helper, "getPercentageBetChoices").mockReturnValue(betChoices);
 
             // act
             const result = await consumer.buildPayload(realPlayer);
 
             // assert
-            expect(helper.getUserBetPercentage).toHaveBeenCalledWith(playerBetCount, betChoices);
+            expect(helper.getUserBetPercentage).toHaveBeenCalledWith(playerBetCount);
             expect(result).toEqual({
                 ...basePayload,
                 userBetPercentage,

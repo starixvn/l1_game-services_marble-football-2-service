@@ -1,6 +1,6 @@
 import { TableInGameConsumer } from "sc-game-base/src/table/event-consumers";
 import GameData from "../game-data";
-import { getPercentageBetChoices, getUserBetPercentage } from "../helpers/bet-percentage";
+import { getUserBetPercentage } from "../helpers/bet-percentage";
 import GameDefinition from "../game-definition";
 import { LIVE_BET_CHOICES, PRE_MATCH_BET_CHOICES } from "../constants";
 import {
@@ -35,17 +35,11 @@ export default class InGameConsumer extends TableInGameConsumer {
         const payload = await super.buildPayload(realPlayer);
         return {
             ...payload,
-            userBetPercentage: this.getUserBetPercentage(),
+            userBetPercentage: getUserBetPercentage(this.gameData.playerBetCount),
             liveStreamServer: this.gameData.liveStreamServer,
             videoResult: this.getCurrentVideoResult(),
             tournament: this.gameData.publishedTournament,
         };
-    }
-
-    private getUserBetPercentage() {
-        const betChoices = getPercentageBetChoices();
-
-        return getUserBetPercentage(this.gameData.playerBetCount, betChoices);
     }
 
     getCurrentVideoResult() {

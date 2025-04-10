@@ -1,8 +1,6 @@
 import { betPercentage } from "../../../src/helpers";
 import { BET_CHOICES } from "../../../src/constants";
-import { Duration } from "../../../src/game-definition";
-import { getPercentageBetChoices, getUserBetPercentage } from "../../../src/helpers/bet-percentage";
-import * as gameTimingHelper from "../../../src/helpers/game-timing";
+import { getUserBetPercentage } from "../../../src/helpers/bet-percentage";
 
 describe("betPercentage", () => {
     describe("calculateUserBetPercentage", () => {
@@ -59,15 +57,6 @@ describe("betPercentage", () => {
     });
 
     describe("getUserBetPercentage", () => {
-        const betChoices = [
-            BET_CHOICES.home,
-            BET_CHOICES.homeLive,
-            BET_CHOICES.draw,
-            BET_CHOICES.drawLive,
-            BET_CHOICES.away,
-            BET_CHOICES.awayLive,
-        ];
-
         it("should calculate percentages using default bet choices", () => {
             // Arrange
             const playerBetCount = {
@@ -80,16 +69,19 @@ describe("betPercentage", () => {
             };
 
             // Act
-            const result = betPercentage.getUserBetPercentage(playerBetCount, betChoices);
+            const result = betPercentage.getUserBetPercentage(playerBetCount);
 
             // Assert
             expect(result).toEqual({
-                [BET_CHOICES.home]: 17,
-                [BET_CHOICES.draw]: 8,
-                [BET_CHOICES.away]: 25,
-                [BET_CHOICES.homeLive]: 8,
-                [BET_CHOICES.drawLive]: 17,
-                [BET_CHOICES.awayLive]: 25,
+                [BET_CHOICES.home]: 33,
+                [BET_CHOICES.draw]: 17,
+                [BET_CHOICES.away]: 50,
+                [BET_CHOICES.homeLive]: 17,
+                [BET_CHOICES.drawLive]: 33,
+                [BET_CHOICES.awayLive]: 50,
+                homeFinal: 25,
+                drawFinal: 25,
+                awayFinal: 50,
             });
         });
 
@@ -98,7 +90,7 @@ describe("betPercentage", () => {
             const playerBetCount = {};
 
             // Act
-            const result = betPercentage.getUserBetPercentage(playerBetCount, betChoices);
+            const result = betPercentage.getUserBetPercentage(playerBetCount);
 
             // Assert
             expect(result).toEqual({
@@ -108,6 +100,9 @@ describe("betPercentage", () => {
                 [BET_CHOICES.homeLive]: 0,
                 [BET_CHOICES.drawLive]: 0,
                 [BET_CHOICES.awayLive]: 0,
+                homeFinal: 0,
+                drawFinal: 0,
+                awayFinal: 0,
             });
         });
 
@@ -119,81 +114,23 @@ describe("betPercentage", () => {
             };
 
             // Act
-            const result = betPercentage.getUserBetPercentage(playerBetCount, betChoices);
+            const result = betPercentage.getUserBetPercentage(playerBetCount);
 
             // Assert
             expect(result).toEqual({
-                [BET_CHOICES.home]: 33,
+                [BET_CHOICES.home]: 100,
                 [BET_CHOICES.draw]: 0,
                 [BET_CHOICES.away]: 0,
-                [BET_CHOICES.homeLive]: 67,
+                [BET_CHOICES.homeLive]: 100,
                 [BET_CHOICES.drawLive]: 0,
                 [BET_CHOICES.awayLive]: 0,
+                homeFinal: 100,
+                drawFinal: 0,
+                awayFinal: 0,
             });
         });
 
-        it("should handle only specific bet choices correctly", () => {
-            // Arrange
-            const playerBetCount = {
-                [BET_CHOICES.home]: ["user1"],
-                [BET_CHOICES.homeLive]: ["user2", "user3"],
-                [BET_CHOICES.draw]: ["user4"],
-                [BET_CHOICES.drawLive]: ["user5", "user6"],
-                [BET_CHOICES.away]: ["user7"],
-                [BET_CHOICES.awayLive]: ["user8", "user9", "user10"],
-            };
-
-            // Act
-            const result = betPercentage.getUserBetPercentage(playerBetCount, [BET_CHOICES.home, BET_CHOICES.away, BET_CHOICES.draw]);
-
-            // Assert
-            expect(result).toEqual({
-                [BET_CHOICES.home]: 33,
-                [BET_CHOICES.draw]: 33,
-                [BET_CHOICES.away]: 33,
-            });
-        });
-    });
-
-    describe("getPercentageBetChoices", () => {
-        it("should return bet choices correctly", () => {
-            // Act
-            const result = getPercentageBetChoices();
-
-            // Assert
-            expect(result).toEqual([
-                BET_CHOICES.home,
-                BET_CHOICES.away,
-                BET_CHOICES.draw,
-                BET_CHOICES.homeLive,
-                BET_CHOICES.awayLive,
-                BET_CHOICES.drawLive,
-            ]);
-        });
-    });
-
-    describe("getUserBetPercentage", () => {
         it("should calculate bet percentages correctly", () => {
-            // Arrange
-            const playerBetCount = {
-                home: ["user1", "user2"],
-                away: ["user3"],
-                draw: [],
-            };
-            const betChoices = ["home", "away", "draw"];
-
-            // Act
-            const result = getUserBetPercentage(playerBetCount, betChoices);
-
-            // Assert
-            expect(result).toEqual({
-                home: 67,
-                away: 33,
-                draw: 0,
-            });
-        });
-
-        it("should handle empty bet choices", () => {
             // Arrange
             const playerBetCount = {
                 home: ["user1", "user2"],
@@ -205,22 +142,37 @@ describe("betPercentage", () => {
             const result = getUserBetPercentage(playerBetCount);
 
             // Assert
-            expect(result).toEqual({});
+            expect(result).toEqual({
+                home: 67,
+                away: 33,
+                draw: 0,
+                homeLive: 0,
+                awayLive: 0,
+                drawLive: 0,
+                homeFinal: 67,
+                awayFinal: 33,
+                drawFinal: 0,
+            });
         });
 
         it("should handle empty player bet count", () => {
             // Arrange
             const playerBetCount = {};
-            const betChoices = ["home", "away", "draw"];
 
             // Act
-            const result = getUserBetPercentage(playerBetCount, betChoices);
+            const result = getUserBetPercentage(playerBetCount);
 
             // Assert
             expect(result).toEqual({
                 home: 0,
                 away: 0,
                 draw: 0,
+                homeLive: 0,
+                awayLive: 0,
+                drawLive: 0,
+                homeFinal: 0,
+                awayFinal: 0,
+                drawFinal: 0,
             });
         });
     });
