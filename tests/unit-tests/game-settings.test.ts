@@ -83,20 +83,11 @@ describe("gameSettings", () => {
 
     it("should have the correct botSettings", () => {
         expect(gameSettings.botSettings).toEqual({
-            ratio: { mainOpts: 80, subOpts: 20 },
-            mainOpts: [BET_CHOICES.home, BET_CHOICES.away, BET_CHOICES.homeLive, BET_CHOICES.awayLive],
-            subOpts: [
-                BET_CHOICES.over,
-                BET_CHOICES.under,
-                BET_CHOICES.odd,
-                BET_CHOICES.even,
-                BET_CHOICES.draw,
-                BET_CHOICES.overLive,
-                BET_CHOICES.underLive,
-                BET_CHOICES.oddLive,
-                BET_CHOICES.evenLive,
-                BET_CHOICES.drawLive,
-            ],
+            ratio: { mainPreOpts: 40, mainLiveOpts: 40, subPreOpts: 10, subLiveOpts: 10 },
+            mainPreOpts: [BET_CHOICES.home, BET_CHOICES.away],
+            mainLiveOpts: [BET_CHOICES.homeLive, BET_CHOICES.awayLive],
+            subPreOpts: [BET_CHOICES.over, BET_CHOICES.under, BET_CHOICES.odd, BET_CHOICES.even, BET_CHOICES.draw],
+            subLiveOpts: [BET_CHOICES.overLive, BET_CHOICES.underLive, BET_CHOICES.oddLive, BET_CHOICES.evenLive, BET_CHOICES.drawLive],
         });
     });
 });

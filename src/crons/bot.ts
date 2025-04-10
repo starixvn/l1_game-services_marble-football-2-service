@@ -26,7 +26,7 @@ export default class Bot extends TableGameConfigBot {
     getBetChoice(bot: any) {
         const betOptions = this.filterBetChoice(this.definition.choices);
         const betChoiceRatios = this.getBetChoicesRatios();
-        const underRatioGroups = helpers.arrayHelper.shuffle(betChoiceRatios.filter((data) => data.underBetRatio));
+        const underRatioGroups = helpers.arrayHelper.shuffle(betChoiceRatios.filter((data) => data.underBetRatio && data.group.length > 0));
         const choice = underRatioGroups.length > 0 ? this.chance.pickone(underRatioGroups[0].group) : this.chance.pickone(betOptions);
         const hedgeBetGroup = this.definition.hedgeBetGroups.find((group) => group.includes(choice));
 
@@ -62,20 +62,19 @@ export default class Bot extends TableGameConfigBot {
             currency: " ",
             operatorId: " ",
             clientSeed: bot.clientSeed,
-            
         };
 
         await this.tempBetsRepository.updateOne(
             { uid: bot.id, roundId: this.gameData.roundId },
             { $set: update, $setOnInsert: create },
-            { upsert: true, setDefaultsOnInsert: true },
+            { upsert: true, setDefaultsOnInsert: true }
         );
 
         return create.time;
     }
 
     filterBetChoice(betOptions: string[]) {
-        return betOptions.filter((choice) =>  this.isBetChoiceValid(choice));
+        return betOptions.filter((choice) => this.isBetChoiceValid(choice));
     }
 
     private isBetChoiceValid(choice: string) {
@@ -83,7 +82,7 @@ export default class Bot extends TableGameConfigBot {
         const durations = this.definition.durations;
         const isFirstHalf = isWithinFirstHalfBettingTime(remainingTime, durations);
         const acceptedBetChoices = isFirstHalf ? PRE_MATCH_BET_CHOICES : LIVE_BET_CHOICES;
-        return Object.hasOwn(acceptedBetChoices, choice) && this.isOddOfBetChoiceValid(choice)
+        return Object.hasOwn(acceptedBetChoices, choice) && this.isOddOfBetChoiceValid(choice);
     }
 
     private isOddOfBetChoiceValid(choice: string) {

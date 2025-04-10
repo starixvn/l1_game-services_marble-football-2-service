@@ -31,19 +31,7 @@ export default {
         ratio: { mainPreOpts: 40, mainLiveOpts: 40, subPreOpts: 10, subLiveOpts: 10 },
         mainPreOpts: [BET_CHOICES.home, BET_CHOICES.away],
         mainLiveOpts: [BET_CHOICES.homeLive, BET_CHOICES.awayLive],
-        subPreOpts: [
-            BET_CHOICES.over,
-            BET_CHOICES.under,
-            BET_CHOICES.odd,
-            BET_CHOICES.even,
-            BET_CHOICES.draw,
-        ],
-        subLiveOpts: [
-            BET_CHOICES.overLive,
-            BET_CHOICES.underLive,
-            BET_CHOICES.oddLive,
-            BET_CHOICES.evenLive,
-            BET_CHOICES.drawLive,
-        ],
+        subPreOpts: [BET_CHOICES.over, BET_CHOICES.under, BET_CHOICES.odd, BET_CHOICES.even, BET_CHOICES.draw],
+        subLiveOpts: [BET_CHOICES.overLive, BET_CHOICES.underLive, BET_CHOICES.oddLive, BET_CHOICES.evenLive, BET_CHOICES.drawLive],
     },
 };
