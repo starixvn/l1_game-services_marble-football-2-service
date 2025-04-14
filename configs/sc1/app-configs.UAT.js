@@ -2,8 +2,8 @@ export default {
     hostingPort: 5000,
     apiSettings: {
         enabledApi: true,
-        apiUrl: "http://l1_game_api_uat:5000",
-        authUrl: "http://l1_auth_api_uat:5000",
+        apiUrl: "http://l1-game-api-uat-service:5000",
+        authUrl: "http://l1-auth-api-uat-service:5000",
         client: {
             id: "game-server",
             secret: "gameserver@20luminet&",
@@ -24,7 +24,7 @@ export default {
     },
     enabledLogs: true,
     database: {
-        url: "mongodb://lmn_backend:LmnBackend%4022027@10.99.99.53:39120,10.99.99.54:39120,10.99.99.188:39120,10.99.99.187:39120/?replicaSet=SabaUAT&appName=marblefootball",
+        url: "mongodb://lmn_backend:LmnBackend%4022027@10.99.99.53:39120,10.99.99.54:39120,10.99.99.188:39120,10.99.99.187:39120/?replicaSet=SabaUAT&appName=marblefootball2",
         options: {
             dbName: "minigame",
             useNewUrlParser: true,
@@ -34,11 +34,11 @@ export default {
     },
     sentry: {
         sentryUrl: "http://52368c4019044019885440599c180bda@10.2.190.51:9009/24",
-        logIdentifier: "MarbleFootBall",
+        logIdentifier: "MarbleFootBall2",
         env: "UAT",
     },
     authenticateSettings: {
-        url: "http://l1_auth_api_uat:5000",
+        url: "http://l1-auth-api-uat-service:5000",
         id: "game-services",
         secret: "gameservices@20luminet&",
         requestTimeout: 10000,
@@ -46,7 +46,7 @@ export default {
         audiences: ["api", "admin-api"],
     },
     userServiceSettings: {
-        url: "http://l1_user_service_uat:5000",
+        url: "http://l1-user-service-uat-service:5000",
     },
     adminSecretKey: "asWDEerfOIdgsdqRTFabvmgh",
     metrics: {
@@ -55,7 +55,7 @@ export default {
     },
     enableMsgpackParser: true,
     gameManagementApiSettings: {
-        BASE: "http://l1_game_management_service_uat:5000",
+        BASE: "http://l1-game-management-service-uat-service:5000",
     },
     otel: {
         system: "SG",
@@ -65,7 +65,7 @@ export default {
 
     liveStreamServer: "https://d10r8t0fxmjzn1.cloudfront.net/114/",
     gameResultSettings: {
-        baseUrl: "http://l1_game_result_uat:5000",
+        baseUrl: "http://l1-game-result-uat-service:5000",
         id: "Game Service",
         key: "906db6ee-b64b-4173-8c82-410f8509764d",
     },

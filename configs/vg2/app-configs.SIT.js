@@ -2,8 +2,8 @@ export default {
     hostingPort: 5000,
     apiSettings: {
         enabledApi: true,
-        apiUrl: "http://l2_game_api_sit:5000",
-        authUrl: "http://l2_auth_api_sit:5000",
+        apiUrl: "http://l2-game-api-sit-service:5000",
+        authUrl: "http://l2-auth-api-sit-service:5000",
         client: {
             id: "game-server",
             secret: "gameserver@20luminet&",
@@ -24,7 +24,7 @@ export default {
     },
     enabledLogs: true,
     database: {
-        url: "mongodb://lmn_backend:LmnBackend%40517@10.99.99.53:39230,10.99.99.54:39230,10.99.99.188:39230,10.99.99.187:39230/?replicaSet=SabaL2SIT&appName=marblefootball",
+        url: "mongodb://lmn_backend:LmnBackend%40517@10.99.99.53:39230,10.99.99.54:39230,10.99.99.188:39230,10.99.99.187:39230/?replicaSet=SabaL2SIT&appName=marblefootball2",
         options: {
             dbName: "minigame",
             useNewUrlParser: true,
@@ -34,11 +34,11 @@ export default {
     },
     sentry: {
         sentryUrl: "http://8ac47fca6d3e4a41908896a64ef201ac@10.2.190.51:9009/53",
-        logIdentifier: "MarbleFootBall",
+        logIdentifier: "MarbleFootBall2",
         env: "SIT",
     },
     authenticateSettings: {
-        url: "http://l2_auth_api_sit:5000",
+        url: "http://l2-auth-api-sit-service:5000",
         id: "game-services",
         secret: "gameservices@20luminet&",
         requestTimeout: 10000,
@@ -46,7 +46,7 @@ export default {
         audiences: ["api", "admin-api"],
     },
     userServiceSettings: {
-        url: "http://l2_user_service_sit:5000",
+        url: "http://l2-user-service-sit-service:5000",
     },
     adminSecretKey: "asWDEerfOIdgsdqRTFabvmgh",
     metrics: {
@@ -55,7 +55,7 @@ export default {
     },
     enableMsgpackParser: true,
     gameManagementApiSettings: {
-        BASE: "http://l2_game_management_service_sit:5000",
+        BASE: "http://l2-game-management-service-sit-service:5000",
     },
     otel: {
         system: "VG2",
@@ -68,7 +68,7 @@ export default {
     },
     liveStreamServer: "https://d1aof1lwumql9k.cloudfront.net/114_STAGING/",
     gameResultSettings: {
-        baseUrl: "http://l2_game_result_sit:5000",
+        baseUrl: "http://l2-game-result-sit-service:5000",
         id: "Game Service",
         key: "422541af-80aa-4524-97c8-62f643ac923e",
     },

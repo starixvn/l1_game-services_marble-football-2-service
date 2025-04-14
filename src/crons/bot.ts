@@ -1,6 +1,6 @@
 import { TableGameConfigBot } from "sc-game-base/src/table/crons";
 import GameData from "../game-data";
-import { isWithinBettingTime, isWithinFirstHalfBettingTime, isWithinSecondHalfBettingTime } from "../helpers/game-timing";
+import { isWithinBettingTime, isWithinFirstHalfBettingTime } from "../helpers/game-timing";
 import GameDefinition from "../game-definition";
 import { helpers } from "sc-common";
 import { LIVE_BET_CHOICES, PRE_MATCH_BET_CHOICES } from "../constants";
