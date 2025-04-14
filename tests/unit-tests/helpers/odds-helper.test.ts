@@ -103,8 +103,8 @@ describe("odds-helper", () => {
             expect(probabilityToBetOdds(0.5, 0.1)).toBe(1.8);
         });
 
-        it("should floor odds above 20", () => {
-            expect(probabilityToBetOdds(0.039)).toBe(25);
+        it("should round odds correctly", () => {
+            expect(probabilityToBetOdds(0.039)).toBe(25.64);
         });
 
         it("should return 0 for probability <= 0", () => {
