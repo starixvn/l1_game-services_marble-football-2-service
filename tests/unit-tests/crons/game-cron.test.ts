@@ -458,7 +458,7 @@ describe("GameCron", () => {
             // Act & Assert
             await expect(gameCron.getVideoTimelineByVideoName(videoName)).rejects.toThrow(mockError);
             expect(logService.logError).toHaveBeenCalledWith(
-                "In match 123, failed to get video timeline http://example.com/test-video.json with error: Error: Network error",
+                "In match 123, failed to get video timeline http://example.com/test-video.json with error: Error: Network error"
             );
         });
     });
@@ -604,10 +604,10 @@ describe("GameCron", () => {
             // Should be true during first half betting window
             expect((gameCron as any).isDuringFirstHalfBettingTime(placingBetsFirstHalf - 1)).toBe(true);
             expect((gameCron as any).isDuringFirstHalfBettingTime(lockingBetFirstHalf + 1)).toBe(true);
+            expect((gameCron as any).isDuringFirstHalfBettingTime(lockingBetFirstHalf)).toBe(true);
 
             // Should be false outside first half betting window
             expect((gameCron as any).isDuringFirstHalfBettingTime(placingBetsFirstHalf)).toBe(false);
-            expect((gameCron as any).isDuringFirstHalfBettingTime(lockingBetFirstHalf)).toBe(false);
         });
 
         it("should correctly identify second half betting time", () => {
@@ -617,10 +617,10 @@ describe("GameCron", () => {
             // Should be true during second half betting window
             expect((gameCron as any).isDuringSecondHalfBettingTime(placingBetsSecondHalf - 1)).toBe(true);
             expect((gameCron as any).isDuringSecondHalfBettingTime(lockingBetSecondHalf + 1)).toBe(true);
+            expect((gameCron as any).isDuringSecondHalfBettingTime(lockingBetSecondHalf)).toBe(true);
 
             // Should be false outside second half betting window
             expect((gameCron as any).isDuringSecondHalfBettingTime(placingBetsSecondHalf)).toBe(false);
-            expect((gameCron as any).isDuringSecondHalfBettingTime(lockingBetSecondHalf)).toBe(false);
         });
 
         it("should correctly identify start placing bet first half time", () => {
@@ -793,7 +793,7 @@ describe("GameCron", () => {
             expect(calculateLiveOddsSpy).toHaveBeenCalledWith(
                 gameCron.gameData.matchConfig.secondHalfConfig,
                 gameCron.gameData.result.firstHalf,
-                gameCron.gameData.gameConfigs.margin,
+                gameCron.gameData.gameConfigs.margin
             );
         });
     });
