@@ -216,9 +216,21 @@ describe("GameCron", () => {
                 expect(gameStatusPublisher.publishEndPlacingBetStatus).toHaveBeenCalled();
             });
 
-            it("should run bot and publish running round info during bet time", async () => {
+            it("should publish running round info and not run bot at beginning of place bet time", async () => {
                 // arrange
                 gameCron.gameData.remainingTime = definition.durations.placingBetsFirstHalf - 1;
+
+                // act
+                await gameCron.proceed();
+
+                // assert
+                expect(bot.run).not.toHaveBeenCalled();
+                expect(runningRoundInfoPublisher.publish).toHaveBeenCalled();
+            });
+
+            it("should run bot and publish running round info during bot betting time", async () => {
+                // arrange
+                gameCron.gameData.remainingTime = definition.durations.placingBetsFirstHalf - 3;
 
                 // act
                 await gameCron.proceed();
@@ -281,9 +293,21 @@ describe("GameCron", () => {
                 expect(gameStatusPublisher.publishStartPlacingBetStatus).toHaveBeenCalled();
             });
 
-            it("should run bot and publish running round info during bet time", async () => {
+            it("should publish running round info and not run bot at beginning of place bet time", async () => {
                 // arrange
                 gameCron.gameData.remainingTime = definition.durations.placingBetsSecondHalf - 1;
+
+                // act
+                await gameCron.proceed();
+
+                // assert
+                expect(bot.run).not.toHaveBeenCalled();
+                expect(runningRoundInfoPublisher.publish).toHaveBeenCalled();
+            });
+
+            it("should run bot and publish running round info during bot betting time", async () => {
+                // arrange
+                gameCron.gameData.remainingTime = definition.durations.placingBetsSecondHalf - 3;
 
                 // act
                 await gameCron.proceed();
@@ -392,6 +416,76 @@ describe("GameCron", () => {
 
             // assert
             expect(gameCron.gameData.remainingTime).toBe(5);
+        });
+
+        describe("bot betting time", () => {
+            it("should run bot during first half betting time with buffer", async () => {
+                // arrange
+                const { placingBetsFirstHalf, lockingBetFirstHalf } = definition.durations;
+                gameCron.gameData.remainingTime = placingBetsFirstHalf - 3; // 2 seconds before betting window closes
+
+                // act
+                await gameCron.proceed();
+
+                // assert
+                expect(bot.run).toHaveBeenCalled();
+            });
+
+            it("should not run bot at the end of first half betting time", async () => {
+                // arrange
+                const { placingBetsFirstHalf } = definition.durations;
+                gameCron.gameData.remainingTime = placingBetsFirstHalf - 1; // 1 second before betting window closes
+
+                // act
+                await gameCron.proceed();
+
+                // assert
+                expect(bot.run).not.toHaveBeenCalled();
+            });
+
+            it("should run bot during second half betting time with buffer", async () => {
+                // arrange
+                const { placingBetsSecondHalf, lockingBetSecondHalf } = definition.durations;
+                gameCron.gameData.remainingTime = placingBetsSecondHalf - 3; // 2 seconds before betting window closes
+
+                // act
+                await gameCron.proceed();
+
+                // assert
+                expect(bot.run).toHaveBeenCalled();
+            });
+
+            it("should not run bot at the end of second half betting time", async () => {
+                // arrange
+                const { placingBetsSecondHalf } = definition.durations;
+                gameCron.gameData.remainingTime = placingBetsSecondHalf - 1; // 1 second before betting window closes
+
+                // act
+                await gameCron.proceed();
+
+                // assert
+                expect(bot.run).not.toHaveBeenCalled();
+            });
+
+            it("should not run bot outside betting windows", async () => {
+                // arrange
+                const { placingBetsFirstHalf, lockingBetFirstHalf, placingBetsSecondHalf, lockingBetSecondHalf } = definition.durations;
+
+                // Test various times outside betting windows
+                const testTimes = [
+                    placingBetsFirstHalf, // Start of first half betting
+                    lockingBetFirstHalf - 1, // Just before first half betting ends
+                    placingBetsSecondHalf, // Start of second half betting
+                    lockingBetSecondHalf - 1, // Just before second half betting ends
+                ];
+
+                for (const time of testTimes) {
+                    gameCron.gameData.remainingTime = time;
+                    await gameCron.proceed();
+                    expect(bot.run).not.toHaveBeenCalled();
+                    jest.clearAllMocks();
+                }
+            });
         });
     });
 
@@ -663,6 +757,29 @@ describe("GameCron", () => {
 
             expect((gameCron as any).isStreamingVideoSecondHalf(streamingVideoSecondHalf)).toBe(true);
             expect((gameCron as any).isStreamingVideoSecondHalf(streamingVideoSecondHalf - 1)).toBe(false);
+        });
+
+        it("should correctly identify bot betting time", () => {
+            // Create test cases with different remaining times
+            const { placingBetsFirstHalf, lockingBetFirstHalf, placingBetsSecondHalf, lockingBetSecondHalf } = definition.durations;
+
+            // Should be true during first half betting window with buffer
+            expect((gameCron as any).isDuringBotBettingTime(placingBetsFirstHalf - 3)).toBe(true);
+            expect((gameCron as any).isDuringBotBettingTime(lockingBetFirstHalf + 1)).toBe(true);
+
+            // Should be true during second half betting window with buffer
+            expect((gameCron as any).isDuringBotBettingTime(placingBetsSecondHalf - 3)).toBe(true);
+            expect((gameCron as any).isDuringBotBettingTime(lockingBetSecondHalf + 1)).toBe(true);
+
+            // Should be false at the end of betting windows
+            expect((gameCron as any).isDuringBotBettingTime(placingBetsFirstHalf - 1)).toBe(false);
+            expect((gameCron as any).isDuringBotBettingTime(placingBetsSecondHalf - 1)).toBe(false);
+
+            // Should be false outside betting windows
+            expect((gameCron as any).isDuringBotBettingTime(placingBetsFirstHalf)).toBe(false);
+            expect((gameCron as any).isDuringBotBettingTime(lockingBetFirstHalf)).toBe(true);
+            expect((gameCron as any).isDuringBotBettingTime(placingBetsSecondHalf)).toBe(false);
+            expect((gameCron as any).isDuringBotBettingTime(lockingBetSecondHalf)).toBe(true);
         });
     });
 

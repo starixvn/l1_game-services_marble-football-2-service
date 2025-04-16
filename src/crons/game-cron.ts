@@ -174,8 +174,11 @@ export default class GameCron extends Table.Crons.TableGameCron {
         }
 
         if (this.isDuringFirstHalfBettingTime(remainingTime) || this.isDuringSecondHalfBettingTime(remainingTime)) {
-            this.bot && (await this.bot.run());
             this.runningRoundInfoPublisher.publish();
+        }
+
+        if (this.isDuringBotBettingTime(remainingTime)) {
+            this.bot && (await this.bot.run());
         }
 
         if (this.isStreamingVideoFirstHalf(remainingTime)) {
@@ -205,6 +208,15 @@ export default class GameCron extends Table.Crons.TableGameCron {
         const { placingBetsSecondHalf, lockingBetSecondHalf } = this.definition.durations;
 
         return remainingTime < placingBetsSecondHalf && remainingTime >= lockingBetSecondHalf;
+    }
+
+    private isDuringBotBettingTime(remainingTime: number) {
+        const { placingBetsFirstHalf, lockingBetFirstHalf, placingBetsSecondHalf, lockingBetSecondHalf } = this.definition.durations;
+
+        return (
+            (remainingTime < placingBetsFirstHalf - 2 && remainingTime >= lockingBetFirstHalf) ||
+            (remainingTime < placingBetsSecondHalf - 2 && remainingTime >= lockingBetSecondHalf)
+        );
     }
 
     private isStartPlacingBetFirstHalf(remainingTime: number) {
