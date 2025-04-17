@@ -14,6 +14,10 @@ export default class Bot extends TableGameConfigBot {
         this.updatePlayerBetCount(botId, choice);
     }
 
+    getTicketsPerRound() {
+        return this.chance.integer({ min: 2, max: 10 });
+    }
+
     updatePlayerBetCount(playerId: string, choice: string) {
         if (this.definition.choices.includes(choice)) {
             if (!this.gameData.playerBetCount[choice]) {
