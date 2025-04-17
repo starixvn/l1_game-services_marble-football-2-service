@@ -24,11 +24,10 @@ export default class Bot extends TableGameConfigBot {
     }
 
     getBetChoice(bot: any) {
-        const betOptions = this.filterBetChoice(this.definition.choices);
-        const betChoiceRatios = this.getBetChoicesRatios();
-        const underRatioGroups = helpers.arrayHelper.shuffle(betChoiceRatios.filter((data) => data.underBetRatio && data.group.length > 0));
-        const choice = underRatioGroups.length > 0 ? this.chance.pickone(underRatioGroups[0].group) : this.chance.pickone(betOptions);
-        const hedgeBetGroup = this.definition.hedgeBetGroups.find((group) => group.includes(choice));
+        const betChoiceRatios = this.filterBetChoicesRatios(this.getBetChoicesRatios());
+        const underRatioGroups = helpers.arrayHelper.shuffle(betChoiceRatios.filter((data) => data.underBetRatio));
+        const choice = this.chance.pickone(underRatioGroups[0].group);
+        const hedgeBetGroup = this.hedgeBetGroups.find((group) => group.includes(choice));
 
         if (hedgeBetGroup) {
             const oppositeChoice = choice === hedgeBetGroup[0] ? hedgeBetGroup[1] : hedgeBetGroup[0];
@@ -38,15 +37,25 @@ export default class Bot extends TableGameConfigBot {
         }
     }
 
-    getBetChoicesRatios() {
-        const totalBotBet = this.getAllBetAmountOnChoices(this.betOptions);
-        return Object.keys(this.botSettings.ratio).map((group) => {
-            const betOptions = this.filterBetChoice(this.botSettings[group] as string[]);
-            return {
-                group: betOptions,
-                underBetRatio: (this.getAllBetAmountOnChoices(betOptions) * 100) / totalBotBet < this.botSettings.ratio[group],
-            };
-        });
+    filterBetChoicesRatios(betChoiceRatios: { group: string[]; underBetRatio: boolean }[]) {
+        const result = [];
+
+        for (const betChoiceRatio of betChoiceRatios) {
+            const betOptions = this.filterBetChoice(betChoiceRatio.group);
+
+            if (betOptions.length > 0) {
+                result.push({ group: betOptions, underBetRatio: betChoiceRatio.underBetRatio });
+            }
+        }
+
+        // Incase all bet choices are over the ratio, return all bet choices
+        if (result.every((data) => !data.underBetRatio)) {
+            for (const betChoiceRatio of result) {
+                betChoiceRatio.underBetRatio = true;
+            }
+        }
+
+        return result;
     }
 
     isDuringBetTime = () => isWithinBettingTime(this.gameData.remainingTime, this.definition.durations);

@@ -139,21 +139,21 @@ describe("Bot", () => {
         describe("during first half betting period", () => {
             beforeEach(() => {
                 (gameTimingHelpers.isWithinFirstHalfBettingTime as jest.Mock).mockReturnValue(true);
-                
+
                 Object.defineProperty(botInstance, "PRE_MATCH_BET_CHOICES", {
                     value: {
                         home: "home",
-                        away: "away"
-                    }
+                        away: "away",
+                    },
                 });
-                
+
                 Object.defineProperty(botInstance, "LIVE_BET_CHOICES", {
                     value: {
                         homeLive: "homeLive",
-                        awayLive: "awayLive"
-                    }
+                        awayLive: "awayLive",
+                    },
                 });
-                
+
                 Object.defineProperty(botInstance, "gameData", {
                     value: {
                         ...gameData,
@@ -161,10 +161,10 @@ describe("Bot", () => {
                             home: 1.5,
                             away: 2.0,
                             homeLive: 0,
-                            awayLive: 0
-                        }
+                            awayLive: 0,
+                        },
                     },
-                    writable: true
+                    writable: true,
                 });
             });
 
@@ -183,32 +183,19 @@ describe("Bot", () => {
                 expect(helpers.arrayHelper.shuffle).toHaveBeenCalledWith(underRatioGroups);
             });
 
-            it("should return a random choice when no underRatio groups are available", () => {
-                // Arrange
-                const bot = { choices: ["home", "away"] };
-                (botInstance as any).getBetChoicesRatios.mockReturnValue([]);
-                mockPickone.mockImplementationOnce((arr) => "home");
-
-                // Act
-                const result = botInstance.getBetChoice(bot);
-
-                // Assert
-                expect(result).toBe("away");
-            });
-
             it("should return original choice when bot doesn't have the opposite choice in hedge bet group", () => {
                 // Arrange
                 const bot = { choices: ["home"] };
-                (botInstance as any).getBetChoicesRatios.mockReturnValue([]);
+                (botInstance as any).getBetChoicesRatios.mockReturnValue([{ underBetRatio: true, group: ["home"] }]);
                 mockPickone.mockImplementationOnce((arr) => "home");
                 Object.defineProperty(botInstance, "definition", {
                     value: {
                         ...definition,
                         hedgeBetGroups: [["home", "away"]],
                     },
-                    writable: true
+                    writable: true,
                 });
-                
+
                 // Act
                 const result = botInstance.getBetChoice(bot);
 
@@ -219,16 +206,16 @@ describe("Bot", () => {
             it("should return opposite choice when bot has it in hedge bet group", () => {
                 // Arrange
                 const bot = { choices: ["home", "away"] };
-                (botInstance as any).getBetChoicesRatios.mockReturnValue([]);
+                (botInstance as any).getBetChoicesRatios.mockReturnValue([{ underBetRatio: true, group: ["home"] }]);
                 mockPickone.mockImplementationOnce((arr) => "home");
                 Object.defineProperty(botInstance, "definition", {
                     value: {
                         ...definition,
                         hedgeBetGroups: [["home", "away"]],
                     },
-                    writable: true
+                    writable: true,
                 });
-                
+
                 // Act
                 const result = botInstance.getBetChoice(bot);
 
@@ -240,21 +227,21 @@ describe("Bot", () => {
         describe("during second half betting period", () => {
             beforeEach(() => {
                 (gameTimingHelpers.isWithinFirstHalfBettingTime as jest.Mock).mockReturnValue(false);
-                
+
                 Object.defineProperty(botInstance, "PRE_MATCH_BET_CHOICES", {
                     value: {
                         home: "home",
-                        away: "away"
-                    }
+                        away: "away",
+                    },
                 });
-                
+
                 Object.defineProperty(botInstance, "LIVE_BET_CHOICES", {
                     value: {
                         homeLive: "homeLive",
-                        secondHalfAway: "secondHalfAway" 
-                    }
+                        secondHalfAway: "secondHalfAway",
+                    },
                 });
-                
+
                 Object.defineProperty(botInstance, "gameData", {
                     value: {
                         ...gameData,
@@ -262,25 +249,26 @@ describe("Bot", () => {
                             home: 0,
                             away: 0,
                             homeLive: 1.8,
-                            secondHalfAway: 2.2
-                        }
+                            secondHalfAway: 2.2,
+                        },
                     },
-                    writable: true
+                    writable: true,
                 });
             });
 
             it("should return a second half choice from available options", () => {
                 // Arrange
                 const bot = { choices: ["homeLive", "secondHalfAway"] };
+                (botInstance as any).getBetChoicesRatios.mockReturnValue([{ underBetRatio: true, group: ["homeLive"] }]);
                 mockPickone.mockImplementationOnce((arr) => "homeLive");
                 Object.defineProperty(botInstance, "definition", {
                     value: {
                         ...definition,
                         hedgeBetGroups: [["homeLive", "secondHalfAway"]],
                     },
-                    writable: true
+                    writable: true,
                 });
-                
+
                 // Act
                 const result = botInstance.getBetChoice(bot);
 
@@ -306,20 +294,20 @@ describe("Bot", () => {
 
         it("should insert a new bet when currentBet is null", async () => {
             // Arrange
-            const bot = { 
-                id: "bot123", 
-                name: "TestBot", 
+            const bot = {
+                id: "bot123",
+                name: "TestBot",
                 clientSeed: "seed123",
             };
             const choice = "home";
             const amount = 100;
             const currentBet = null;
             const mockDate = new Date("2023-01-01T12:00:00Z");
-            
+
             jest.spyOn(global, "Date").mockImplementation(() => mockDate as any);
             gameData.roundId = 123;
             gameData.dynamicOdds = { home: 1.5, away: 2.5 };
-            
+
             // Act
             const result = await botInstance.insertOrUpdateBet(bot, choice, amount, currentBet);
 
@@ -327,9 +315,9 @@ describe("Bot", () => {
             expect(tempBetsUpdateOneSpy).toHaveBeenCalledWith(
                 { uid: "bot123", roundId: 123 },
                 {
-                    $set: { 
+                    $set: {
                         home: 100,
-                        odds: gameData.dynamicOdds
+                        odds: gameData.dynamicOdds,
                     },
                     $setOnInsert: {
                         uid: "bot123",
@@ -341,29 +329,29 @@ describe("Bot", () => {
                         clientSeed: "seed123",
                     },
                 },
-                { upsert: true, setDefaultsOnInsert: true },
+                { upsert: true, setDefaultsOnInsert: true }
             );
             expect(result).toEqual(mockDate);
-            
+
             jest.spyOn(global, "Date").mockRestore();
         });
 
         it("should update an existing bet when currentBet exists", async () => {
             // Arrange
-            const bot = { 
-                id: "bot123", 
-                name: "TestBot", 
+            const bot = {
+                id: "bot123",
+                name: "TestBot",
                 clientSeed: "seed123",
             };
             const choice = "home";
             const amount = 100;
             const currentBet = { home: 50 };
             const mockDate = new Date("2023-01-01T12:00:00Z");
-            
+
             jest.spyOn(global, "Date").mockImplementation(() => mockDate as any);
             gameData.roundId = 123;
             gameData.dynamicOdds = { home: 1.5, away: 2.5 };
-            
+
             // Act
             const result = await botInstance.insertOrUpdateBet(bot, choice, amount, currentBet);
 
@@ -371,9 +359,9 @@ describe("Bot", () => {
             expect(tempBetsUpdateOneSpy).toHaveBeenCalledWith(
                 { uid: "bot123", roundId: 123 },
                 {
-                    $set: { 
+                    $set: {
                         home: 150,
-                        odds: gameData.dynamicOdds
+                        odds: gameData.dynamicOdds,
                     },
                     $setOnInsert: {
                         uid: "bot123",
@@ -385,29 +373,29 @@ describe("Bot", () => {
                         clientSeed: "seed123",
                     },
                 },
-                { upsert: true, setDefaultsOnInsert: true },
+                { upsert: true, setDefaultsOnInsert: true }
             );
             expect(result).toEqual(mockDate);
-            
+
             jest.spyOn(global, "Date").mockRestore();
         });
 
         it("should handle different bet choices correctly", async () => {
             // Arrange
-            const bot = { 
-                id: "bot123", 
-                name: "TestBot", 
+            const bot = {
+                id: "bot123",
+                name: "TestBot",
                 clientSeed: "seed123",
             };
             const choice = "away";
             const amount = 200;
             const currentBet = null;
             const mockDate = new Date("2023-01-01T12:00:00Z");
-            
+
             jest.spyOn(global, "Date").mockImplementation(() => mockDate as any);
             gameData.roundId = 123;
             gameData.dynamicOdds = { home: 1.5, away: 2.5 };
-            
+
             // Act
             const result = await botInstance.insertOrUpdateBet(bot, choice, amount, currentBet);
 
@@ -415,9 +403,9 @@ describe("Bot", () => {
             expect(tempBetsUpdateOneSpy).toHaveBeenCalledWith(
                 { uid: "bot123", roundId: 123 },
                 {
-                    $set: { 
+                    $set: {
                         away: 200,
-                        odds: gameData.dynamicOdds
+                        odds: gameData.dynamicOdds,
                     },
                     $setOnInsert: {
                         uid: "bot123",
@@ -429,47 +417,11 @@ describe("Bot", () => {
                         clientSeed: "seed123",
                     },
                 },
-                { upsert: true, setDefaultsOnInsert: true },
+                { upsert: true, setDefaultsOnInsert: true }
             );
             expect(result).toEqual(mockDate);
-            
+
             jest.spyOn(global, "Date").mockRestore();
-        });
-    });
-
-    describe("getBetChoicesRatios", () => {
-        it("should calculate bet choice ratios correctly", () => {
-            // Arrange
-            jest.spyOn(botInstance as any, "getBetChoicesRatios").mockRestore();
-
-            Object.defineProperty(botInstance, "botSettings", {
-                value: {
-                    ratio: { group1: 40, group2: 60 },
-                    group1: ["home"],
-                    group2: ["away"],
-                },
-            });
-
-            Object.defineProperty(botInstance, "betOptions", {
-                value: ["home", "away"],
-            });
-
-            (botInstance as any).getAllBetAmountOnChoices = jest
-                .fn()
-                .mockReturnValueOnce(1000)
-                .mockReturnValueOnce(350)
-                .mockReturnValueOnce(650);
-
-            (botInstance as any).filterBetChoice = jest.fn().mockReturnValueOnce(["home"]).mockReturnValueOnce(["away"]);
-
-            // Act
-            const result = botInstance.getBetChoicesRatios();
-
-            // Assert
-            expect(result).toEqual([
-                { group: ["home"], underBetRatio: true },
-                { group: ["away"], underBetRatio: false },
-            ]);
         });
     });
 
@@ -515,22 +467,22 @@ describe("Bot", () => {
                         home: 1.5,
                         away: 2.0,
                         homeLive: 0,
-                        awayLive: 0
-                    }
+                        awayLive: 0,
+                    },
                 },
-                writable: true
+                writable: true,
             });
             Object.defineProperty(botInstance, "PRE_MATCH_BET_CHOICES", {
                 value: {
                     home: "home",
-                    away: "away"
-                }
+                    away: "away",
+                },
             });
             Object.defineProperty(botInstance, "LIVE_BET_CHOICES", {
                 value: {
                     homeLive: "homeLive",
-                    awayLive: "awayLive"
-                }
+                    awayLive: "awayLive",
+                },
             });
 
             // Act
@@ -551,22 +503,22 @@ describe("Bot", () => {
                         home: 0,
                         away: 0,
                         homeLive: 1.8,
-                        awayLive: 2.2
-                    }
+                        awayLive: 2.2,
+                    },
                 },
-                writable: true
+                writable: true,
             });
             Object.defineProperty(botInstance, "PRE_MATCH_BET_CHOICES", {
                 value: {
                     home: "home",
-                    away: "away"
-                }
+                    away: "away",
+                },
             });
             Object.defineProperty(botInstance, "LIVE_BET_CHOICES", {
                 value: {
                     homeLive: "homeLive",
-                    awayLive: "awayLive"
-                }
+                    awayLive: "awayLive",
+                },
             });
 
             // Act
@@ -587,22 +539,22 @@ describe("Bot", () => {
                         home: 0,
                         away: 0,
                         homeLive: 0,
-                        awayLive: 0
-                    }
+                        awayLive: 0,
+                    },
                 },
-                writable: true
+                writable: true,
             });
             Object.defineProperty(botInstance, "PRE_MATCH_BET_CHOICES", {
                 value: {
                     home: "home",
-                    away: "away"
-                }
+                    away: "away",
+                },
             });
             Object.defineProperty(botInstance, "LIVE_BET_CHOICES", {
                 value: {
                     homeLive: "homeLive",
-                    awayLive: "awayLive"
-                }
+                    awayLive: "awayLive",
+                },
             });
 
             // Act
