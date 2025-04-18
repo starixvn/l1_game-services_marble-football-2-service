@@ -24,18 +24,12 @@ export default class Bot extends TableGameConfigBot {
         bot.totalTickets = bot.remainTickets;
     }
 
-    easeInSine(x: number) {
-        return 1 - Math.cos((x * Math.PI) / 2);
-    }
-
     getNumberOfBotsToBet() {
         const totalTickets = Object.values(this.botsInRoom).reduce((acc: number, bot) => acc + ((bot as any).totalTickets || 0), 0);
-        const remainTickets = Object.values(this.botsInRoom).reduce((acc: number, bot) => acc + ((bot as any).remainTickets || 0), 0);
         const randomPercent = this.chance.integer({ min: 1, max: 10 }) / 100;
-        const percent = totalTickets === remainTickets ? randomPercent : this.easeInSine(1 - remainTickets / totalTickets);
-        const maxTickets = Math.floor(totalTickets * percent);
+        const maxTickets = Math.floor(totalTickets * randomPercent);
 
-        return this.chance.integer({ min: 3, max: maxTickets });
+        return this.chance.integer({ min: 1, max: maxTickets });
     }
 
     getBotsToBet() {
