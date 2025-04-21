@@ -27,7 +27,7 @@ export default class Bot extends TableGameConfigBot {
     getNumberOfBotsToBet() {
         const totalTickets = Object.values(this.botsInRoom).reduce((acc: number, bot) => acc + ((bot as any).totalTickets || 0), 0);
         const randomPercent = this.chance.integer({ min: 1, max: 10 }) / 100;
-        const maxTickets = Math.floor(totalTickets * randomPercent);
+        const maxTickets = Math.max(2, Math.floor(totalTickets * randomPercent));
 
         return this.chance.integer({ min: 1, max: maxTickets });
     }
