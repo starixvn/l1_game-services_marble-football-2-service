@@ -698,7 +698,7 @@ describe("PlaceBetConsumer", () => {
                 expect(result[1].notice).toEqual({ errorCode: "SB1910", maxBet: 600 });
             });
 
-            it("should limit max bet based on odds when odds-based calculation is smaller than configured max bet", () => {
+            it("should limit max bet based on odds when odds-based calculation is smaller than both player profile max bet and settings max bet", () => {
                 // Arrange
                 mockGameData.dynamicOdds = {
                     [BET_CHOICES.homeLive]: 3.0, // Higher odds will result in smaller max bet
@@ -707,13 +707,25 @@ describe("PlaceBetConsumer", () => {
                 const amount = 1000;
                 const freeBet = false;
 
+                (placeBetConsumer.gameData.currencyGroupGames as any) = [
+                    {
+                        groupId: "1",
+                        minBet: 20,
+                        maxBet: 200,
+                        maxBetPerChoices: {
+                            home: 500,
+                            homeLive: 600,
+                        },
+                    },
+                ];
+
                 // Act
                 const result = placeBetConsumer.composeBetAmountValidationCriteria(mockPlayer, betChoice, amount, freeBet);
 
                 // Assert
                 // maxBet / (odds - 1) = 1000 / (3.0 - 1) = 500
                 expect(result[1].failure).toBe(true);
-                expect(result[1].notice).toEqual({ errorCode: "SB1910", maxBet: 500 });
+                expect(result[1].notice).toEqual({ errorCode: "SB1910", maxBet: 100 });
             });
         });
 
