@@ -10,7 +10,6 @@ import { retry } from "../helpers";
 import { generateVideoName } from "../helpers/result-helper";
 import defaultVideoTimelines from "../timelines/video-timelines";
 import GameStatusPublisher from "../publishers/game-status-publisher";
-import Chance from "chance";
 import { calculatePreMatchOdds, calculateLiveOdds } from "../helpers/odds-helper";
 import { securePickOne } from "sc-core-rng";
 import RunningRoundInfoPublisher from "../publishers/running-round-info-publisher";
@@ -77,7 +76,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
             this.gameData.result.firstHalf,
             true
         );
-        this.gameData.result.firstHalfVoice = generateVoice({
+        this.gameData.result.voices = generateVoice({
             isFirstHalf: true,
             timeline: this.gameData.result.firstHalfTimeline ?? [],
             result: this.gameData.result.firstHalf,
@@ -90,7 +89,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
             this.gameData.result.secondHalf,
             false
         );
-        this.gameData.result.secondHalfVoice = generateVoice({
+        this.gameData.result.voices = generateVoice({
             isFirstHalf: false,
             timeline: this.gameData.result.secondHalfTimeline ?? [],
             result: this.gameData.result.secondHalf,

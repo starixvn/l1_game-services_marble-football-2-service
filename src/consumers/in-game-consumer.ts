@@ -100,4 +100,9 @@ export default class InGameConsumer extends TableInGameConsumer {
     publishOddsToPlayer(UID: string): void {
         this.publisher.publishToUser(UID, { odds: this.gameData.dynamicOdds });
     }
+
+    publishVoiceToPlayer(UID: string): void {
+        const { result } = this.gameData;
+        this.publisher.publishToUser(UID, { voices: result?.voices });
+    }
 }

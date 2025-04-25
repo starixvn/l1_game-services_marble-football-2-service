@@ -241,10 +241,10 @@ describe("GameCron", () => {
             });
 
             describe("at first half streaming time", () => {
-                it("should call getVideoTimelineForFirstHalf", async () => {
+                it("should call getVideoTimelineAndVoiceForFirstHalf", async () => {
                     // arrange
                     gameCron.gameData.remainingTime = definition.durations.streamingVideoFirstHalf + 1;
-                    jest.spyOn(gameCron, "getVideoTimelineForFirstHalf").mockResolvedValue();
+                    jest.spyOn(gameCron, "getVideoTimelineAndVoiceForFirstHalf").mockResolvedValue();
 
                     // act
                     await gameCron.proceed();
@@ -262,7 +262,7 @@ describe("GameCron", () => {
                         firstHalf: "HH",
                     } as any;
 
-                    jest.spyOn(gameCron, "getVideoTimelineForFirstHalf").mockResolvedValue();
+                    jest.spyOn(gameCron, "getVideoTimelineAndVoiceForFirstHalf").mockResolvedValue();
 
                     // act
                     await gameCron.proceed();
@@ -329,10 +329,10 @@ describe("GameCron", () => {
             });
 
             describe("at streaming time", () => {
-                it("should call getVideoTimelineForSecondHalf", async () => {
+                it("should call getVideoTimelineAndVoiceForSecondHalf", async () => {
                     // arrange
                     gameCron.gameData.remainingTime = definition.durations.streamingVideoSecondHalf + 1;
-                    jest.spyOn(gameCron, "getVideoTimelineForSecondHalf").mockResolvedValue();
+                    jest.spyOn(gameCron, "getVideoTimelineAndVoiceForSecondHalf").mockResolvedValue();
 
                     // act
                     await gameCron.proceed();
@@ -350,7 +350,7 @@ describe("GameCron", () => {
                         secondHalf: "AA",
                     } as any;
 
-                    jest.spyOn(gameCron, "getVideoTimelineForSecondHalf").mockResolvedValue();
+                    jest.spyOn(gameCron, "getVideoTimelineAndVoiceForSecondHalf").mockResolvedValue();
 
                     // act
                     await gameCron.proceed();
@@ -421,7 +421,7 @@ describe("GameCron", () => {
         describe("bot betting time", () => {
             it("should run bot during first half betting time with buffer", async () => {
                 // arrange
-                const { placingBetsFirstHalf, lockingBetFirstHalf } = definition.durations;
+                const { placingBetsFirstHalf } = definition.durations;
                 gameCron.gameData.remainingTime = placingBetsFirstHalf - 3; // 2 seconds before betting window closes
 
                 // act
@@ -445,7 +445,7 @@ describe("GameCron", () => {
 
             it("should run bot during second half betting time with buffer", async () => {
                 // arrange
-                const { placingBetsSecondHalf, lockingBetSecondHalf } = definition.durations;
+                const { placingBetsSecondHalf } = definition.durations;
                 gameCron.gameData.remainingTime = placingBetsSecondHalf - 3; // 2 seconds before betting window closes
 
                 // act
@@ -595,8 +595,8 @@ describe("GameCron", () => {
         });
     });
 
-    describe("getVideoTimelineForFirstHalf", () => {
-        it("should call getVideoTimelineWithRetry with correct arguments", async () => {
+    describe("getVideoTimelineAndVoiceForFirstHalf", () => {
+        it("should call getVideoTimelineWithRetry with correct arguments and set up voice generation", async () => {
             // Arrange
             const videoName = "first-half-video";
             const isFirstHalf = true;
@@ -606,6 +606,7 @@ describe("GameCron", () => {
                 firstHalf: "0",
             } as any;
             jest.spyOn(gameCron, "getVideoTimelineWithRetry").mockResolvedValueOnce(mockTimeline);
+            jest.spyOn(require("../../../src/helpers/voices"), "generateVoice").mockReturnValue(["voice1", "voice2"]);
 
             // Act
             await gameCron.getVideoTimelineAndVoiceForFirstHalf();
@@ -613,11 +614,17 @@ describe("GameCron", () => {
             // Assert
             expect(gameCron.getVideoTimelineWithRetry).toHaveBeenCalledWith(videoName, "0", isFirstHalf);
             expect(gameCron.gameData.result.firstHalfTimeline).toEqual(mockTimeline);
+            expect(require("../../../src/helpers/voices").generateVoice).toHaveBeenCalledWith({
+                isFirstHalf: true,
+                timeline: mockTimeline,
+                result: "0",
+            });
+            expect(gameCron.gameData.result.voices).toEqual(["voice1", "voice2"]);
         });
     });
 
-    describe("getVideoTimelineForSecondHalf", () => {
-        it("should call getVideoTimelineWithRetry with correct arguments", async () => {
+    describe("getVideoTimelineAndVoiceForSecondHalf", () => {
+        it("should call getVideoTimelineWithRetry with correct arguments and set up voice generation", async () => {
             // Arrange
             const videoName = "second-half-video";
             const isFirstHalf = false;
@@ -627,6 +634,7 @@ describe("GameCron", () => {
                 secondHalf: "0",
             } as any;
             jest.spyOn(gameCron, "getVideoTimelineWithRetry").mockResolvedValueOnce(mockTimeline);
+            jest.spyOn(require("../../../src/helpers/voices"), "generateVoice").mockReturnValue(["voice3", "voice4"]);
 
             // Act
             await gameCron.getVideoTimelineAndVoiceForSecondHalf();
@@ -634,6 +642,12 @@ describe("GameCron", () => {
             // Assert
             expect(gameCron.getVideoTimelineWithRetry).toHaveBeenCalledWith(videoName, "0", isFirstHalf);
             expect(gameCron.gameData.result.secondHalfTimeline).toEqual(mockTimeline);
+            expect(require("../../../src/helpers/voices").generateVoice).toHaveBeenCalledWith({
+                isFirstHalf: false,
+                timeline: mockTimeline,
+                result: "0",
+            });
+            expect(gameCron.gameData.result.voices).toEqual(["voice3", "voice4"]);
         });
     });
 

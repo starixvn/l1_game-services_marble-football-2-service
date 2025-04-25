@@ -14,8 +14,7 @@ export type ResultType = {
     penalty: { home: number; away: number };
     firstHalfTimeline?: number[];
     secondHalfTimeline?: number[];
-    firstHalfVoice?: VoiceGenerationResult;
-    secondHalfVoice?: VoiceGenerationResult;
+    voices?: VoiceGenerationResult;
 };
 
 const resultSchema = new mongoose.Schema<ResultType>(
