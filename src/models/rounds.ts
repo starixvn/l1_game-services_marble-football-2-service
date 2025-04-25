@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { MODEL_NAME_PREFIX, ODDS_TYPE } from "../constants";
 import { MatchType } from "./tournaments";
+import { VoiceGenerationResult } from "../helpers/voices";
 
 export type ResultType = {
     tournamentId?: mongoose.Types.ObjectId;
@@ -13,6 +14,8 @@ export type ResultType = {
     penalty: { home: number; away: number };
     firstHalfTimeline?: number[];
     secondHalfTimeline?: number[];
+    firstHalfVoice?: VoiceGenerationResult;
+    secondHalfVoice?: VoiceGenerationResult;
 };
 
 const resultSchema = new mongoose.Schema<ResultType>(

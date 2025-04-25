@@ -250,7 +250,7 @@ describe("GameCron", () => {
                     await gameCron.proceed();
 
                     // assert
-                    expect(gameCron.getVideoTimelineForFirstHalf).toHaveBeenCalled();
+                    expect(gameCron.getVideoTimelineAndVoiceForFirstHalf).toHaveBeenCalled();
                 });
 
                 it("should publish video stream", async () => {
@@ -338,7 +338,7 @@ describe("GameCron", () => {
                     await gameCron.proceed();
 
                     // assert
-                    expect(gameCron.getVideoTimelineForSecondHalf).toHaveBeenCalled();
+                    expect(gameCron.getVideoTimelineAndVoiceForSecondHalf).toHaveBeenCalled();
                 });
 
                 it("should publish video stream", async () => {
@@ -608,7 +608,7 @@ describe("GameCron", () => {
             jest.spyOn(gameCron, "getVideoTimelineWithRetry").mockResolvedValueOnce(mockTimeline);
 
             // Act
-            await gameCron.getVideoTimelineForFirstHalf();
+            await gameCron.getVideoTimelineAndVoiceForFirstHalf();
 
             // Assert
             expect(gameCron.getVideoTimelineWithRetry).toHaveBeenCalledWith(videoName, "0", isFirstHalf);
@@ -629,7 +629,7 @@ describe("GameCron", () => {
             jest.spyOn(gameCron, "getVideoTimelineWithRetry").mockResolvedValueOnce(mockTimeline);
 
             // Act
-            await gameCron.getVideoTimelineForSecondHalf();
+            await gameCron.getVideoTimelineAndVoiceForSecondHalf();
 
             // Assert
             expect(gameCron.getVideoTimelineWithRetry).toHaveBeenCalledWith(videoName, "0", isFirstHalf);

@@ -10,10 +10,11 @@ import { retry } from "../helpers";
 import { generateVideoName } from "../helpers/result-helper";
 import defaultVideoTimelines from "../timelines/video-timelines";
 import GameStatusPublisher from "../publishers/game-status-publisher";
-
+import Chance from "chance";
 import { calculatePreMatchOdds, calculateLiveOdds } from "../helpers/odds-helper";
 import { securePickOne } from "sc-core-rng";
 import RunningRoundInfoPublisher from "../publishers/running-round-info-publisher";
+import { generateVoice } from "../helpers/voices";
 export default class GameCron extends Table.Crons.TableGameCron {
     declare gameData: GameData;
     declare definition: GameDefinition;
@@ -70,20 +71,30 @@ export default class GameCron extends Table.Crons.TableGameCron {
         });
     }
 
-    async getVideoTimelineForFirstHalf() {
+    async getVideoTimelineAndVoiceForFirstHalf() {
         this.gameData.result.firstHalfTimeline = await this.getVideoTimelineWithRetry(
             this.gameData.result.firstHalfVideo,
             this.gameData.result.firstHalf,
             true
         );
+        this.gameData.result.firstHalfVoice = generateVoice({
+            isFirstHalf: true,
+            timeline: this.gameData.result.firstHalfTimeline ?? [],
+            result: this.gameData.result.firstHalf,
+        })
     }
 
-    async getVideoTimelineForSecondHalf() {
+    async getVideoTimelineAndVoiceForSecondHalf() {
         this.gameData.result.secondHalfTimeline = await this.getVideoTimelineWithRetry(
             this.gameData.result.secondHalfVideo,
             this.gameData.result.secondHalf,
             false
         );
+        this.gameData.result.secondHalfVoice = generateVoice({
+            isFirstHalf: false,
+            timeline: this.gameData.result.secondHalfTimeline ?? [],
+            result: this.gameData.result.secondHalf,
+        });
     }
 
     getDefaultVideoTimeline(result: string, isFirstHalf: boolean) {
@@ -182,12 +193,12 @@ export default class GameCron extends Table.Crons.TableGameCron {
         }
 
         if (this.isStreamingVideoFirstHalf(remainingTime)) {
-            await this.getVideoTimelineForFirstHalf();
+            await this.getVideoTimelineAndVoiceForFirstHalf();
             this.publishVideoStreamFirstHalf();
         }
 
         if (this.isStreamingVideoSecondHalf(remainingTime)) {
-            await this.getVideoTimelineForSecondHalf();
+            await this.getVideoTimelineAndVoiceForSecondHalf();
             this.publishVideoStreamSecondHalf();
         }
 
@@ -284,4 +295,5 @@ export default class GameCron extends Table.Crons.TableGameCron {
         const currentOdds = this.gameData.dynamicOdds;
         this.gameData.dynamicOdds = { ...currentOdds, ...odds };
     }
+
 }
