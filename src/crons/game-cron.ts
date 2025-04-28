@@ -13,7 +13,7 @@ import GameStatusPublisher from "../publishers/game-status-publisher";
 import { calculatePreMatchOdds, calculateLiveOdds } from "../helpers/odds-helper";
 import { securePickOne } from "sc-core-rng";
 import RunningRoundInfoPublisher from "../publishers/running-round-info-publisher";
-import { generateVoice } from "../helpers/voices";
+import { generateVoice, VOICE_DURATION_CONFIG } from "../helpers/voices";
 export default class GameCron extends Table.Crons.TableGameCron {
     declare gameData: GameData;
     declare definition: GameDefinition;
@@ -80,7 +80,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
             isFirstHalf: true,
             timeline: this.gameData.result.firstHalfTimeline ?? [],
             result: this.gameData.result.firstHalf,
-        })
+        }, VOICE_DURATION_CONFIG);
     }
 
     async getVideoTimelineAndVoiceForSecondHalf() {
@@ -93,7 +93,8 @@ export default class GameCron extends Table.Crons.TableGameCron {
             isFirstHalf: false,
             timeline: this.gameData.result.secondHalfTimeline ?? [],
             result: this.gameData.result.secondHalf,
-        });
+        },
+        VOICE_DURATION_CONFIG);
     }
 
     getDefaultVideoTimeline(result: string, isFirstHalf: boolean) {

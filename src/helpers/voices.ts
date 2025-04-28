@@ -1,3 +1,5 @@
+import { Chance } from "chance";
+
 export type VoiceGenerationArgs = {
     isFirstHalf: boolean;
     timeline: number[];
@@ -9,14 +11,65 @@ export type VoiceGenerationResult = {
     voice: string[];
 }
 
-export function generateVoice(args: VoiceGenerationArgs): VoiceGenerationResult {
-    return {
-        timeline: [9, 13, 17],
-        voice: ['goal_1_1', 'goal_1_2', 'goal_1_3'],
+export type VoiceDurationConfig = {
+    [key: string]: {
+        [key: number]: number;
     }
 }
 
-const FAST_GOAL_TIME = 5;
+export const VOICE_DURATION_CONFIG: VoiceDurationConfig = {
+    goal: {
+        1: 7,
+        2: 12,
+        3: 4
+    },
+}
+
+export function generateVoice(args: VoiceGenerationArgs, config: VoiceDurationConfig): VoiceGenerationResult {
+
+    const timeline: number[] = []
+    const voice: string[] = []
+    const goalTimeline = args.timeline;
+
+    const tracker: TrackingStas = {
+        totalGoal: 0,
+        homeScore: 0,
+        awayScore: 0,
+        consecutiveGoal: 0,
+    }
+
+    goalTimeline.forEach((goal, index) => {
+        tracker.totalGoal++;
+        tracker.consecutiveGoal++;
+        tracker.currentTimeGoal = goal;
+
+        if (index > 0) {
+            tracker.previousTimeGoal = goalTimeline[index - 1];
+        }
+        
+        if (index < goalTimeline.length - 1) {
+            tracker.nextTimeGoal = goalTimeline[index + 1];
+        }
+        if (tracker.voiceEndIn && tracker.voiceEndIn > goal) {
+            return;
+        }
+
+        const goalVoices = getPossibleVoiceArray(config, "goal");
+        const chance = new Chance();
+        const chosenVoice = chance.pickone(goalVoices);
+        tracker.voiceEndIn = goal + chosenVoice.duration;
+
+        timeline.push(goal);
+        voice.push(chosenVoice.file);
+
+    });
+
+    return {
+        timeline,
+        voice,
+    }
+}
+
 
 type TrackingStas = {
     totalGoal: number;
@@ -26,24 +79,21 @@ type TrackingStas = {
     currentTimeGoal?: number;
     previousTimeGoal?: number;
     nextTimeGoal?: number;
+    voiceEndIn?: number
 }
 
-function isDraw(stats: TrackingStas, scoreEachTeam: number): boolean {
-    return stats.homeScore === stats.awayScore && stats.homeScore === scoreEachTeam;
-}
+function getPossibleVoiceArray(config: VoiceDurationConfig, key: string) {
+    const possibeVoices = []
 
-function isConsecutiveGoal(stats: TrackingStas, targetScore: number): boolean {
-    return stats.consecutiveGoal === targetScore;
-}
+    for (const duration in config[key]) {
+        for (let i = 1; i <= config[key][duration]; i++) {
+            possibeVoices.push({
+                file: `${key}_${duration}_${i}`,
+                duration: parseInt(duration),
+                index: i
+            });
+        }
+    }
 
-function isFastGoal(stats: TrackingStas): boolean {
-    return Boolean(stats.currentTimeGoal && stats.currentTimeGoal < FAST_GOAL_TIME);
-}
-
-function isFirstGoal(stats: TrackingStas): boolean {
-    return Boolean(!stats.previousTimeGoal && stats.currentTimeGoal && stats.currentTimeGoal < FAST_GOAL_TIME);
-}
-
-function isLastGoal(stats: TrackingStas, isSecondHalf: boolean): boolean {
-    return Boolean(isSecondHalf && stats.currentTimeGoal && stats.currentTimeGoal > 2 * FAST_GOAL_TIME);
+    return possibeVoices;
 }

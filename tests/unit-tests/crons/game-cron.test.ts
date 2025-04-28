@@ -21,6 +21,7 @@ import axios from "axios";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import crypto from "crypto";
 import { PRE_MATCH_BET_CHOICES, LIVE_BET_CHOICES } from "../../../src/constants";
+import { VOICE_DURATION_CONFIG } from "../../../src/helpers/voices";
 jest.mock("../../../src/timelines/video-timelines", () => ({
     "22841ea360fc3c3676a38502aa9a90a1ae1fbdac1d937746358efe559d349b6f_0": [],
     "53e5fe7054fb5c4867e0277e8867c0c08f9ca8be43fdac0d3b6c6ea5c7d656a2_AAAA": [1.8, 19.033333333333335, 33.8, 42.43333333333333],
@@ -618,7 +619,7 @@ describe("GameCron", () => {
                 isFirstHalf: true,
                 timeline: mockTimeline,
                 result: "0",
-            });
+            }, VOICE_DURATION_CONFIG);
             expect(gameCron.gameData.result.voices).toEqual(["voice1", "voice2"]);
         });
     });
@@ -646,7 +647,7 @@ describe("GameCron", () => {
                 isFirstHalf: false,
                 timeline: mockTimeline,
                 result: "0",
-            });
+            }, VOICE_DURATION_CONFIG);
             expect(gameCron.gameData.result.voices).toEqual(["voice3", "voice4"]);
         });
     });

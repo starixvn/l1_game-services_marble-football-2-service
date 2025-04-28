@@ -1,4 +1,3 @@
-import { calculatePlayerBetPercentage } from "./../../../src/helpers/bet-percentage";
 import {
     isFirstHalfOddsActive,
     isWithinBettingTime,
