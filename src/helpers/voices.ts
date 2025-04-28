@@ -34,6 +34,26 @@ export const VOICE_DURATION_CONFIG: VoiceDurationConfig = {
         2: 12,
         3: 4
     },
+    draw1: {
+        1: 2,
+        2: 2,
+        3: 5,
+        4: 1
+    },
+    draw2: {
+        2: 6,
+        3: 4
+    },
+    draw3: {
+        2: 4,
+        3: 5,
+        4: 1
+    },
+    draw4: {
+        2: 3,
+        3: 4,
+        4: 2
+    }
 }
 
 export function generateVoice(args: VoiceGenerationArgs, config: VoiceDurationConfig): VoiceGenerationResult {
@@ -53,6 +73,8 @@ export function generateVoice(args: VoiceGenerationArgs, config: VoiceDurationCo
         tracker.totalGoal++;
         tracker.consecutiveGoal++;
         tracker.currentTimeGoal = goal;
+        tracker.homeScore += args.result[index] === "H" ? 1 : 0;
+        tracker.awayScore += args.result[index] === "A" ? 1 : 0;
 
         if (index > 0) {
             tracker.previousTimeGoal = goalTimeline[index - 1];
@@ -67,6 +89,11 @@ export function generateVoice(args: VoiceGenerationArgs, config: VoiceDurationCo
 
         const goalVoices = getPossibleVoiceArray(config, "goal");
 
+        for (const checkNumber of [1,2,3,4]) {
+            if (isEqualizer(tracker, checkNumber)) {
+                goalVoices.push(...getPossibleVoiceArray(config, `draw${checkNumber}`));
+            }
+        }
         const chance = new Chance();
         const chosenVoice = chance.pickone(goalVoices);
         tracker.voiceEndIn = goal + chosenVoice.duration;
@@ -84,7 +111,10 @@ export function generateVoice(args: VoiceGenerationArgs, config: VoiceDurationCo
 
 
 function getPossibleVoiceArray(config: VoiceDurationConfig, key: string) {
-    const possibeVoices = []
+    const possibeVoices: { file: string, duration: number, index: number }[] = []
+    if (!Object.hasOwn(config, key)) {
+        return possibeVoices;
+    }
 
     for (const duration in config[key]) {
         for (let i = 1; i <= config[key][duration]; i++) {

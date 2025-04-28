@@ -78,12 +78,133 @@ describe('generateVoice', () => {
  });
 
  describe("Equalizer 1 - 1", () => {
-    it("should generate voice for equalizer 1 - 1", () =>{
-        // To be implemented
+    const timeline = [10, 20];
+    const result = "HA";
+
+    it("should generate voice for equalizer 1 - 1", () => {
+        // Arrange
+        const restore = mockPickoneIndices([0, 1]);
+        
+        try {
+            // Act
+            const actual = generateVoice({
+                isFirstHalf: true,
+                result,
+                timeline
+            }, {
+                goal: { 1: 1 },
+                draw1: { 1: 1 }
+            });
+
+            // Assert
+            expect(actual.voice).toContain('draw1_1_1');
+        } finally {
+            restore();
+        }
     });
 
     it("should also randomly generate random goal too", () => {
-        // To be implemented
+        // Arrange
+        const restore = mockPickoneIndices([1, 2]);
+        
+        try {
+            // Act
+            const actual = generateVoice({
+                isFirstHalf: true,
+                result,
+                timeline
+            }, {
+                goal: { 1: 2 },
+                draw1: { 2: 1 }
+            });
+
+            // Assert
+            expect(actual.voice).toContain('goal_1_2');
+            expect(actual.voice).toContain('draw1_2_1');
+        } finally {
+            restore();
+        }
+    });
+ });
+
+ describe("Equalizer 2 - 2", () => {
+    const timeline = [10, 20, 30, 40];
+    const result = "HAHA";
+
+    it("should generate voice for equalizer 2 - 2", () => {
+        // Arrange
+        const restore = mockPickoneIndices([0, 0, 0, 1]);
+        
+        try {
+            // Act
+            const actual = generateVoice({
+                isFirstHalf: true,
+                result,
+                timeline
+            }, {
+                goal: { 1: 1 },
+                draw2: { 2: 1 }
+            });
+
+            // Assert
+            expect(actual.voice).toContain('draw2_2_1');
+        } finally {
+            restore();
+        }
+    });
+ });
+
+ describe("Equalizer 3 - 3", () => {
+    const timeline = [10, 20, 30, 40, 50, 60];
+    const result = "HAHAHA";
+
+    it("should generate voice for equalizer 3 - 3", () => {
+        // Arrange
+        const restore = mockPickoneIndices([0, 0, 0, 0, 0, 1]);
+        
+        try {
+            // Act
+            const actual = generateVoice({
+                isFirstHalf: true,
+                result,
+                timeline
+            }, {
+                goal: { 1: 1 },
+                draw3: { 3: 1 }
+            });
+
+            // Assert
+            expect(actual.voice).toContain('draw3_3_1');
+        } finally {
+            restore();
+        }
+    });
+ });
+
+ describe("Equalizer 4 - 4", () => {
+    const timeline = [10, 20, 30, 40, 50, 60, 70, 80];
+    const result = "HAHAHAHA";
+
+    it("should generate voice for equalizer 4 - 4", () => {
+        // Arrange
+        const restore = mockPickoneIndices([0, 0, 0, 0, 0, 0, 0, 1]);
+        
+        try {
+            // Act
+            const actual = generateVoice({
+                isFirstHalf: true,
+                result,
+                timeline
+            }, {
+                goal: { 1: 1 },
+                draw4: { 4: 1 }
+            });
+
+            // Assert
+            expect(actual.voice).toContain('draw4_4_1');
+        } finally {
+            restore();
+        }
     });
  });
 });
