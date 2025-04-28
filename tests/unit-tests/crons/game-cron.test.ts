@@ -652,6 +652,60 @@ describe("GameCron", () => {
         });
     });
 
+    describe("publishVideoStreamAndVoiceFirstHalf", () => {
+        it("should publish first half video result and voices", () => {
+            // Arrange
+            gameCron.gameData.result = {
+                firstHalfVideo: "http://marble-football/watch?v=HH",
+                firstHalfTimeline: [1, 2, 3],
+                firstHalf: "HH",
+                voices: ["voice1", "voice2"],
+            } as any;
+            
+            // Act
+            (gameCron as any).publishVideoStreamAndVoiceFirstHalf();
+            
+            // Assert
+            expect(runningRoundInfoPublisher.publishToAllUsers).toHaveBeenCalledWith({
+                videoResult: {
+                    firstHalfVideo: "http://marble-football/watch?v=HH",
+                    firstHalfTimeline: [1, 2, 3],
+                    firstHalf: "HH",
+                }
+            });
+            expect(runningRoundInfoPublisher.publishToAllUsers).toHaveBeenCalledWith({
+                voices: ["voice1", "voice2"]
+            });
+        });
+    });
+
+    describe("publishVideoStreamAndVoiceSecondHalf", () => {
+        it("should publish second half video result and voices", () => {
+            // Arrange
+            gameCron.gameData.result = {
+                secondHalfVideo: "http://marble-football/watch?v=AA",
+                secondHalfTimeline: [4, 5, 6],
+                secondHalf: "AA",
+                voices: ["voice1", "voice2"],
+            } as any;
+            
+            // Act
+            (gameCron as any).publishVideoStreamAndVoiceSecondHalf();
+            
+            // Assert
+            expect(runningRoundInfoPublisher.publishToAllUsers).toHaveBeenCalledWith({
+                videoResult: {
+                    secondHalfVideo: "http://marble-football/watch?v=AA",
+                    secondHalfTimeline: [4, 5, 6],
+                    secondHalf: "AA",
+                }
+            });
+            expect(runningRoundInfoPublisher.publishToAllUsers).toHaveBeenCalledWith({
+                voices: ["voice1", "voice2"]
+            });
+        });
+    });
+
     describe("queryLastResult", () => {
         let superQueryLastResultSpy: any;
 
@@ -927,6 +981,36 @@ describe("GameCron", () => {
                 gameCron.gameData.result.firstHalf,
                 gameCron.gameData.gameConfigs.margin
             );
+        });
+    });
+
+    describe("publishVoices", () => {
+        it("should publish voices to all users", () => {
+            // Arrange
+            gameCron.gameData.result = {
+                voices: ["voice1", "voice2", "voice3"]
+            } as any;
+            
+            // Act
+            (gameCron as any).publishVoices();
+            
+            // Assert
+            expect(runningRoundInfoPublisher.publishToAllUsers).toHaveBeenCalledWith({
+                voices: ["voice1", "voice2", "voice3"]
+            });
+        });
+
+        it("should handle case with no voices", () => {
+            // Arrange
+            gameCron.gameData.result = {} as any;
+            
+            // Act
+            (gameCron as any).publishVoices();
+            
+            // Assert
+            expect(runningRoundInfoPublisher.publishToAllUsers).toHaveBeenCalledWith({
+                voices: {}
+            });
         });
     });
 });

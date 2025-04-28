@@ -1,5 +1,16 @@
 import { Chance } from "chance";
 
+type TrackingStas = {
+    totalGoal: number;
+    homeScore: number;
+    awayScore: number;
+    consecutiveGoal: number;
+    currentTimeGoal?: number;
+    previousTimeGoal?: number;
+    nextTimeGoal?: number;
+    voiceEndIn?: number
+}
+
 export type VoiceGenerationArgs = {
     isFirstHalf: boolean;
     timeline: number[];
@@ -55,6 +66,7 @@ export function generateVoice(args: VoiceGenerationArgs, config: VoiceDurationCo
         }
 
         const goalVoices = getPossibleVoiceArray(config, "goal");
+
         const chance = new Chance();
         const chosenVoice = chance.pickone(goalVoices);
         tracker.voiceEndIn = goal + chosenVoice.duration;
@@ -71,17 +83,6 @@ export function generateVoice(args: VoiceGenerationArgs, config: VoiceDurationCo
 }
 
 
-type TrackingStas = {
-    totalGoal: number;
-    homeScore: number;
-    awayScore: number;
-    consecutiveGoal: number;
-    currentTimeGoal?: number;
-    previousTimeGoal?: number;
-    nextTimeGoal?: number;
-    voiceEndIn?: number
-}
-
 function getPossibleVoiceArray(config: VoiceDurationConfig, key: string) {
     const possibeVoices = []
 
@@ -96,4 +97,8 @@ function getPossibleVoiceArray(config: VoiceDurationConfig, key: string) {
     }
 
     return possibeVoices;
+}
+
+function isEqualizer(tracker: TrackingStas, checkNumber: number) {
+    return tracker.homeScore === checkNumber && tracker.awayScore === checkNumber;
 }

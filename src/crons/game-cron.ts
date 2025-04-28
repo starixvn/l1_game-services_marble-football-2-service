@@ -118,7 +118,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
         this.gameData.settlementResultFromAdmin = {};
     }
 
-    private publishVideoStreamFirstHalf() {
+    private publishVideoStreamAndVoiceFirstHalf() {
         const videoResult = {
             firstHalfVideo: this.gameData.result.firstHalfVideo,
             firstHalfTimeline: this.gameData.result.firstHalfTimeline,
@@ -126,9 +126,14 @@ export default class GameCron extends Table.Crons.TableGameCron {
         };
 
         this.runningRoundInfoPublisher.publishToAllUsers({ videoResult });
+        this.publishVoices();
     }
 
-    private publishVideoStreamSecondHalf() {
+    private publishVoices() {
+        this.runningRoundInfoPublisher.publishToAllUsers({ voices: this.gameData.result?.voices ?? {} });
+    }
+
+    private publishVideoStreamAndVoiceSecondHalf() {
         const videoResult = {
             secondHalfVideo: this.gameData.result.secondHalfVideo,
             secondHalfTimeline: this.gameData.result.secondHalfTimeline,
@@ -136,6 +141,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
         };
 
         this.runningRoundInfoPublisher.publishToAllUsers({ videoResult });
+        this.publishVoices();
     }
 
     async publishTournament() {
@@ -194,12 +200,12 @@ export default class GameCron extends Table.Crons.TableGameCron {
 
         if (this.isStreamingVideoFirstHalf(remainingTime)) {
             await this.getVideoTimelineAndVoiceForFirstHalf();
-            this.publishVideoStreamFirstHalf();
+            this.publishVideoStreamAndVoiceFirstHalf();
         }
 
         if (this.isStreamingVideoSecondHalf(remainingTime)) {
             await this.getVideoTimelineAndVoiceForSecondHalf();
-            this.publishVideoStreamSecondHalf();
+            this.publishVideoStreamAndVoiceSecondHalf();
         }
 
         if (remainingTime < 0) {
