@@ -3,15 +3,15 @@ import { generateVoice } from '../../../src/helpers/voices';
 
 const chance = new Chance();
 
-function mockPickone<T>(mockValues: T[]): () => void {
+function mockPickoneIndices(indices: number[]): () => void {
   const originalPickone = Chance.prototype.pickone;
   
   let currentIndex = 0;
   
-  Chance.prototype.pickone = function<U>(_arr: U[]): U {
-    const value = mockValues[currentIndex];
-    currentIndex = (currentIndex + 1) % mockValues.length;
-    return value as unknown as U;
+  Chance.prototype.pickone = function<T>(arr: T[]): T {
+    const pickIndex = indices[currentIndex];
+    currentIndex = (currentIndex + 1) % indices.length;
+    return arr[pickIndex];
   };
   
   return () => {
@@ -25,15 +25,9 @@ describe('generateVoice', () => {
     const timeline = [6, 12];
     const result = "AA";
 
-
     it('should generate voice for goal', () => {
         // Arrange
-        const mockVoices = [
-            { file: 'goal_1_1', duration: 1, index: 1 },
-            { file: 'goal_1_2', duration: 1, index: 2 }
-        ];
-        
-        const restore = mockPickone(mockVoices);
+        const restore = mockPickoneIndices([0, 1]);
         
         try {
             // Act
@@ -43,7 +37,7 @@ describe('generateVoice', () => {
                 timeline
             }, {
                 goal: { 
-                    1: 1,
+                    1: 2,
                     2: 1,
                     3: 1
                 }
@@ -58,9 +52,7 @@ describe('generateVoice', () => {
 
     it('should not generate voice overlapping the previous voice', () => {
         // Arrange
-        const mockVoice = { file: 'goal_3_1', duration: 3, index: 1 };
-        
-        const restore = mockPickone([mockVoice]);
+        const restore = mockPickoneIndices([0]);
         
         try {
             const closeTimeline = [5, 6];
