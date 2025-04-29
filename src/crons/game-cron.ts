@@ -9,11 +9,12 @@ import axios from "axios";
 import { retry } from "../helpers";
 import { generateVideoName } from "../helpers/result-helper";
 import defaultVideoTimelines from "../timelines/video-timelines";
+import defaultEventTimelines from "../timelines/event-timelines";
 import GameStatusPublisher from "../publishers/game-status-publisher";
 import { calculatePreMatchOdds, calculateLiveOdds } from "../helpers/odds-helper";
 import { securePickOne } from "sc-core-rng";
 import RunningRoundInfoPublisher from "../publishers/running-round-info-publisher";
-import { generateVoice, VOICE_DURATION_CONFIG } from "../helpers/voices";
+import { generateVoiceWithEventTimeline, VOICE_DURATION_CONFIG } from "../helpers/voices";
 export default class GameCron extends Table.Crons.TableGameCron {
     declare gameData: GameData;
     declare definition: GameDefinition;
@@ -57,6 +58,20 @@ export default class GameCron extends Table.Crons.TableGameCron {
         }
     }
 
+    async getEventTimelineByVideoName(videoName: string) {
+        const url = new URL(`event_${videoName}.json`, this.appConfigs.liveStreamServer);
+        const agent = this.appConfigs.proxyServer.enabled ? new HttpsProxyAgent(this.appConfigs.proxyServer.url) : undefined;
+
+        try {
+            const response = await axios.get(url.toString(), { httpsAgent: agent });
+
+            return response.data;
+        } catch (error) {
+            this.logService.logError(`In match ${this.gameData.roundId}, failed to get event timeline ${url} with error: ${error}`);
+            throw error
+        };
+    }
+
     async getVideoTimelineWithRetry(videoName: string, videoResult: string, isFirstHalf: boolean) {
         const delay = 100;
         const retries = 3;
@@ -70,16 +85,32 @@ export default class GameCron extends Table.Crons.TableGameCron {
         });
     }
 
+    async getEventTimelineWithRetry(videoName: string, videoResult: string, isFirstHalf: boolean) {
+        const delay = 100;
+        const retries = 3;
+
+        return retry(() => this.getEventTimelineByVideoName(videoName), retries, delay).catch((error) => {
+            this.logService.logError(
+                `In match ${this.gameData.roundId}, failed to fetch ${isFirstHalf ? "first half" : "second half"} timeline: ${error}`
+            );
+            return this.getDefaultEventTimeline(videoResult, isFirstHalf);
+        });
+    }
     async getVideoTimelineAndVoiceForFirstHalf() {
         this.gameData.result.firstHalfTimeline = await this.getVideoTimelineWithRetry(
             this.gameData.result.firstHalfVideo,
             this.gameData.result.firstHalf,
             true
         );
-        this.gameData.result.voices = generateVoice({
-            isFirstHalf: true,
-            timeline: this.gameData.result.firstHalfTimeline ?? [],
-            result: this.gameData.result.firstHalf,
+        this.gameData.result.firstHalfEventTimeline = await this.getEventTimelineWithRetry(
+            this.gameData.result.firstHalfVideo,
+            this.gameData.result.firstHalf,
+            true
+        );
+
+        this.gameData.result.voices = generateVoiceWithEventTimeline({
+            timeline: this.gameData.result.firstHalfEventTimeline?.timeLine ?? [],
+            eventName: this.gameData.result.firstHalfEventTimeline?.eventName ?? [],
         }, VOICE_DURATION_CONFIG);
     }
 
@@ -89,12 +120,16 @@ export default class GameCron extends Table.Crons.TableGameCron {
             this.gameData.result.secondHalf,
             false
         );
-        this.gameData.result.voices = generateVoice({
-            isFirstHalf: false,
-            timeline: this.gameData.result.secondHalfTimeline ?? [],
-            result: this.gameData.result.secondHalf,
-        },
-        VOICE_DURATION_CONFIG);
+        this.gameData.result.secondHalfEventTimeline = await this.getEventTimelineWithRetry(
+            this.gameData.result.secondHalfVideo,
+            this.gameData.result.secondHalf,
+            false
+        );
+        this.gameData.result.voices = generateVoiceWithEventTimeline({
+            timeline: this.gameData.result.secondHalfEventTimeline?.timeLine ?? [],
+            eventName: this.gameData.result.secondHalfEventTimeline?.eventName ?? [],
+            firstHalfScore: this.gameData.result.firstHalf,
+        }, VOICE_DURATION_CONFIG);
     }
 
     getDefaultVideoTimeline(result: string, isFirstHalf: boolean) {
@@ -111,6 +146,17 @@ export default class GameCron extends Table.Crons.TableGameCron {
         this.logService.logWarning(`Get default video timeline for ${videoName}_${result}: ${videoTimeline}`);
 
         return videoTimeline;
+    }
+
+    getDefaultEventTimeline(result: string, isFirstHalf: boolean) {
+        const videoName = isFirstHalf
+            ? this.gameData.result.firstHalfVideo
+            : this.gameData.result.secondHalfVideo;
+        const eventTimeline = (defaultEventTimelines as Record<string, any>)[`${videoName}_${result}`];
+
+        this.logService.logWarning(`Get default event timeline for ${videoName}_${result}: ${eventTimeline}`);
+
+        return eventTimeline;
     }
 
     async generateRoundData() {

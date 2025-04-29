@@ -39,6 +39,40 @@ async function getVideoTimeline(videoName: string): Promise<number[]> {
     }
 }
 
+async function getEventTimeline(videoName: string): Promise<number[]> {
+    const url = new URL(`event_${videoName}.json`, appConfigs.liveStreamServer);
+
+    try {
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            console.log(`Failed to fetch video timeline ${url} with error: ${response.status}`);
+            return [];
+        }
+
+        const data = await response.json();
+
+        return data;
+    } catch (error) {
+        console.log(`Failed to get video timeline ${url} with error: ${error}`);
+        return [];
+    }
+}
+
+async function fetchDefaultEventTimelines() {
+    const eventTimelines = {} as Record<string, number[]>;
+
+    for (const key in DEFAULT_NUMBER_OF_VIDEOS) {
+        const videoName = generateVideoName(key, {}, true);
+        const timeline = await getEventTimeline(videoName);
+        eventTimelines[`${videoName}_${key}`] = timeline;
+    }
+
+    console.log("eventTimelines: \n", eventTimelines);
+    saveFiles("event-timelines.json", JSON.stringify(eventTimelines));
+    console.log("Done saving event timelines");
+}
+
 async function fetchDefaultVideoTimelines() {
     const videoTimelines = {} as Record<string, number[]>;
 
@@ -54,3 +88,4 @@ async function fetchDefaultVideoTimelines() {
 }
 
 fetchDefaultVideoTimelines();
+fetchDefaultEventTimelines();

@@ -32,7 +32,6 @@ describe('generateVoice', () => {
         try {
             // Act
             const actual = generateVoice({
-                isFirstHalf: true,
                 result,
                 timeline
             }, {
@@ -59,7 +58,6 @@ describe('generateVoice', () => {
             
             // Act
             const actual = generateVoice({
-                isFirstHalf: true,
                 result,
                 timeline: closeTimeline
             }, {
@@ -88,7 +86,6 @@ describe('generateVoice', () => {
         try {
             // Act
             const actual = generateVoice({
-                isFirstHalf: true,
                 result,
                 timeline
             }, {
@@ -103,6 +100,29 @@ describe('generateVoice', () => {
         }
     });
 
+    it("should count score from previous half", () => {
+        // Arrange
+        const restore = mockPickoneIndices([0, 1]);
+        const thisResult = "H";
+        try {
+            // Act
+            const actual = generateVoice({
+                result: thisResult,
+                timeline,
+                firstHalfScoreSequence: "A"
+            }, {
+                goal: { 1: 1 },
+                draw1: { 1: 1 }
+            });
+
+            // Assert
+            expect(actual.voice).toContain('draw1_1_1');
+        } finally {
+            restore();
+        }
+    });
+
+
     it("should also randomly generate random goal too", () => {
         // Arrange
         const restore = mockPickoneIndices([1, 2]);
@@ -110,7 +130,6 @@ describe('generateVoice', () => {
         try {
             // Act
             const actual = generateVoice({
-                isFirstHalf: true,
                 result,
                 timeline
             }, {
@@ -138,7 +157,6 @@ describe('generateVoice', () => {
         try {
             // Act
             const actual = generateVoice({
-                isFirstHalf: true,
                 result,
                 timeline
             }, {
@@ -165,7 +183,6 @@ describe('generateVoice', () => {
         try {
             // Act
             const actual = generateVoice({
-                isFirstHalf: true,
                 result,
                 timeline
             }, {
@@ -192,7 +209,6 @@ describe('generateVoice', () => {
         try {
             // Act
             const actual = generateVoice({
-                isFirstHalf: true,
                 result,
                 timeline
             }, {

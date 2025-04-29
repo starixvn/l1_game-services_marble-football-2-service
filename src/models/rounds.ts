@@ -14,6 +14,16 @@ export type ResultType = {
     penalty: { home: number; away: number };
     firstHalfTimeline?: number[];
     secondHalfTimeline?: number[];
+    firstHalfEventTimeline?: {
+        timeLine: number[];
+        eventName: string[];
+        frame: number[];
+    }
+    secondHalfEventTimeline?: {
+        timeLine: number[];
+        eventName: string[];
+        frame: number[];
+    }
     voices?: VoiceGenerationResult;
 };
 
