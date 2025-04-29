@@ -116,11 +116,19 @@ export function generateVoiceWithEventTimeline(args: EventTimelineArgs, config: 
             tracker.awayScore += isAwayGoal(eventName) ? 1 : 0;
             tracker.homeScore += isHomeGoal(eventName) ? 1 : 0;
 
+            if (tracker.previousVoiceEndTime && tracker.previousVoiceEndTime > eventTime) {
+                return;
+            }
+
             possibleVoices.push(...getPossibleVoiceArray(config, "goal"));
+
+            for (const checkNumber of [1,2,3,4]) {
+                if (isEqualizer(tracker, checkNumber)) {
+                    possibleVoices.push(...getPossibleVoiceArray(config, `draw${checkNumber}`));
+                }
+            }
         }
         
-
-
         const chance = new Chance();
         const chosenVoice = chance.pickone(possibleVoices);
         tracker.previousVoiceEndTime = eventTime + chosenVoice.duration;
@@ -181,7 +189,6 @@ export function generateVoice(args: VoiceGenerationArgs, config: VoiceDurationCo
         voice,
     }
 }
-
 function initTracker(firstHalfScoreSequence: string = "") {
     const tracker: TrackingStas = {
         totalGoal: 0,
@@ -245,3 +252,4 @@ function isHomeGoal(eventName: string) {
 function isAwayGoal(eventName: string) {
     return eventName === EVENT_NAMES.GOAL_A;
 }
+

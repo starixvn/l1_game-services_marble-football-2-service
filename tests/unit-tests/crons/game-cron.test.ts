@@ -392,7 +392,7 @@ describe("GameCron", () => {
                         secondHalfVideo: "http://marble-football/watch?v=AA",
                         secondHalfTimeline: [4, 5, 6],
                         secondHalfEventTimeline: {
-                            timeline: [4.5, 5.5, 6.5],
+                            timeLine: [4.5, 5.5, 6.5],
                             eventName: ["goal_A", "goal_A", "hit_glove_R"]
                         },
                         secondHalf: "AA",
@@ -725,7 +725,7 @@ describe("GameCron", () => {
         it("should correctly return event timeline", async () => {
             // Arrange
             const mockEventTimeline = {
-                timeline: [0, 10, 20],
+                timeLine: [0, 10, 20],
                 eventName: ["start", "goal", "end"]
             };
 
@@ -807,7 +807,7 @@ describe("GameCron", () => {
             const isFirstHalf = false;
             const mockTimeline = [7, 8, 9];
             const mockEventTimeline = {
-                timeline: [7, 8, 9],
+                timeLine: [7, 8, 9],
                 eventName: ["goal_H", "goal_A", "goal_A"]
             };
             
@@ -830,7 +830,7 @@ describe("GameCron", () => {
             expect(gameCron.gameData.result.secondHalfTimeline).toEqual(mockTimeline);
             expect(gameCron.gameData.result.secondHalfEventTimeline).toEqual(mockEventTimeline);
             expect(require("../../../src/helpers/voices").generateVoiceWithEventTimeline).toHaveBeenCalledWith({
-                timeline: mockEventTimeline.timeline,
+                timeline: mockEventTimeline.timeLine,
                 eventName: mockEventTimeline.eventName,
                 firstHalfScore: "HAA"
             }, expect.anything());
@@ -1218,7 +1218,7 @@ describe("GameCron", () => {
             // Mock the event timelines module
             const defaultEventTimelines = require("../../../src/timelines/event-timelines");
             defaultEventTimelines["test-video_HAA"] = {
-                timeline: [1, 2, 3],
+                timeLine: [1, 2, 3],
                 eventName: ["goal_H", "goal_A", "goal_A"]
             };
             
@@ -1227,7 +1227,7 @@ describe("GameCron", () => {
             
             // Assert
             expect(eventTimeline).toEqual({
-                timeline: [1, 2, 3],
+                timeLine: [1, 2, 3],
                 eventName: ["goal_H", "goal_A", "goal_A"]
             });
             expect(logService.logWarning).toHaveBeenCalledWith(expect.stringContaining("test-video_HAA"));
@@ -1242,7 +1242,7 @@ describe("GameCron", () => {
             // Mock the event timelines module
             const defaultEventTimelines = require("../../../src/timelines/event-timelines");
             defaultEventTimelines["test-video_AAH"] = {
-                timeline: [4, 5, 6],
+                timeLine: [4, 5, 6],
                 eventName: ["goal_A", "goal_A", "goal_H"]
             };
             
@@ -1251,7 +1251,7 @@ describe("GameCron", () => {
             
             // Assert
             expect(eventTimeline).toEqual({
-                timeline: [4, 5, 6],
+                timeLine: [4, 5, 6],
                 eventName: ["goal_A", "goal_A", "goal_H"]
             });
             expect(logService.logWarning).toHaveBeenCalledWith(expect.stringContaining("test-video_AAH"));

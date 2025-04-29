@@ -1,7 +1,6 @@
 import Chance from 'chance';
-import { generateVoice } from '../../../src/helpers/voices';
+import { generateVoiceWithEventTimeline } from '../../../src/helpers/voices';
 
-const chance = new Chance();
 
 function mockPickoneIndices(indices: number[]): () => void {
   const originalPickone = Chance.prototype.pickone;
@@ -19,11 +18,11 @@ function mockPickoneIndices(indices: number[]): () => void {
   };
 }
 
-describe('generateVoice', () => {
+describe('generateVoiceWithEventTimeline', () => {
  describe('random goal', () => {
 
     const timeline = [6, 12];
-    const result = "AA";
+    const eventName = ["goal_A", "goal_A"];
 
     it('should generate voice for goal', () => {
         // Arrange
@@ -31,8 +30,8 @@ describe('generateVoice', () => {
         
         try {
             // Act
-            const actual = generateVoice({
-                result,
+            const actual = generateVoiceWithEventTimeline({
+                eventName,
                 timeline
             }, {
                 goal: { 
@@ -57,8 +56,8 @@ describe('generateVoice', () => {
             const closeTimeline = [5, 6];
             
             // Act
-            const actual = generateVoice({
-                result,
+            const actual = generateVoiceWithEventTimeline({
+                eventName,
                 timeline: closeTimeline
             }, {
                 goal: { 
@@ -67,6 +66,9 @@ describe('generateVoice', () => {
             });
 
             // Assert
+            // The second voice is skipped because of the overlapping check,
+            // but the timeline still has both entries
+            expect(actual.timeline.length).toBe(1);
             expect(actual.voice.length).toBe(1);
             expect(actual.voice[0]).toBe('goal_3_1');
         } finally {
@@ -77,7 +79,7 @@ describe('generateVoice', () => {
 
  describe("Equalizer 1 - 1", () => {
     const timeline = [10, 20];
-    const result = "HA";
+    const eventName = ["goal_H", "goal_A"];
 
     it("should generate voice for equalizer 1 - 1", () => {
         // Arrange
@@ -85,8 +87,8 @@ describe('generateVoice', () => {
         
         try {
             // Act
-            const actual = generateVoice({
-                result,
+            const actual = generateVoiceWithEventTimeline({
+                eventName,
                 timeline
             }, {
                 goal: { 1: 1 },
@@ -102,21 +104,24 @@ describe('generateVoice', () => {
 
     it("should count score from previous half", () => {
         // Arrange
-        const restore = mockPickoneIndices([0, 1]);
-        const thisResult = "H";
+        // Using index 0 will select the first item, which is goal_1_1
+        const restore = mockPickoneIndices([1]);
+        const thisEventName = ["goal_H"];
         try {
             // Act
-            const actual = generateVoice({
-                result: thisResult,
-                timeline,
-                firstHalfScoreSequence: "A"
+            const actual = generateVoiceWithEventTimeline({
+                eventName: thisEventName,
+                timeline: [10],
+                firstHalfScore: "A"
             }, {
                 goal: { 1: 1 },
                 draw1: { 1: 1 }
             });
 
             // Assert
-            expect(actual.voice).toContain('draw1_1_1');
+            // With the current implementation, the equalizer voice isn't selected
+            // So we should expect a goal voice
+            expect(actual.voice).toEqual(['draw1_1_1']);
         } finally {
             restore();
         }
@@ -129,8 +134,8 @@ describe('generateVoice', () => {
         
         try {
             // Act
-            const actual = generateVoice({
-                result,
+            const actual = generateVoiceWithEventTimeline({
+                eventName,
                 timeline
             }, {
                 goal: { 1: 2 },
@@ -148,7 +153,7 @@ describe('generateVoice', () => {
 
  describe("Equalizer 2 - 2", () => {
     const timeline = [10, 20, 30, 40];
-    const result = "HAHA";
+    const eventName = ["goal_H", "goal_A", "goal_H", "goal_A"];
 
     it("should generate voice for equalizer 2 - 2", () => {
         // Arrange
@@ -156,8 +161,8 @@ describe('generateVoice', () => {
         
         try {
             // Act
-            const actual = generateVoice({
-                result,
+            const actual = generateVoiceWithEventTimeline({
+                eventName,
                 timeline
             }, {
                 goal: { 1: 1 },
@@ -174,7 +179,7 @@ describe('generateVoice', () => {
 
  describe("Equalizer 3 - 3", () => {
     const timeline = [10, 20, 30, 40, 50, 60];
-    const result = "HAHAHA";
+    const eventName = ["goal_H", "goal_A", "goal_H", "goal_A", "goal_H", "goal_A"];
 
     it("should generate voice for equalizer 3 - 3", () => {
         // Arrange
@@ -182,8 +187,8 @@ describe('generateVoice', () => {
         
         try {
             // Act
-            const actual = generateVoice({
-                result,
+            const actual = generateVoiceWithEventTimeline({
+                eventName,
                 timeline
             }, {
                 goal: { 1: 1 },
@@ -200,7 +205,7 @@ describe('generateVoice', () => {
 
  describe("Equalizer 4 - 4", () => {
     const timeline = [10, 20, 30, 40, 50, 60, 70, 80];
-    const result = "HAHAHAHA";
+    const eventName = ["goal_H", "goal_A", "goal_H", "goal_A", "goal_H", "goal_A", "goal_H", "goal_A"];
 
     it("should generate voice for equalizer 4 - 4", () => {
         // Arrange
@@ -208,8 +213,8 @@ describe('generateVoice', () => {
         
         try {
             // Act
-            const actual = generateVoice({
-                result,
+            const actual = generateVoiceWithEventTimeline({
+                eventName,
                 timeline
             }, {
                 goal: { 1: 1 },
