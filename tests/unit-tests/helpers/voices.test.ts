@@ -104,7 +104,6 @@ describe('generateVoiceWithEventTimeline', () => {
 
     it("should count score from previous half", () => {
         // Arrange
-        // Using index 0 will select the first item, which is goal_1_1
         const restore = mockPickoneIndices([1]);
         const thisEventName = ["goal_H"];
         try {
@@ -119,8 +118,6 @@ describe('generateVoiceWithEventTimeline', () => {
             });
 
             // Assert
-            // With the current implementation, the equalizer voice isn't selected
-            // So we should expect a goal voice
             expect(actual.voice).toEqual(['draw1_1_1']);
         } finally {
             restore();
@@ -226,6 +223,224 @@ describe('generateVoiceWithEventTimeline', () => {
         } finally {
             restore();
         }
+    });
+ });
+
+ describe("2 Consecutive Goal", () => {
+    const timeline = [10, 20];
+    const eventName = ["goal_H", "goal_H"];
+
+    it("should generate voice for 2 consecutive goal", () => {
+        // Arrange
+        const restore = mockPickoneIndices([0, 1]);
+        
+        try {
+            // Act
+            const actual = generateVoiceWithEventTimeline({
+                eventName,
+                timeline
+            }, {
+                goal: { 1: 1 },
+                goal2nd: {
+                    2: 1,
+                    3: 1,
+                    4: 1
+                }
+            })
+
+            // Assert
+            expect(actual.voice).toContain('goal2nd_2_1');
+        } finally {
+            restore();
+        }
+    })
+ });
+
+ describe("3 Consecutive Goal", () => {
+    const timeline = [10, 20, 30];
+    const eventName = ["goal_H", "goal_H", "goal_H"];
+
+    it("should generate voice for 3 consecutive goal", () => {
+        // Arrange
+        const restore = mockPickoneIndices([0, 0, 1]);
+        
+        try {
+            // Act
+            const actual = generateVoiceWithEventTimeline({
+                eventName,
+                timeline
+            }, {
+                goal: { 1: 1 },
+                goal3rd: {
+                    2: 1,
+                    3: 1,
+                    4: 1
+                }
+            })
+
+            // Assert
+            expect(actual.voice).toContain('goal3rd_2_1');
+        } finally {
+            restore();
+        }
+    })
+ });
+
+ describe("6 Consecutive Goal", () => {
+    const timeline = [10, 20, 30, 40, 50, 60];
+    const eventName = ["goal_H", "goal_H", "goal_H", "goal_H", "goal_H", "goal_H"];
+
+    it("should generate voice for 6 consecutive goal", () => {
+        // Arrange
+        const restore = mockPickoneIndices([0, 0, 0, 0, 0, 1]);
+        
+        try {
+            // Act
+            const actual = generateVoiceWithEventTimeline({
+                eventName,
+                timeline
+            }, {
+                goal: { 1: 1 },
+                goal5th: {
+                    2: 1,
+                    3: 1,
+                    4: 1,
+                    5: 1
+                }
+            })
+
+            // Assert
+            expect(actual.voice).toContain('goal5th_2_1');
+        } finally {
+            restore();
+        }
+    })
+ });
+
+ describe("Fast Goal", () => {
+    const timeline = [2, 4];
+    const eventName = ["goal_H", "goal_H"];
+
+    it("should generate voice for fast goal", () => {
+        // Arrange
+        const restore = mockPickoneIndices([0, 1]);
+        
+        try {
+            // Act
+            const actual = generateVoiceWithEventTimeline({
+                eventName,
+                timeline
+            }, {
+                goal: { 1: 1 },
+                fastGoal: { 2: 1 }
+            })
+
+            // Assert
+            expect(actual.voice).toContain('fastGoal_2_1');
+        } finally {
+            restore();
+        }
+    })
+ });
+
+ describe("First Goal", () => {
+    const timeline = [2];
+    const eventName = ["goal_H"];
+
+    it("should generate voice for first goal", () => {
+        // Arrange
+        const restore = mockPickoneIndices([1]);
+
+        try {
+            // Act
+            const actual = generateVoiceWithEventTimeline({
+                eventName,
+                timeline
+            }, {
+                goal: { 1: 1 },
+                firstGoal: { 1: 1 }
+            })
+
+            // Assert
+            expect(actual.voice).toContain('firstGoal_1_1');
+        } finally {
+            restore();
+        }
+    })
+ });
+
+ describe("Last Goal", () => {
+    const timeline = [26];
+    const eventName = ["goal_H"];
+
+    it("should generate voice for last goal", () => {
+        // Arrange
+        const restore = mockPickoneIndices([1]);
+        
+        try {
+            // Act
+            const actual = generateVoiceWithEventTimeline({
+                eventName,
+                timeline,
+            }, {
+                lastGoal: { 1: 1 }
+            })
+
+            // Assert
+            expect(actual.voice).toEqual([]);
+        } finally {
+            restore();
+        }
+    });
+ });
+
+ describe("Glove", () => {
+    describe("Overlap with previous goal", () => {
+        it("Should not generate voice for glove", () => {
+            // Arrange
+            const restore = mockPickoneIndices([0, 0]);
+            const timeline = [2,4];
+            const eventName = ["goal_H", "hit_glove B"];
+            try {
+                // Act
+                const actual = generateVoiceWithEventTimeline({
+                    eventName,
+                    timeline
+                }, {
+                    goal: { 3: 1 },
+                    save: { 1: 1 }
+                });
+
+                // Assert
+                expect(actual.voice).toEqual(['goal_3_1']);
+            } finally {
+                restore();
+            }
+        });
+    });
+
+    describe("Overlap with next goal", () => {
+        it("Should not generate voice for glove", () => {
+            // Arrange
+            const restore = mockPickoneIndices([0, 0]);
+            const timeline = [2,4];
+            const eventName = ["hit_glove B", "goal_H"];
+            try {
+                // Act
+                const actual = generateVoiceWithEventTimeline({
+                    eventName,
+                    timeline
+                }, {
+                    goal: { 1: 1 },
+                    save: { 3: 1 }
+                });
+
+                // Assert
+                expect(actual.voice).toEqual(['goal_1_1']);
+            } finally {
+                restore();
+            }
+        });
     });
  });
 });
