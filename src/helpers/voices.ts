@@ -118,21 +118,27 @@ export const VOICE_DURATION_CONFIG: VoiceDurationConfig = {
         2: 10,
         3: 5,
         4: 2
+    },
+    noGoal: {
+        2:6,
+        3:4
     }
 }
 
 const TIME_WITHIN_TO_BE_CONSIDERED_AS_FAST_GOAL = 5;
 const GOAL_COUNT_TO_BE_CONSIDERED_AS_FAST_GOAL = 2;
 const TIME_TO_BE_CONSIDERED_AS_LAST_GOAL = 25;
+const TIME_TO_BE_CONSIDERED_AS_NO_GOAL_WITHIN = 15;
 
 export function generateVoiceWithEventTimeline(args: EventTimelineArgs, config: VoiceDurationConfig): VoiceGenerationResult {
 
-    const voice: string[] = [];
-    const timeline: number[] = [];
-    let tracker = initTracker(args.firstHalfScore);
 
     const events = args.eventName;
 
+    const { initialVoice, initialTracker } = initVoiceEvents(args, config);
+    let tracker = initialTracker;
+    const { timeline, voice } = initialVoice;
+    
     events.forEach((event, index) => {
         const eventTime = args.timeline[index];
         const eventName = event;
@@ -148,6 +154,17 @@ export function generateVoiceWithEventTimeline(args: EventTimelineArgs, config: 
             eventTime
         }, nextEvent);
 
+        if (isNoGoalWithinTime(tracker, TIME_TO_BE_CONSIDERED_AS_NO_GOAL_WITHIN) && !isPreviousEventPassedTime(tracker, TIME_TO_BE_CONSIDERED_AS_NO_GOAL_WITHIN)) {
+            const noGoalVoices = getPossibleVoiceArray(config, "noGoal");
+            const chance = new Chance();
+            const chosenVoice = chance.pickone(noGoalVoices);
+            if (chosenVoice) {
+                timeline.push(TIME_TO_BE_CONSIDERED_AS_NO_GOAL_WITHIN);
+                voice.push(chosenVoice.file);
+                tracker = trackEventOnVoiceChosen(tracker, TIME_TO_BE_CONSIDERED_AS_NO_GOAL_WITHIN, chosenVoice);
+            }
+        }
+
         if (isGoal(eventName)) {
             tracker = trackGoal(tracker, {
                 eventTime,
@@ -161,8 +178,9 @@ export function generateVoiceWithEventTimeline(args: EventTimelineArgs, config: 
 
         if (isOverlappingPrevious(tracker)) {
             if (isGoalAndPreviousIsNotGoal(tracker)) {
-                voice.pop();
-                timeline.pop();
+                const ignoredVoice = voice.pop();
+                const ignoredTimeline = timeline.pop();
+                console.log(`Ignored voice: ${ignoredVoice} at ${ignoredTimeline}`);
             } else {
                 return;
             }
@@ -347,4 +365,32 @@ function ordinal(number: number) {
     }
 
     return `${number}${Object.hasOwn(digitMap, number) ? digitMap[number] : "th"}`;
+}
+
+function initVoiceEvents(args: EventTimelineArgs, config: VoiceDurationConfig): {
+    initialVoice: VoiceGenerationResult,
+    initialTracker: TrackingStas
+} {
+    const tracker = initTracker(args.firstHalfScore);
+
+    return {
+        initialVoice: {
+            timeline: [],
+            voice: []
+        },
+        initialTracker: tracker
+    }
+
+}
+
+function isPassedTime(tracker: TrackingStas, time: number) {
+    return tracker.currentEvent?.eventTime && tracker.currentEvent?.eventTime > time;
+}
+
+function isNoGoalWithinTime(tracker: TrackingStas, time: number) {
+    return tracker.totalGoal === 0 && isPassedTime(tracker, time);
+}
+
+function isPreviousEventPassedTime(tracker: TrackingStas, time: number) {
+    return tracker.previousEvent?.eventTime && tracker.previousEvent?.eventTime >= time;
 }
