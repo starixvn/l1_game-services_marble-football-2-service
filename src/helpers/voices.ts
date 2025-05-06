@@ -156,7 +156,7 @@ export function generateVoiceWithEventTimeline(args: EventTimelineArgs, config: 
             eventTime
         }, nextEvent);
 
-        const durationLimit = nextEvent?.eventTime ? nextEvent.eventTime - eventTime : undefined;
+        const durationLimit = nextEvent?.eventTime ? Math.ceil(nextEvent.eventTime - eventTime) : undefined;
 
         if (isNoGoalWithinTime(tracker, TIME_TO_BE_CONSIDERED_AS_NO_GOAL_WITHIN) && !isPreviousEventPassedTime(tracker, TIME_TO_BE_CONSIDERED_AS_NO_GOAL_WITHIN)) {
             const noGoalVoices = getPossibleVoiceArray(config, "noGoal", {
