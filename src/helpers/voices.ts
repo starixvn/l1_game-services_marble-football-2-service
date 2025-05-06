@@ -62,6 +62,10 @@ type Voice = {
     key: string;
 }
 
+type VoiceChoiceConfig = {
+    limitDuration?: number;
+}
+
 export const VOICE_DURATION_CONFIG: VoiceDurationConfig = {
     goal: {
         1: 7,
@@ -131,8 +135,6 @@ const TIME_TO_BE_CONSIDERED_AS_LAST_GOAL = 25;
 const TIME_TO_BE_CONSIDERED_AS_NO_GOAL_WITHIN = 15;
 
 export function generateVoiceWithEventTimeline(args: EventTimelineArgs, config: VoiceDurationConfig): VoiceGenerationResult {
-
-
     const events = args.eventName;
 
     const { initialVoice, initialTracker } = initVoiceEvents(args, config);
@@ -154,8 +156,12 @@ export function generateVoiceWithEventTimeline(args: EventTimelineArgs, config: 
             eventTime
         }, nextEvent);
 
+        const durationLimit = nextEvent?.eventTime ? nextEvent.eventTime - eventTime : undefined;
+
         if (isNoGoalWithinTime(tracker, TIME_TO_BE_CONSIDERED_AS_NO_GOAL_WITHIN) && !isPreviousEventPassedTime(tracker, TIME_TO_BE_CONSIDERED_AS_NO_GOAL_WITHIN)) {
-            const noGoalVoices = getPossibleVoiceArray(config, "noGoal");
+            const noGoalVoices = getPossibleVoiceArray(config, "noGoal", {
+                limitDuration: durationLimit
+            });
             const chance = new Chance();
             const chosenVoice = chance.pickone(noGoalVoices);
             if (chosenVoice) {
@@ -171,9 +177,13 @@ export function generateVoiceWithEventTimeline(args: EventTimelineArgs, config: 
                 eventName
             });
 
-            possibleVoices.push(...getPossibleVoiceForGoal(tracker, config));
+            possibleVoices.push(...getPossibleVoiceForGoal(tracker, config, {
+                limitDuration: durationLimit
+            }));
         } else if (isGlove(eventName)) {
-            possibleVoices.push(...getPossibleVoiceArray(config, "save"));
+            possibleVoices.push(...getPossibleVoiceArray(config, "save", {
+                limitDuration: durationLimit
+            }));
         }
 
         if (isOverlappingPrevious(tracker)) {
@@ -194,7 +204,6 @@ export function generateVoiceWithEventTimeline(args: EventTimelineArgs, config: 
             tracker = trackEventOnVoiceChosen(tracker, eventTime, chosenVoice);
         }
     });
-
     return {
         timeline,
         voice
@@ -273,18 +282,24 @@ function isFastGoal(tracker: TrackingStas, timeForConsideration: number, goalCou
     return tracker.totalGoal == goalCountForConsideration && tracker.currentGoal?.time && tracker.currentGoal?.time < timeForConsideration;
 }
 
-function getPossibleVoiceArray(config: VoiceDurationConfig, key: string, extraConfigs = {}) {
+function getPossibleVoiceArray(config: VoiceDurationConfig, key: string, extraConfigs: VoiceChoiceConfig = {}) {
     const possibeVoices: { file: string, duration: number, index: number, key: string }[] = []
     if (!Object.hasOwn(config, key)) {
         return possibeVoices;
     }
-
-    for (const duration in config[key]) {
-        for (let i = 1; i <= config[key][duration]; i++) {
+    const durationList: string[] = Object.keys(config[key]).sort((a, b) => parseInt(a) - parseInt(b));
+    for (const duration of durationList) {
+        const durationNumber = parseInt(duration);
+        if (extraConfigs.limitDuration && durationNumber > extraConfigs.limitDuration) {
+            if (possibeVoices.length > 0) {
+                break;
+            }
+        }
+        for (let i = 1; i <= config[key][durationNumber]; i++) {
             possibeVoices.push({
                 key,
                 file: `${key}_${duration}_${i}`,
-                duration: parseInt(duration),
+                duration: durationNumber,
                 index: i
             });
         }
@@ -293,29 +308,29 @@ function getPossibleVoiceArray(config: VoiceDurationConfig, key: string, extraCo
     return possibeVoices;
 }
 
-function getPossibleVoiceForGoal(tracker: TrackingStas, config: VoiceDurationConfig) {
+function getPossibleVoiceForGoal(tracker: TrackingStas, config: VoiceDurationConfig, extraConfigs: VoiceChoiceConfig = {}) {
     const possibleVoices: Voice[] = [];
-    possibleVoices.push(...getPossibleVoiceArray(config, "goal"));
+    possibleVoices.push(...getPossibleVoiceArray(config, "goal", extraConfigs));
 
     if (isEqualizer(tracker, tracker.homeScore)) {
-        possibleVoices.push(...getPossibleVoiceArray(config, `draw${tracker.homeScore}`));
+        possibleVoices.push(...getPossibleVoiceArray(config, `draw${tracker.homeScore}`, extraConfigs));
     }
 
     if (isConsecutive(tracker)) {
         const actualCheckNumber = tracker.consecutiveGoal > 5 ? 5 : tracker.consecutiveGoal;
-        possibleVoices.push(...getPossibleVoiceArray(config, `goal${ordinal(actualCheckNumber)}`));
+        possibleVoices.push(...getPossibleVoiceArray(config, `goal${ordinal(actualCheckNumber)}`, extraConfigs));
     }
 
     if (isFastGoal(tracker, TIME_WITHIN_TO_BE_CONSIDERED_AS_FAST_GOAL, GOAL_COUNT_TO_BE_CONSIDERED_AS_FAST_GOAL)) {
-        possibleVoices.push(...getPossibleVoiceArray(config, `fastGoal`));
+        possibleVoices.push(...getPossibleVoiceArray(config, `fastGoal`, extraConfigs));
     }
 
     if (isFastGoal(tracker, TIME_WITHIN_TO_BE_CONSIDERED_AS_FAST_GOAL, 1)) {
-        possibleVoices.push(...getPossibleVoiceArray(config, `firstGoal`));
+        possibleVoices.push(...getPossibleVoiceArray(config, `firstGoal`, extraConfigs));
     }
 
     if (isLastGoal(tracker)) {
-        possibleVoices.push(...getPossibleVoiceArray(config, `lastGoal`));
+        possibleVoices.push(...getPossibleVoiceArray(config, `lastGoal`, extraConfigs));
     }
 
     return possibleVoices;
