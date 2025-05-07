@@ -50,9 +50,7 @@ async function getEventTimeline(videoName: string): Promise<number[]> {
             return [];
         }
 
-        const data = await response.json();
-
-        return data;
+        return response.json();
     } catch (error) {
         console.log(`Failed to get video timeline ${url} with error: ${error}`);
         return [];

@@ -210,13 +210,13 @@ export function generateVoiceWithEventTimeline(args: EventTimelineArgs, config: 
     }
 }
 
-function initTracker(firstHalfScoreSequence: string = "") {
+function initTracker(firstHalfScoreSequence = "") {
     const tracker: TrackingStas = {
         totalGoal: 0,
         homeScore: 0,
         awayScore: 0,
         consecutiveGoal: 0,
-        isFirstHalf: firstHalfScoreSequence == "",
+        isFirstHalf: firstHalfScoreSequence === "",
     }
 
     firstHalfScoreSequence.split("").forEach((score, index, scores) => {
@@ -279,7 +279,7 @@ function isConsecutiveGoal(tracker: TrackingStas) {
 }
 
 function isFastGoal(tracker: TrackingStas, timeForConsideration: number, goalCountForConsideration: number) {
-    return tracker.totalGoal == goalCountForConsideration && tracker.currentGoal?.time && tracker.currentGoal?.time < timeForConsideration;
+    return tracker.totalGoal === goalCountForConsideration && tracker.currentGoal?.time && tracker.currentGoal?.time < timeForConsideration;
 }
 
 function getPossibleVoiceArray(config: VoiceDurationConfig, key: string, extraConfigs: VoiceChoiceConfig = {}) {
