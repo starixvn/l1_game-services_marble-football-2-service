@@ -4,6 +4,7 @@ import { ITournament } from "./models/tournaments";
 import { GameConfigs } from "sc-game-base/src/core/game-data";
 import { DEFAULT_TOURNAMENT_CODES } from "./constants";
 import { MatchConfigType } from "./match-configs";
+import { VoiceDurationConfig } from "./helpers/voices";
 export default class GameData extends TableGameData {
     declare realPlayers: { [playerId: string]: RealPlayer };
     declare result: ResultType;
@@ -20,6 +21,7 @@ export default class GameData extends TableGameData {
     tournament = {} as ITournament;
     publishedTournament = {} as ITournament;
     dynamicOdds?: Record<string, number>;
+    voiceConfig?: VoiceDurationConfig;
 }
 
 export type RealPlayer = {

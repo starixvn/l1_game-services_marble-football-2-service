@@ -73,6 +73,9 @@ const appConfigs = {
         enabled: false,
         url: "",
     },
+    cache: {
+        ttl: 1000 * 60 * 5,
+    },
 };
 
 export default appConfigs;

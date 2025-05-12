@@ -28,6 +28,7 @@
     "dependencies": {
         "awilix": "^8.0.0",
         "axios": "^1.7.2",
+        "cacheable": "^1.9.0",
         "chance": "^1.1.11",
         "d3-array": "^3.2.4",
         "extensionless": "^1.9.6",

@@ -22,6 +22,7 @@ import GameManagementApiClientFactory from "sc-game-base/src/core/game-managemen
 import Bot from "../../src/crons/bot";
 import { IRound } from "../../src/models/rounds";
 import { TournamentConsumer } from "../../src/consumers";
+import CacheConsumer from "../../src/consumers/cache-consumer";
 jest.mock("sc-game-management-client");
 
 const roundsRepository = {
@@ -74,6 +75,7 @@ const publisher = stub<BaseEventPublisher>();
 
 const bot = stub<Bot>();
 const tournamentConsumer: TournamentConsumer = stub<TournamentConsumer>();
+const cacheConsumer: CacheConsumer = stub<CacheConsumer>();
 const settleGameConsumer: SettleGameRoundConsumer = stub<SettleGameRoundConsumer>();
 const gameStatusPublisher: GameStatusPublisher = stub<GameStatusPublisher>();
 const runningRoundInfoPublisher: RunningRoundInfoPublisher = stub<RunningRoundInfoPublisher>();
@@ -97,6 +99,7 @@ export {
     betLogsRepository,
     betsRepository,
     bot,
+    cacheConsumer,
     endGame,
     gameManagementApiClientFactory,
     gameStatusPublisher,

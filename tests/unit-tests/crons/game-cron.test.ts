@@ -14,6 +14,7 @@ import {
     unsettledRoundConsumer,
     logService,
     tournamentConsumer,
+    cacheConsumer,
 } from "../global-stubs";
 import GameData from "../../../src/game-data";
 import GameDefinition from "../../../src/game-definition";
@@ -21,6 +22,7 @@ import axios from "axios";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import crypto from "crypto";
 import { PRE_MATCH_BET_CHOICES, LIVE_BET_CHOICES } from "../../../src/constants";
+import { DEFAULT_VOICE_DURATION_CONFIG } from "../../../src/helpers/voices";
 jest.mock("../../../src/timelines/video-timelines", () => ({
     "22841ea360fc3c3676a38502aa9a90a1ae1fbdac1d937746358efe559d349b6f_0": [],
     "53e5fe7054fb5c4867e0277e8867c0c08f9ca8be43fdac0d3b6c6ea5c7d656a2_AAAA": [1.8, 19.033333333333335, 33.8, 42.43333333333333],
@@ -149,6 +151,7 @@ describe("GameCron", () => {
             provablyFairConsumer,
             unsettledRoundConsumer,
             tournamentConsumer,
+            cacheConsumer,
         });
 
         gameCron.gameManagementApiClient = {
@@ -230,7 +233,7 @@ describe("GameCron", () => {
                 gameCron.calculateAndPublishOddsPreMatch = jest.fn();
                 gameCron.resetForNewRound = jest.fn();
                 gameCron.bot = { reset: jest.fn() } as any;
-                gameCron.updateNewMatchConfig = jest.fn();
+                gameCron.updateNewMatchConfig = jest.fn().mockResolvedValue(null);
                 gameCron.generateRoundData = jest.fn().mockResolvedValue(null);
 
                 // act
@@ -798,6 +801,36 @@ describe("GameCron", () => {
             }, expect.anything());
             expect(gameCron.gameData.result.voices).toEqual(["voice1", "voice2"]);
         });
+
+        it("should use custom voice config when available", async () => {
+            // Arrange
+            const videoName = "first-half-video";
+            const mockTimeline = [7, 8, 9];
+            const mockEventTimeline = {
+                timeLine: [7, 8, 9],
+                eventName: ["goal_H", "goal_A", "goal_A"]
+            };
+            const customVoiceConfig = {
+                goal: { 1: 5, 2: 10, 3: 8 },
+                save: { 1: 2, 2: 3, 3: 4 }
+            };
+            
+            gameCron.gameData.result = {
+                firstHalfVideo: videoName,
+                firstHalf: "0",
+            } as any;
+            gameCron.gameData.voiceConfig = customVoiceConfig;
+            
+            jest.spyOn(gameCron, "getVideoTimelineWithRetry").mockResolvedValueOnce(mockTimeline);
+            jest.spyOn(gameCron, "getEventTimelineWithRetry").mockResolvedValueOnce(mockEventTimeline);
+            const generateVoiceSpy = jest.spyOn(require("../../../src/helpers/voices"), "generateVoiceWithEventTimeline").mockReturnValue(["voice1", "voice2"]);
+
+            // Act
+            await gameCron.getVideoTimelineAndVoiceForFirstHalf();
+
+            // Assert
+            expect(generateVoiceSpy.mock.calls[0][1]).toBe(customVoiceConfig);
+        });
     });
 
     describe("getVideoTimelineAndVoiceForSecondHalf", () => {
@@ -835,6 +868,37 @@ describe("GameCron", () => {
                 firstHalfScore: "HAA"
             }, expect.anything());
             expect(gameCron.gameData.result.voices).toEqual(["voice3", "voice4"]);
+        });
+
+        it("should use custom voice config when available", async () => {
+            // Arrange
+            const videoName = "second-half-video";
+            const mockTimeline = [7, 8, 9];
+            const mockEventTimeline = {
+                timeLine: [7, 8, 9],
+                eventName: ["goal_H", "goal_A", "goal_A"]
+            };
+            const customVoiceConfig = {
+                goal: { 1: 5, 2: 10, 3: 8 },
+                save: { 1: 2, 2: 3, 3: 4 }
+            };
+            
+            gameCron.gameData.result = {
+                secondHalfVideo: videoName,
+                secondHalf: "0",
+                firstHalf: "HAA"
+            } as any;
+            gameCron.gameData.voiceConfig = customVoiceConfig;
+            
+            jest.spyOn(gameCron, "getVideoTimelineWithRetry").mockResolvedValueOnce(mockTimeline);
+            jest.spyOn(gameCron, "getEventTimelineWithRetry").mockResolvedValueOnce(mockEventTimeline);
+            const generateVoiceSpy = jest.spyOn(require("../../../src/helpers/voices"), "generateVoiceWithEventTimeline").mockReturnValue(["voice3", "voice4"]);
+
+            // Act
+            await gameCron.getVideoTimelineAndVoiceForSecondHalf();
+
+            // Assert
+            expect(generateVoiceSpy.mock.calls[0][1]).toBe(customVoiceConfig);
         });
     });
 
@@ -1047,14 +1111,24 @@ describe("GameCron", () => {
     });
 
     describe("updateNewMatchConfig", () => {
-        it("should update match config with first half and random second half config", () => {
+        it("should update match config with first half, random second half config, and voice config", async () => {
+            // Arrange
+            const mockVoiceConfig = { 
+                intro: 1, 
+                goal: 2, 
+                halfTime: 3 
+            };
+            (cacheConsumer.get as jest.Mock).mockResolvedValue(mockVoiceConfig);
+            
             // Act
-            gameCron.updateNewMatchConfig();
+            await gameCron.updateNewMatchConfig();
 
             // Assert
             expect(gameCron.gameData.matchConfig).toBeDefined();
             expect(gameCron.gameData.matchConfig.firstHalfConfig).toBeDefined();
             expect(gameCron.gameData.matchConfig.secondHalfConfig).toBeDefined();
+            expect(gameCron.gameData.voiceConfig).toEqual(mockVoiceConfig);
+            expect(cacheConsumer.get).toHaveBeenCalledWith('voice_config', expect.any(Function));
         });
     });
 
@@ -1255,6 +1329,108 @@ describe("GameCron", () => {
                 eventName: ["goal_A", "goal_A", "goal_H"]
             });
             expect(logService.logWarning).toHaveBeenCalledWith(expect.stringContaining("test-video_AAH"));
+        });
+    });
+
+    describe("getVoiceConfigFromCache", () => {
+        it("should return voice config from cache if available", async () => {
+            // Arrange
+            const mockVoiceConfig = { intro: 1, goal: 2 };
+            (cacheConsumer.get as jest.Mock).mockResolvedValue(mockVoiceConfig);
+            
+            // Act
+            const result = await (gameCron as any).getVoiceConfigFromCache();
+            
+            // Assert
+            expect(result).toEqual(mockVoiceConfig);
+            expect(cacheConsumer.get).toHaveBeenCalledWith('voice_config', expect.any(Function));
+        });
+    });
+
+    describe("getVoiceConfigWithRetry", () => {
+        it("should retry getting voice config and return result on success", async () => {
+            // Arrange
+            const mockVoiceConfig = { intro: 1, goal: 2 };
+            jest.spyOn(gameCron as any, 'getVoiceConfigFromStreamServer').mockResolvedValue(mockVoiceConfig);
+            
+            // Act
+            const result = await (gameCron as any).getVoiceConfigWithRetry();
+            
+            // Assert
+            expect(result).toEqual(mockVoiceConfig);
+        });
+
+        it("should return default voice config on failure after retries", async () => {
+            // Arrange
+            const mockError = new Error("Network error");
+            jest.spyOn(gameCron as any, 'getVoiceConfigFromStreamServer').mockRejectedValue(mockError);
+            
+            // Act
+            const result = await (gameCron as any).getVoiceConfigWithRetry();
+            
+            // Assert
+            expect(result).toEqual(DEFAULT_VOICE_DURATION_CONFIG);
+            expect(logService.logError).toHaveBeenCalledWith(expect.stringContaining("failed to get voice config with error"));
+        });
+    });
+
+    describe("getVoiceConfigFromStreamServer", () => {
+        it("should fetch voice config with proxy when enabled", async () => {
+            // Arrange
+            const mockVoiceConfig = { intro: 1, goal: 2 };
+            gameCron.appConfigs = {
+                liveStreamServer: "http://example.com/",
+                proxyServer: {
+                    enabled: true,
+                    url: "http://proxy.com",
+                },
+            } as any;
+
+            (axios.get as jest.Mock).mockResolvedValue({ data: mockVoiceConfig });
+
+            // Act
+            const result = await (gameCron as any).getVoiceConfigFromStreamServer();
+
+            // Assert
+            expect(axios.get).toHaveBeenCalledWith("http://example.com/config_voice.json", { httpsAgent: expect.any(HttpsProxyAgent) });
+            expect(result).toEqual(mockVoiceConfig);
+        });
+
+        it("should fetch voice config without proxy when disabled", async () => {
+            // Arrange
+            const mockVoiceConfig = { intro: 1, goal: 2 };
+            gameCron.appConfigs = {
+                liveStreamServer: "http://example.com/",
+                proxyServer: {
+                    enabled: false,
+                },
+            } as any;
+
+            (axios.get as jest.Mock).mockResolvedValue({ data: mockVoiceConfig });
+
+            // Act
+            const result = await (gameCron as any).getVoiceConfigFromStreamServer();
+
+            // Assert
+            expect(axios.get).toHaveBeenCalledWith("http://example.com/config_voice.json", { httpsAgent: undefined });
+            expect(result).toEqual(mockVoiceConfig);
+        });
+
+        it("should handle and log errors when the request fails", async () => {
+            // Arrange
+            const mockError = new Error("Network error");
+            gameCron.appConfigs = {
+                liveStreamServer: "http://example.com/",
+                proxyServer: { enabled: false },
+            } as any;
+
+            (axios.get as jest.Mock).mockRejectedValue(mockError);
+
+            // Act & Assert
+            await expect((gameCron as any).getVoiceConfigFromStreamServer()).rejects.toThrow(mockError);
+            expect(logService.logError).toHaveBeenCalledWith(
+                "failed to get voice config with error: Error: Network error"
+            );
         });
     });
 });

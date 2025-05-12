@@ -14,7 +14,8 @@ import GameStatusPublisher from "../publishers/game-status-publisher";
 import { calculatePreMatchOdds, calculateLiveOdds } from "../helpers/odds-helper";
 import { securePickOne } from "sc-core-rng";
 import RunningRoundInfoPublisher from "../publishers/running-round-info-publisher";
-import { generateVoiceWithEventTimeline, VOICE_DURATION_CONFIG } from "../helpers/voices";
+import { generateVoiceWithEventTimeline, DEFAULT_VOICE_DURATION_CONFIG, VoiceDurationConfig } from "../helpers/voices";
+import CacheConsumer from "../consumers/cache-consumer";
 export default class GameCron extends Table.Crons.TableGameCron {
     declare gameData: GameData;
     declare definition: GameDefinition;
@@ -23,12 +24,14 @@ export default class GameCron extends Table.Crons.TableGameCron {
     declare runningRoundInfoPublisher: RunningRoundInfoPublisher;
 
     tournamentConsumer: TournamentConsumer;
+    cacheConsumer: CacheConsumer;
 
     constructor(container: any) {
         super(container);
 
         this.gameData.liveStreamServer = this.appConfigs.liveStreamServer;
         this.tournamentConsumer = container.tournamentConsumer;
+        this.cacheConsumer = container.cacheConsumer;
     }
 
     async queryLastResult() {
@@ -111,7 +114,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
         this.gameData.result.voices = generateVoiceWithEventTimeline({
             timeline: this.gameData.result.firstHalfEventTimeline?.timeLine ?? [],
             eventName: this.gameData.result.firstHalfEventTimeline?.eventName ?? [],
-        }, VOICE_DURATION_CONFIG);
+        }, this.gameData.voiceConfig ?? DEFAULT_VOICE_DURATION_CONFIG);
     }
 
     async getVideoTimelineAndVoiceForSecondHalf() {
@@ -129,7 +132,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
             timeline: this.gameData.result.secondHalfEventTimeline?.timeLine ?? [],
             eventName: this.gameData.result.secondHalfEventTimeline?.eventName ?? [],
             firstHalfScore: this.gameData.result.firstHalf,
-        }, VOICE_DURATION_CONFIG);
+        }, this.gameData.voiceConfig ?? DEFAULT_VOICE_DURATION_CONFIG);
     }
 
     getDefaultVideoTimeline(result: string, isFirstHalf: boolean) {
@@ -218,7 +221,7 @@ export default class GameCron extends Table.Crons.TableGameCron {
         if (this.isStartPlacingBetFirstHalf(remainingTime)) {
             this.resetForNewRound();
             this.bot?.reset();
-            this.updateNewMatchConfig();
+            await this.updateNewMatchConfig();
             this.calculateAndPublishOddsPreMatch();
             await this.generateRoundData();
 
@@ -318,11 +321,13 @@ export default class GameCron extends Table.Crons.TableGameCron {
         return remainingTime === streamingVideoSecondHalf;
     }
 
-    updateNewMatchConfig() {
+    async updateNewMatchConfig() {
         this.gameData.matchConfig = {
             firstHalfConfig: firstHalfConfig,
             secondHalfConfig: securePickOne(secondHalfConfigs),
         };
+        const voiceConfig = await this.getVoiceConfigFromCache();
+        this.gameData.voiceConfig = voiceConfig;
     }
 
     calculateAndPublishOddsPreMatch() {
@@ -348,4 +353,34 @@ export default class GameCron extends Table.Crons.TableGameCron {
         this.gameData.dynamicOdds = { ...currentOdds, ...odds };
     }
 
+    private async getVoiceConfigFromCache() {
+        return this.cacheConsumer.get<VoiceDurationConfig>('voice_config', () => this.getVoiceConfigWithRetry());
+    }
+
+    private async getVoiceConfigWithRetry() {
+        const delay = 100;
+        const retries = 3;
+
+        return retry(() => this.getVoiceConfigFromStreamServer(), retries, delay).catch((error) => {
+            this.logService.logError(`failed to get voice config with error: ${error}`)
+            
+            return DEFAULT_VOICE_DURATION_CONFIG;
+        });
+
+    }
+
+    private async getVoiceConfigFromStreamServer() {
+        const url = new URL('config_voice.json', this.appConfigs.liveStreamServer);
+
+        const agent = this.appConfigs.proxyServer.enabled ? new HttpsProxyAgent(this.appConfigs.proxyServer.url) : undefined;
+
+        try {
+            const response = await axios.get(url.toString(), { httpsAgent: agent });
+
+            return response.data;
+        } catch (error) {
+            this.logService.logError(`failed to get voice config with error: ${error}`);
+            throw error
+        };
+    }
 }
