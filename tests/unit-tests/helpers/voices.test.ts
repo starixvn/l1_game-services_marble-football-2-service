@@ -26,7 +26,7 @@ describe('generateVoiceWithEventTimeline', () => {
 
     it('should generate voice for goal', () => {
         // Arrange
-        const restore = mockPickoneIndices([0, 1]);
+        const restore = mockPickoneIndices([0, 0, 0, 1]);
         
         try {
             // Act
@@ -50,7 +50,7 @@ describe('generateVoiceWithEventTimeline', () => {
 
         it('should not generate voice overlapping the previous voice', () => {
             // Arrange
-            const restore = mockPickoneIndices([0]);
+            const restore = mockPickoneIndices([0, 0]);
             
             try {
                 const closeTimeline = [5, 6];
@@ -83,7 +83,7 @@ describe('generateVoiceWithEventTimeline', () => {
 
         it("should generate voice for equalizer 1 - 1", () => {
             // Arrange
-            const restore = mockPickoneIndices([0, 1]);
+            const restore = mockPickoneIndices([1, 0]);
             
             try {
                 // Act
@@ -104,7 +104,7 @@ describe('generateVoiceWithEventTimeline', () => {
 
         it("should count score from previous half", () => {
             // Arrange
-            const restore = mockPickoneIndices([1]);
+            const restore = mockPickoneIndices([1, 0]);
             const thisEventName = ["goal_H"];
             try {
                 // Act
@@ -124,10 +124,26 @@ describe('generateVoiceWithEventTimeline', () => {
             }
         });
 
+        it("should not generate unconfigured voice", () => {
+            // Arrange
+            const thisEventName = ["goal_H"];
+            // Act
+            const actual = generateVoiceWithEventTimeline({
+                eventName: thisEventName,
+                timeline: [10],
+                firstHalfScore: "A"
+            }, {
+                goal: { 1: 1 },
+            });
+
+            // Assert
+            expect(actual.voice).toEqual(['goal_1_1']);
+        });
+
 
         it("should also randomly generate random goal too", () => {
             // Arrange
-            const restore = mockPickoneIndices([1, 2]);
+            const restore = mockPickoneIndices([0, 1, 0, 0]);
             
             try {
                 // Act
@@ -141,7 +157,7 @@ describe('generateVoiceWithEventTimeline', () => {
 
                 // Assert
                 expect(actual.voice).toContain('goal_1_2');
-                expect(actual.voice).toContain('draw1_2_1');
+                expect(actual.voice).toContain('goal_1_1');
             } finally {
                 restore();
             }
@@ -154,7 +170,7 @@ describe('generateVoiceWithEventTimeline', () => {
 
         it("should generate voice for equalizer 2 - 2", () => {
             // Arrange
-            const restore = mockPickoneIndices([0, 0, 0, 1]);
+            const restore = mockPickoneIndices([0, 0, 0, 0, 0, 0, 1, 0]);
             
             try {
                 // Act
@@ -180,7 +196,7 @@ describe('generateVoiceWithEventTimeline', () => {
 
         it("should generate voice for equalizer 3 - 3", () => {
             // Arrange
-            const restore = mockPickoneIndices([0, 0, 0, 0, 0, 1]);
+            const restore = mockPickoneIndices([0,0, 0,0, 0,0, 0,0, 0,0, 1,0]);
             
             try {
                 // Act
@@ -206,7 +222,7 @@ describe('generateVoiceWithEventTimeline', () => {
 
         it("should generate voice for equalizer 4 - 4", () => {
             // Arrange
-            const restore = mockPickoneIndices([0, 0, 0, 0, 0, 0, 0, 1]);
+            const restore = mockPickoneIndices([1, 0]);
             
             try {
                 // Act
@@ -232,7 +248,7 @@ describe('generateVoiceWithEventTimeline', () => {
 
         it("should generate voice for 2 consecutive goal", () => {
             // Arrange
-            const restore = mockPickoneIndices([0, 1]);
+            const restore = mockPickoneIndices([1, 0]);
             
             try {
                 // Act
@@ -262,7 +278,7 @@ describe('generateVoiceWithEventTimeline', () => {
 
         it("should generate voice for 3 consecutive goal", () => {
             // Arrange
-            const restore = mockPickoneIndices([0, 0, 1]);
+            const restore = mockPickoneIndices([0, 0, 0, 0, 1, 0]);
             
             try {
                 // Act
@@ -287,7 +303,7 @@ describe('generateVoiceWithEventTimeline', () => {
 
         it("should should count score from previous half", () => {
             // Arrange
-            const restore = mockPickoneIndices([0, 0, 1]);
+            const restore = mockPickoneIndices([0,0, 0,0, 1,0]);
             
             try {
                 // Act
@@ -324,7 +340,7 @@ describe('generateVoiceWithEventTimeline', () => {
 
         it("should generate voice for 6 consecutive goal", () => {
             // Arrange
-            const restore = mockPickoneIndices([0, 0, 0, 0, 0, 1]);
+            const restore = mockPickoneIndices([0,0, 0,0, 0,0, 0,0, 0,0, 1,0]);
             
             try {
                 // Act
@@ -355,7 +371,7 @@ describe('generateVoiceWithEventTimeline', () => {
 
         it("should generate voice for fast goal", () => {
             // Arrange
-            const restore = mockPickoneIndices([0, 1]);
+            const restore = mockPickoneIndices([1, 0]);
             
             try {
                 // Act
@@ -381,7 +397,7 @@ describe('generateVoiceWithEventTimeline', () => {
 
         it("should generate voice for first goal", () => {
             // Arrange
-            const restore = mockPickoneIndices([1]);
+            const restore = mockPickoneIndices([1, 0]);
 
             try {
                 // Act
@@ -407,7 +423,7 @@ describe('generateVoiceWithEventTimeline', () => {
 
         it("should generate voice for last goal", () => {
             // Arrange
-            const restore = mockPickoneIndices([1]);
+            const restore = mockPickoneIndices([1, 0]);
             
             try {
                 // Act
@@ -479,7 +495,7 @@ describe('generateVoiceWithEventTimeline', () => {
     describe("No Goal", () => {
         it("Should generate voice for no goal", () => {
             // Arrange
-            const restore = mockPickoneIndices([0, 0]);
+            const restore = mockPickoneIndices([0, 0, 0, 0]);
             const timeline = [21];
             const eventName = ["goal_H"];
             try {
@@ -551,7 +567,7 @@ describe('generateVoiceWithEventTimeline', () => {
         describe("There is a voice that has shorter duration than the limit", () => {
             it("should only generate within the limit", () => {
                 // Arrange
-                const restore = mockPickoneIndices([0, 6]);
+                const restore = mockPickoneIndices([0, 0, 0, 6]);
                 const config = {
                     goal: {
                         1: 1,
@@ -576,7 +592,7 @@ describe('generateVoiceWithEventTimeline', () => {
             });
             it("should not generate voice over the limit", () => {
                 // Arrange
-                const restore = mockPickoneIndices([1, 6]); // check if the first voice array only contain goal_1_1
+                const restore = mockPickoneIndices([0, 1, 0, 6]);
                 const config = {
                     goal: {
                         1: 1,
@@ -605,7 +621,7 @@ describe('generateVoiceWithEventTimeline', () => {
         describe("There is no voice that has shorter duration than the limit", () => {
             it("should generate voice for the shortest duration exceed the limit, and therefore overlap next voice", () => {
                 // Arrange
-                const restore = mockPickoneIndices([0, 6]);
+                const restore = mockPickoneIndices([0, 0, 0, 6]);
                 const config = {
                     goal: {
                         3: 1,
@@ -630,7 +646,7 @@ describe('generateVoiceWithEventTimeline', () => {
 
             it("should not generate voice other than that", () => {
                 // Arrange
-                const restore = mockPickoneIndices([1, 2]); // check if the first voice array only contain goal_3_1
+                const restore = mockPickoneIndices([0, 1, 0, 2]);
                 const config = {
                     goal: {
                         3: 1,
