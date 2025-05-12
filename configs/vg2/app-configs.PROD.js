@@ -72,4 +72,7 @@ export default {
         enabled: true,
         url: "http://lisasqd.nebula.prod:8801",
     },
+    cache: {
+        ttl: 1000 * 60 * 5,
+    },
 };
