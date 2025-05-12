@@ -22,11 +22,11 @@ type TrackingStas = {
     nextEvent?: Event;
     previousVoiceEndTime?: number;
     prevGoal?: {
-        time: number;
+        time?: number;
         team: "H" | "A";
     }
     currentGoal?: {
-        time: number;
+        time?: number;
         team: "H" | "A";
     },
     isFirstHalf: boolean;
@@ -66,7 +66,7 @@ type VoiceChoiceConfig = {
     limitDuration?: number;
 }
 
-export const VOICE_DURATION_CONFIG: VoiceDurationConfig = {
+export const DEFAULT_VOICE_DURATION_CONFIG: VoiceDurationConfig = {
     goal: {
         1: 7,
         2: 12,
@@ -145,6 +145,7 @@ export function generateVoiceWithEventTimeline(args: EventTimelineArgs, config: 
         const eventTime = args.timeline[index];
         const eventName = event;
         const possibleVoices: Voice[] = [];
+        const possibleEventNames: string[] = [];
 
         const nextEvent = events[index + 1] ? {
             eventName: events[index + 1],
@@ -223,12 +224,13 @@ function initTracker(firstHalfScoreSequence = "") {
         tracker.totalGoal++;
         tracker.homeScore += score === "H" ? 1 : 0;
         tracker.awayScore += score === "A" ? 1 : 0;
-        if (index > 0) {
-            if (scores[index - 1] !== score) {
-                tracker.consecutiveGoal = 0;
-            }
+        if (index > 0 && scores[index - 1] !== score) {
+            tracker.consecutiveGoal = 0;
         }
         tracker.consecutiveGoal++;
+        tracker.currentGoal = {
+            team: score as "H" | "A"
+        }
     });
 
     return tracker;
@@ -264,6 +266,7 @@ function trackEventBeforeProcess(tracker: TrackingStas, event: Event, nextEvent?
     newTracker.previousEvent = newTracker.currentEvent;
     newTracker.currentEvent = event;
     newTracker.nextEvent = nextEvent;
+    newTracker.prevGoal = newTracker.currentGoal;
     return newTracker;
 }
 

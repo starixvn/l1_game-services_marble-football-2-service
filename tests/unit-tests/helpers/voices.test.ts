@@ -284,6 +284,38 @@ describe('generateVoiceWithEventTimeline', () => {
                 restore();
             }
         });
+
+        it("should should count score from previous half", () => {
+            // Arrange
+            const restore = mockPickoneIndices([0, 0, 1]);
+            
+            try {
+                // Act
+                const actual = generateVoiceWithEventTimeline({
+                    eventName: ["goal_A", "goal_A", "goal_A"],
+                    timeline: [10, 20, 30],
+                    firstHalfScore: "HHA"
+                }, {
+                    goal: { 1: 1 },
+                    goal2nd: {
+                        1: 1
+                    },
+                    goal3rd: {
+                        2: 1,
+                        3: 1,
+                        4: 1
+                    },
+                    goal4th: {
+                        1:1
+                    }
+                })
+
+                // Assert
+                expect(actual.voice).toContain('goal4th_1_1');
+            } finally {
+                restore();
+            }
+        });
     });
 
     describe("6 Consecutive Goal", () => {
