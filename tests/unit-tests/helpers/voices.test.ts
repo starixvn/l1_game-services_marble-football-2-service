@@ -26,7 +26,7 @@ describe('generateVoiceWithEventTimeline', () => {
 
     it('should generate voice for goal', () => {
         // Arrange
-        const restore = mockPickoneIndices([0, 0, 0, 1]);
+        const restore = mockPickoneIndices([0, 0, 0, 0]);
         
         try {
             // Act
@@ -366,12 +366,12 @@ describe('generateVoiceWithEventTimeline', () => {
     });
 
     describe("Fast Goal", () => {
-        const timeline = [2, 4];
-        const eventName = ["goal_H", "goal_H"];
+        const timeline = [2, 4.3];
+        const eventName = ["goal_H", "goal_A"];
 
         it("should generate voice for fast goal", () => {
             // Arrange
-            const restore = mockPickoneIndices([1, 0]);
+            const restore = mockPickoneIndices([0, 0, 1, 0]);
             
             try {
                 // Act
@@ -389,13 +389,34 @@ describe('generateVoiceWithEventTimeline', () => {
                 restore();
             }
         });
+
+        it("should not count score from previous half", () => {
+            // Arrange
+            const restore = mockPickoneIndices([1, 0, 0, 0]);
+            
+            try {
+                // Act
+                const actual = generateVoiceWithEventTimeline({
+                    eventName,
+                    timeline,
+                    firstHalfScore: "H"
+                }, {
+                    fastGoal: { 1: 1 },
+                })
+
+                // Assert
+                expect(actual.voice).toEqual([]);
+            } finally {
+                restore();
+            }
+        })
     });
 
     describe("First Goal", () => {
         const timeline = [2];
         const eventName = ["goal_H"];
 
-        it("should generate voice for first goal", () => {
+        it("should generate voice for first goal on first half", () => {
             // Arrange
             const restore = mockPickoneIndices([1, 0]);
 
@@ -567,7 +588,7 @@ describe('generateVoiceWithEventTimeline', () => {
         describe("There is a voice that has shorter duration than the limit", () => {
             it("should only generate within the limit", () => {
                 // Arrange
-                const restore = mockPickoneIndices([0, 0, 0, 6]);
+                const restore = mockPickoneIndices([0, 0, 0, 5]);
                 const config = {
                     goal: {
                         1: 1,
@@ -668,6 +689,53 @@ describe('generateVoiceWithEventTimeline', () => {
                     restore();
                 }
             });
+        });
+    });
+
+    describe("When there is a voice that is already generated", () => {
+        it("should not generate the same voice", () => {
+            // Arrange
+            const restore = mockPickoneIndices([0, 0, 0, 0]);
+            const timeline = [14, 20];
+            const eventName = ["goal_A", "goal_H"];
+            try {
+                // Act
+                const actual = generateVoiceWithEventTimeline({
+                    eventName,
+                    timeline
+                }, {
+                    goal: { 1: 2 }
+                });
+
+                // Assert
+                expect(actual.voice).toEqual(['goal_1_1', 'goal_1_2']);
+            } finally {
+                restore();
+            }
+        });
+
+        it("should not generate voice that is already generated in the first half", () => {
+            // Arrange
+            const restore = mockPickoneIndices([1,0]);
+            const timeline = [14];
+            const eventName = ["goal_A"];
+            try {
+                // Act
+                const actual = generateVoiceWithEventTimeline({
+                    eventName,
+                    timeline,
+                    firstHalfScore: "A",
+                    firstHalfVoices: ["goal_1_1"],
+                }, {
+                    goal: { 1: 1 },
+                    goal2nd: { 1: 1 }
+                });
+
+                // Assert
+                expect(actual.voice).toEqual(['goal2nd_1_1']);
+            } finally {
+                restore();
+            }
         });
     });
 });

@@ -30,6 +30,7 @@ type TrackingStas = {
         team: "H" | "A";
     },
     isFirstHalf: boolean;
+    totalGoalCurrentHalf: number;
 }
 
 export type VoiceGenerationArgs = {
@@ -42,6 +43,7 @@ export type EventTimelineArgs = {
     timeline: number[];
     eventName: string[];
     firstHalfScore?: string;
+    firstHalfVoices?: string[];
 }
 
 export type VoiceGenerationResult = {
@@ -64,6 +66,7 @@ type Voice = {
 
 type VoiceChoiceConfig = {
     limitDuration?: number;
+    exclusion?: Set<string>;
 }
 
 export const DEFAULT_VOICE_DURATION_CONFIG: VoiceDurationConfig = {
@@ -112,6 +115,11 @@ export const DEFAULT_VOICE_DURATION_CONFIG: VoiceDurationConfig = {
         3:2,
         4:1
     },
+    firstGoal: {
+        1: 1,
+        2: 6,
+        3: 1
+    },
     fastGoal: {
         2:1,
         3:4,
@@ -126,6 +134,10 @@ export const DEFAULT_VOICE_DURATION_CONFIG: VoiceDurationConfig = {
     noGoal: {
         2:6,
         3:4
+    },
+    lastGoal: {
+        2:4,
+        3:3
     }
 }
 
@@ -140,6 +152,14 @@ export function generateVoiceWithEventTimeline(args: EventTimelineArgs, config: 
     const { initialVoice, initialTracker } = initVoiceEvents(args, config);
     let tracker = initialTracker;
     const { timeline, voice } = initialVoice;
+    const exclusion = new Set(args.firstHalfVoices ?? []);
+
+    console.log("--- CONFIG ---");
+    console.log(config);
+    console.log("--- INPUT ---");
+    console.log(args.timeline);
+    console.log(args.eventName);
+    console.log(args.firstHalfScore);
     
     events.forEach((event, index) => {
         const eventTime = args.timeline[index];
@@ -160,7 +180,8 @@ export function generateVoiceWithEventTimeline(args: EventTimelineArgs, config: 
 
         if (isNoGoalWithinTime(tracker, TIME_TO_BE_CONSIDERED_AS_NO_GOAL_WITHIN) && !isPreviousEventPassedTime(tracker, TIME_TO_BE_CONSIDERED_AS_NO_GOAL_WITHIN)) {
             const noGoalVoices = getPossibleVoiceArray(config, "noGoal", {
-                limitDuration: durationLimit
+                limitDuration: durationLimit,
+                exclusion
             });
             const chance = new Chance();
             const chosenVoice = chance.pickone(noGoalVoices);
@@ -178,7 +199,7 @@ export function generateVoiceWithEventTimeline(args: EventTimelineArgs, config: 
             });
             possibleEventNames.push(...getPossibleEventForGoal(tracker, config));
 
-        } else if (isGlove(eventName)) {
+        } else if (isEventNameForGlove(eventName)) {
             possibleEventNames.push(...getPossibleEventName(config, "save"));
 
         }
@@ -191,20 +212,27 @@ export function generateVoiceWithEventTimeline(args: EventTimelineArgs, config: 
             } else {
                 return;
             }
-        }
-        
+        };
+
         const chance = new Chance();
         const chosenEvent = chance.pickone(possibleEventNames);
         const possibleVoices = getPossibleVoiceArray(config, chosenEvent, {
-            limitDuration: durationLimit
+            limitDuration: durationLimit,
+            exclusion
         });
         const chosenVoice = chance.pickone(possibleVoices);
         if (chosenVoice) {
             timeline.push(eventTime);
             voice.push(chosenVoice.file);
             tracker = trackEventOnVoiceChosen(tracker, eventTime, chosenVoice);
+            exclusion.add(chosenVoice.file);
         }
     });
+
+    console.log("--- OUTPUT ---");
+    console.log(timeline);
+    console.log(voice);
+
     return {
         timeline,
         voice
@@ -218,6 +246,7 @@ function initTracker(firstHalfScoreSequence = "") {
         awayScore: 0,
         consecutiveGoal: 0,
         isFirstHalf: firstHalfScoreSequence === "",
+        totalGoalCurrentHalf: 0
     }
 
     firstHalfScoreSequence.split("").forEach((score, index, scores) => {
@@ -257,6 +286,7 @@ function trackGoal(tracker: TrackingStas, {
     newTracker.totalGoal++;
     newTracker.awayScore += isAwayGoal(eventName) ? 1 : 0;
     newTracker.homeScore += isHomeGoal(eventName) ? 1 : 0;
+    newTracker.totalGoalCurrentHalf++;
 
     return newTracker;
 }
@@ -281,9 +311,13 @@ function isConsecutiveGoal(tracker: TrackingStas) {
     return tracker.prevGoal && tracker.prevGoal.team === tracker.currentGoal?.team;
 }
 
-function isFastGoal(tracker: TrackingStas, timeForConsideration: number, goalCountForConsideration: number) {
-    return tracker.totalGoal === goalCountForConsideration && tracker.currentGoal?.time && tracker.currentGoal?.time < timeForConsideration;
+function isFastGoal(tracker: TrackingStas) {
+    return tracker.totalGoalCurrentHalf === GOAL_COUNT_TO_BE_CONSIDERED_AS_FAST_GOAL && tracker.currentGoal?.time && tracker.currentGoal?.time < TIME_WITHIN_TO_BE_CONSIDERED_AS_FAST_GOAL;
 }
+
+function isFirstGoal(tracker: TrackingStas) {
+    return tracker.isFirstHalf && tracker.totalGoalCurrentHalf === 1 && tracker.currentGoal?.time && tracker.currentGoal?.time < TIME_WITHIN_TO_BE_CONSIDERED_AS_FAST_GOAL;
+}   
 
 function getPossibleVoiceArray(config: VoiceDurationConfig, key: string, extraConfigs: VoiceChoiceConfig = {}) {
     const possibeVoices: { file: string, duration: number, index: number, key: string }[] = []
@@ -308,7 +342,7 @@ function getPossibleVoiceArray(config: VoiceDurationConfig, key: string, extraCo
         }
     }
 
-    return possibeVoices;
+    return possibeVoices.filter(voice => !extraConfigs.exclusion?.has(voice.file));
 }
 
 function getPossibleEventName(config: VoiceDurationConfig, key: string) {
@@ -322,7 +356,7 @@ function getPossibleEventForGoal(tracker: TrackingStas, config: VoiceDurationCon
     const possibleEventNames: string[] = [];
     possibleEventNames.push("goal");
 
-    if (isEqualizer(tracker, tracker.homeScore)) {
+    if (isEqualizer(tracker)) {
         possibleEventNames.push(...getPossibleEventName(config, `draw${tracker.homeScore}`));
     }
 
@@ -331,11 +365,11 @@ function getPossibleEventForGoal(tracker: TrackingStas, config: VoiceDurationCon
         possibleEventNames.push(...getPossibleEventName(config, `goal${ordinal(actualCheckNumber)}`));
     }
     
-    if (isFastGoal(tracker, TIME_WITHIN_TO_BE_CONSIDERED_AS_FAST_GOAL, GOAL_COUNT_TO_BE_CONSIDERED_AS_FAST_GOAL)) {
+    if (isFastGoal(tracker)) {
         possibleEventNames.push(...getPossibleEventName(config, `fastGoal`));
     }
 
-    if (isFastGoal(tracker, TIME_WITHIN_TO_BE_CONSIDERED_AS_FAST_GOAL, 1)) {
+    if (isFirstGoal(tracker)) {
         possibleEventNames.push(...getPossibleEventName(config, `firstGoal`));
     }
 
@@ -350,8 +384,8 @@ function isLastGoal(tracker: TrackingStas) {
     return !tracker.isFirstHalf && tracker.currentGoal?.time && tracker.currentGoal?.time > TIME_TO_BE_CONSIDERED_AS_LAST_GOAL;
 }
 
-function isEqualizer(tracker: TrackingStas, checkNumber: number) {
-    return tracker.homeScore === checkNumber && tracker.awayScore === checkNumber;
+function isEqualizer(tracker: TrackingStas) {
+    return tracker.homeScore === tracker.awayScore;
 }
 
 function isConsecutive(tracker: TrackingStas) {
@@ -362,7 +396,11 @@ function isGoal(eventName: string) {
     return eventName === EVENT_NAMES.GOAL_H || eventName === EVENT_NAMES.GOAL_A;
 }
 
-function isGlove(eventName: string) {
+function isGlove(tracker: TrackingStas) {
+    return tracker.currentEvent && isEventNameForGlove(tracker.currentEvent.eventName);
+}
+
+function isEventNameForGlove(eventName: string) {
     return eventName === EVENT_NAMES.GLOVE_B || eventName === EVENT_NAMES.GLOVE_R;
 }
 
