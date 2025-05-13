@@ -73,7 +73,8 @@ export const DEFAULT_VOICE_DURATION_CONFIG: VoiceDurationConfig = {
     goal: {
         1: 7,
         2: 12,
-        3: 4
+        3: 4,
+        4: 1
     },
     draw1: {
         1: 2,
@@ -192,18 +193,15 @@ export function generateVoiceWithEventTimeline(args: EventTimelineArgs, config: 
             }
         }
 
-        if (isGoal(eventName)) {
+        if (isGoalForEventName(eventName)) {
             tracker = trackGoal(tracker, {
                 eventTime,
                 eventName
             });
-            possibleEventNames.push(...getPossibleEventForGoal(tracker, config));
-
-        } else if (isEventNameForGlove(eventName)) {
-            possibleEventNames.push(...getPossibleEventName(config, "save"));
-
         }
 
+        possibleEventNames.push(...getPossibleEventForGoal(tracker, config));
+        
         if (isOverlappingPrevious(tracker)) {
             if (isGoalAndPreviousIsNotGoal(tracker)) {
                 const ignoredVoice = voice.pop();
@@ -311,13 +309,6 @@ function isConsecutiveGoal(tracker: TrackingStas) {
     return tracker.prevGoal && tracker.prevGoal.team === tracker.currentGoal?.team;
 }
 
-function isFastGoal(tracker: TrackingStas) {
-    return tracker.totalGoalCurrentHalf === GOAL_COUNT_TO_BE_CONSIDERED_AS_FAST_GOAL && tracker.currentGoal?.time && tracker.currentGoal?.time < TIME_WITHIN_TO_BE_CONSIDERED_AS_FAST_GOAL;
-}
-
-function isFirstGoal(tracker: TrackingStas) {
-    return tracker.isFirstHalf && tracker.totalGoalCurrentHalf === 1 && tracker.currentGoal?.time && tracker.currentGoal?.time < TIME_WITHIN_TO_BE_CONSIDERED_AS_FAST_GOAL;
-}   
 
 function getPossibleVoiceArray(config: VoiceDurationConfig, key: string, extraConfigs: VoiceChoiceConfig = {}) {
     const possibeVoices: { file: string, duration: number, index: number, key: string }[] = []
@@ -354,13 +345,16 @@ function getPossibleEventName(config: VoiceDurationConfig, key: string) {
 
 function getPossibleEventForGoal(tracker: TrackingStas, config: VoiceDurationConfig) {
     const possibleEventNames: string[] = [];
-    possibleEventNames.push("goal");
+    
+    if (isGoal(tracker)) {
+        possibleEventNames.push("goal");
+    }
 
-    if (isEqualizer(tracker)) {
+    if (isDraw(tracker)) {
         possibleEventNames.push(...getPossibleEventName(config, `draw${tracker.homeScore}`));
     }
 
-    if (isConsecutive(tracker)) {
+    if (isGoalNth(tracker)) {
         const actualCheckNumber = tracker.consecutiveGoal > 5 ? 5 : tracker.consecutiveGoal;
         possibleEventNames.push(...getPossibleEventName(config, `goal${ordinal(actualCheckNumber)}`));
     }
@@ -376,28 +370,43 @@ function getPossibleEventForGoal(tracker: TrackingStas, config: VoiceDurationCon
     if (isLastGoal(tracker)) {
         possibleEventNames.push(...getPossibleEventName(config, `lastGoal`));
     }
-    
+
+    if (isGlove(tracker)) {
+        possibleEventNames.push(...getPossibleEventName(config, `save`));
+    }    
     return possibleEventNames;
 }
+
+function isGoal(tracker: TrackingStas) {
+    return isGoalForEventName(tracker.currentEvent?.eventName ?? "");
+}
+
+function isDraw(tracker: TrackingStas) {
+    return tracker.homeScore === tracker.awayScore;
+}
+
+function isGoalNth(tracker: TrackingStas) {
+    return tracker.consecutiveGoal > 1;
+}
+
+function isFastGoal(tracker: TrackingStas) {
+    return tracker.totalGoalCurrentHalf === GOAL_COUNT_TO_BE_CONSIDERED_AS_FAST_GOAL && tracker.currentGoal?.time && tracker.currentGoal?.time < TIME_WITHIN_TO_BE_CONSIDERED_AS_FAST_GOAL;
+}
+
+function isFirstGoal(tracker: TrackingStas) {
+    return tracker.isFirstHalf && tracker.totalGoalCurrentHalf === 1 && tracker.currentGoal?.time && tracker.currentGoal?.time < TIME_WITHIN_TO_BE_CONSIDERED_AS_FAST_GOAL;
+}   
 
 function isLastGoal(tracker: TrackingStas) {
     return !tracker.isFirstHalf && tracker.currentGoal?.time && tracker.currentGoal?.time > TIME_TO_BE_CONSIDERED_AS_LAST_GOAL;
 }
 
-function isEqualizer(tracker: TrackingStas) {
-    return tracker.homeScore === tracker.awayScore;
-}
-
-function isConsecutive(tracker: TrackingStas) {
-    return tracker.consecutiveGoal > 0;
-}
-
-function isGoal(eventName: string) {
-    return eventName === EVENT_NAMES.GOAL_H || eventName === EVENT_NAMES.GOAL_A;
-}
-
 function isGlove(tracker: TrackingStas) {
     return tracker.currentEvent && isEventNameForGlove(tracker.currentEvent.eventName);
+}
+
+function isGoalForEventName(eventName: string) {
+    return eventName === EVENT_NAMES.GOAL_H || eventName === EVENT_NAMES.GOAL_A;
 }
 
 function isEventNameForGlove(eventName: string) {
@@ -417,7 +426,7 @@ function isOverlappingPrevious(tracker: TrackingStas) {
 }
 
 function isGoalAndPreviousIsNotGoal(tracker: TrackingStas) {
-    return isGoal(tracker.currentEvent?.eventName ?? "") && !isGoal(tracker.previousEvent?.eventName ?? "");
+    return isGoalForEventName(tracker.currentEvent?.eventName ?? "") && !isGoalForEventName(tracker.previousEvent?.eventName ?? "");
 }
 
 function ordinal(number: number) {
