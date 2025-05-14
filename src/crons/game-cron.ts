@@ -175,14 +175,6 @@ export default class GameCron extends Table.Crons.TableGameCron {
         };
 
         this.runningRoundInfoPublisher.publishToAllUsers({ videoResult });
-        console.log("--------- FIRST HALF ---------");
-        console.log("Result: ", this.gameData.result.firstHalf);
-        console.log("Video: ",this.gameData.result.firstHalfVideo);
-        console.log("Events:", this.gameData.result.firstHalfEventTimeline?.eventName);
-        console.log("Timeline:", this.gameData.result.firstHalfEventTimeline?.timeLine);
-        console.log("VOICES:");
-        console.log("Voice Events: ", this.gameData.result.voices?.voice);
-        console.log("Voice Timeline: ", this.gameData.result.voices?.timeline);
         this.publishVoices();
     }
 
@@ -198,14 +190,6 @@ export default class GameCron extends Table.Crons.TableGameCron {
         };
 
         this.runningRoundInfoPublisher.publishToAllUsers({ videoResult });
-        console.log("--------- SECOND HALF ---------");
-        console.log("Result: ", this.gameData.result.secondHalf);
-        console.log("Video: ", this.gameData.result.secondHalfVideo);
-        console.log("Events:", this.gameData.result.secondHalfEventTimeline?.eventName);
-        console.log("Timeline:", this.gameData.result.secondHalfEventTimeline?.timeLine);
-        console.log("VOICES:");
-        console.log("Voice Events: ", this.gameData.result.voices?.voice);
-        console.log("Voice Timeline: ", this.gameData.result.voices?.timeline);
         this.publishVoices();
     }
 

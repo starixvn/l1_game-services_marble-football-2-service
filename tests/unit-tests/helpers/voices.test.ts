@@ -1,5 +1,5 @@
 import Chance from 'chance';
-import { generateVoiceWithEventTimeline } from '../../../src/helpers/voices';
+import { DEFAULT_VOICE_DURATION_CONFIG, generateVoiceWithEventTimeline } from '../../../src/helpers/voices';
 
 
 function mockPickoneIndices(indices: number[]): () => void {
@@ -736,5 +736,30 @@ describe('generateVoiceWithEventTimeline', () => {
                 restore();
             }
         });
+    });
+
+    describe("Debugging test", () => {
+        it("error pickone empty array", () => {
+            // Arrange
+            const events = [ 'goal_H', 'hit_glove_B', 'hit_glove_R', 'hit_glove_B', 'goal_H' ]
+            const timeline = [
+                8.866666666666667,
+                14.866666666666667,
+                21.566666666666666,
+                27.166666666666668,
+                27.8
+              ]
+            
+            const actual = generateVoiceWithEventTimeline({
+                eventName: events,
+                timeline,
+                firstHalfScore: "AAAH",
+                firstHalfVoices: [ 'firstGoal_2_6', 'goal2nd_3_3', 'goal3rd_4_3', 'goal_2_2' ]
+            }, 
+                DEFAULT_VOICE_DURATION_CONFIG);
+            console.log(actual);
+            expect(actual).toBeDefined();
+        });
+
     });
 });

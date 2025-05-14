@@ -18,7 +18,8 @@
         "dev": "cross-env NODE_ENV=development tsx watch ./src/app.ts",
         "dev-build": "nodemon --experimental-loader=extensionless --watch ./build ./build/app.js",
         "reg": "npm set registry http://npm.lumigame.com",
-        "fetch-video-timelines": "tsx src/timelines/fetch-default-video-timeline.ts"
+        "fetch-video-timelines": "tsx src/timelines/fetch-default-video-timeline.ts",
+        "test-voice": "tsx src/timelines/test-voice.ts"
     },
     "jestSonar": {
         "reportPath": "reports",

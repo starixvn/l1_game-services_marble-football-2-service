@@ -70,75 +70,76 @@ type VoiceChoiceConfig = {
 }
 
 export const DEFAULT_VOICE_DURATION_CONFIG: VoiceDurationConfig = {
-    goal: {
-        1: 7,
-        2: 12,
-        3: 4,
-        4: 1
+    "draw4": {
+        "2": 3,
+        "3": 4,
+        "4": 2
     },
-    draw1: {
-        1: 2,
-        2: 2,
-        3: 5,
-        4: 1
+    "lastGoal": {
+        "2": 4,
+        "3": 3
     },
-    draw2: {
-        2: 6,
-        3: 4
+    "draw3": {
+        "2": 4,
+        "3": 5,
+        "4": 1
     },
-    draw3: {
-        2: 4,
-        3: 5,
-        4: 1
+    "draw2": {
+        "2": 6,
+        "3": 4
     },
-    draw4: {
-        2: 3,
-        3: 4,
-        4: 2
+    "draw1": {
+        "1": 2,
+        "2": 2,
+        "3": 5,
+        "4": 1
     },
-    goal2nd: {
-        2:3,
-        3:3,
-        4:1
+    "fastGoal": {
+        "2": 1,
+        "3": 4,
+        "4": 1
     },
-    goal3rd: {
-        2:3,
-        3:3,
-        4:4
+    "goal5th": {
+        "2": 4,
+        "3": 2,
+        "4": 1
     },
-    goal4th: {
-        2:4,
-        3:4,
-        4:1
+    "goal4th": {
+        "2": 4,
+        "3": 4,
+        "4": 1
     },
-    goal5th: {
-        2:4,
-        3:2,
-        4:1
+    "goal3rd": {
+        "2": 3,
+        "3": 3,
+        "4": 4
     },
-    firstGoal: {
-        1: 1,
-        2: 6,
-        3: 1
+    "goal2nd": {
+        "2": 3,
+        "3": 3,
+        "4": 1
     },
-    fastGoal: {
-        2:1,
-        3:4,
-        4:1
+    "firstGoal": {
+        "1": 1,
+        "2": 6,
+        "3": 1
     },
-    save: {
-        1: 1,
-        2: 10,
-        3: 5,
-        4: 2
+    "goal": {
+        "1": 6,
+        "2": 12,
+        "3": 4,
+        "4": 1
     },
-    noGoal: {
-        2:6,
-        3:4
+    "noGoal": {
+        "2": 6,
+        "3": 4,
+        "4": 1
     },
-    lastGoal: {
-        2:4,
-        3:3
+    "save": {
+        "1": 1,
+        "2": 10,
+        "3": 5,
+        "4": 2
     }
 }
 
@@ -211,7 +212,11 @@ export function generateVoiceWithEventTimeline(args: EventTimelineArgs, config: 
             exclusion
         });
         const chance = new Chance();
-        const chosenVoice = chance.pickone(possibleVoices);
+
+        const chosenVoice =
+            possibleVoices.length > 0
+                ? chance.pickone(possibleVoices)
+                : null;
         if (chosenVoice) {
             timeline.push(eventTime);
             voice.push(chosenVoice.file);
@@ -327,23 +332,24 @@ function getPossibleVoiceArray(config: VoiceDurationConfig, key: string, extraCo
 
 
 function getPossibleVoiceEvent(tracker: TrackingStas, config: VoiceDurationConfig) {
-    const key = Object.keys(config).find(key => voiceConditionMap[key](tracker));
+    const key = Object.keys(config).find(key => voiceConditionMap[key]?.(tracker) ?? false);
     return key ? [key] : [];
 }
 
 const voiceConditionMap: Record<string, (tracker: TrackingStas) => boolean> = {
-    goal: isGoal,
-    draw1: isDraw1,
-    draw2: isDraw2,
-    draw3: isDraw3,
     draw4: isDraw4,
-    goal2nd: isGoal2nd,
-    goal3rd: isGoal3rd,
-    goal4th: isGoal4th,
-    goal5th: isGoal5th,
-    fastGoal: isFastGoal,
-    firstGoal: isFirstGoal,
     lastGoal: isLastGoal,
+    draw3: isDraw3,
+    draw2: isDraw2,
+    draw1: isDraw1,
+    fastGoal: isFastGoal,
+    goal5th: isGoal5th,
+    goal4th: isGoal4th,
+    goal3rd: isGoal3rd,
+    goal2nd: isGoal2nd,
+    firstGoal: isFirstGoal,
+    noGoal: () => false,
+    goal: isGoal,
     save: isSave
 }
 
