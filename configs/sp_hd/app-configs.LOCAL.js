@@ -19,6 +19,8 @@ export default {
         transports: ["websocket"],
         allowUpgrades: false,
         perMessageDeflate: false,
+        maxRequestsPerInterval: 100, // default 1000
+        rateLimitInterval: 10 * 1000, // default 10 * 1000
     },
     enabledLogs: true,
     database: {
@@ -56,4 +58,11 @@ export default {
         BASE: "http://sp-hd-game-management-service-local-service:5000",
     },
     disableCors: true,
+    cache: {
+        ttl: 1000 * 60 * 5,
+    },
+    proxyServer: {
+        enabled: false,
+        url: "",
+    },
 };
