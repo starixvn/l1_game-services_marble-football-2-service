@@ -1,3 +1,6 @@
+// NOSONAR
+
+
 import crypto from "crypto";
 import appConfigs from "../app-configs";
 import fs from "fs";
@@ -114,7 +117,7 @@ function processMatch(match: { firstHalf: string, secondHalf: string }, index: n
         eventName: secondHalfTimeline.eventName,
         timeline: secondHalfTimeline.timeLine,
         firstHalfVoices: firstHalfVoiceTimeline.voice,
-        firstHalfScore: match.firstHalf
+        firstHalfScore: match.firstHalf.split("-")[0]
     }, voiceConfig);
     console.log("VOICES:");
     console.log("Voice Events: ", secondHalfVoiceTimeline.voice);
@@ -126,8 +129,7 @@ function getVideoName(indexedResult: string) {
 }
 
 function getVideoTimelineFromObject(object: Record<string, EventTimeline>, result: string) {
-    const eventTimeline = object[result];
-    return eventTimeline;
+    return object[result];
 }
 
 async function getEventTimeline(videoName: string): Promise<{ timeLine: number[], eventName: string[] }> {
@@ -181,8 +183,9 @@ function saveFiles(filename: string, data: string) {
         }
     });
 }
-
-(async () => {
+async function main() {
     await saveAllEventTimeline();
     await generateVoiceData();
-})();
+}
+
+generateVoiceData();
