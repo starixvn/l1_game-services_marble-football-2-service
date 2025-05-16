@@ -70,4 +70,5 @@ export default {
         enabled: false,
         url: "",
     },
+    liveStreamServer: "https://d1aof1lwumql9k.cloudfront.net/114_STAGING/",
 };
