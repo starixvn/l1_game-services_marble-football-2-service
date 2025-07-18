@@ -67,7 +67,7 @@ export default {
     liveStreamServer: "https://d10r8t0fxmjzn1.cloudfront.net/114/",
     gameResultSettings: {
         baseUrl: "http://sp_hd_game_result_sit:5000",
-        id: "Game Service",
+        id: "Game Client",
         key: "dded3dfe-261e-47f0-a46e-076b367c5a09",
     },
     proxyServer: {
