@@ -57,18 +57,23 @@ export default {
     gameManagementApiSettings: {
         BASE: "http://sp-hd-game-management-service-local-service:5000",
     },
+    disableCors: true,
+    otel: {
+        system: "HD",
+        enabled: true,
+        endpoint: "http://jaeger.lumigame.com:31318/v1/traces",
+    },
+    liveStreamServer: "https://d1aof1lwumql9k.cloudfront.net/114_STAGING/",
     gameResultSettings: {
         baseUrl: "http://sp-hd-game-result-local-service:5000",
-        id: "Game Service",
+        id: "Game Client",
         key: "58148de3-b895-4f6b-82de-a35eed1b4b28",
-    },
-    disableCors: true,
-    cache: {
-        ttl: 1000 * 60 * 5,
     },
     proxyServer: {
         enabled: false,
         url: "",
     },
-    liveStreamServer: "https://d1aof1lwumql9k.cloudfront.net/114_STAGING/",
+    cache: {
+        ttl: 1000 * 60 * 5,
+    },
 };
