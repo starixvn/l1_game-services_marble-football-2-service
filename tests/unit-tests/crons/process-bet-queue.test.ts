@@ -35,7 +35,7 @@ describe("ProcessBetQueue", () => {
             betLogsRepository,
             gameManagementApiClientFactory,
             baseMetrics,
-        });
+        } as any);
 
         mockPlayer = { UID: "player1" };
         mockBet = { amount: 100, betChoice: "choice1", roundId: 1, clientSeed: new Date() };
@@ -225,7 +225,7 @@ describe("ProcessBetQueue", () => {
                         clientSeed: bet.clientSeed,
                     }),
                 },
-                { upsert: true, setDefaultsOnInsert: true },
+                { upsert: true, setDefaultsOnInsert: true }
             );
             expect(result).toBeInstanceOf(Date);
         });
@@ -261,7 +261,7 @@ describe("ProcessBetQueue", () => {
                     },
                     $setOnInsert: expect.any(Object),
                 },
-                { upsert: true, setDefaultsOnInsert: true },
+                { upsert: true, setDefaultsOnInsert: true }
             );
         });
 
@@ -308,7 +308,7 @@ describe("ProcessBetQueue", () => {
                         playerId: player.session.playerId,
                     }),
                 },
-                { upsert: true, setDefaultsOnInsert: true },
+                { upsert: true, setDefaultsOnInsert: true }
             );
         });
     });

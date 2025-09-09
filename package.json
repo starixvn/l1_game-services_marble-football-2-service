@@ -26,6 +26,11 @@
         "reportFile": "test-reporter.xml",
         "indent": 4
     },
+    "resolutions": {
+        "mongoose": "6.13.6",
+        "form-data": "4.0.4",
+        "sc-common": "2.0.0"
+    },
     "dependencies": {
         "awilix": "^8.0.0",
         "axios": "1.11.0",
@@ -35,11 +40,10 @@
         "extensionless": "^1.9.6",
         "https-proxy-agent": "^7.0.6",
         "lodash.shuffle": "^4.2.0",
-        "mongoose": "8.18.1",
         "random-js": "^2.1.0",
-        "sc-common": "^1.8.1",
         "sc-core-rng": "^1.1.0",
         "sc-game-base": "^5.4.0",
+        "sc-common": "2.0.0",
         "sc-game-management-client": "^0.1.0",
         "socket.io": "^4.5.4"
     },
