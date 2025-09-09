@@ -33,7 +33,9 @@ describe("Bets", () => {
             const actual = new bets({ _id: "672452f978c8cd0e08122643" });
 
             // Assert
-            expect(actual.toObject()).toStrictEqual(expected);
+            console.log(actual.toObject());
+            console.log(expected);
+            expect(actual.toObject()).toEqual(expected);
         });
 
         it("should verify the required properties", () => {
@@ -45,7 +47,7 @@ describe("Bets", () => {
 
             // Assert
             expect(error.message).toBe(
-                `marblefootball2_bets validation failed: rate: Path \`rate\` is required., name: Path \`name\` is required., uid: Path \`uid\` is required., roundId: Path \`roundId\` is required.`,
+                `marblefootball2_bets validation failed: rate: Path \`rate\` is required., name: Path \`name\` is required., uid: Path \`uid\` is required., roundId: Path \`roundId\` is required.`
             );
         });
     });

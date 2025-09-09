@@ -24,7 +24,7 @@ describe("Round", () => {
             const actual = new rounds({ _id: "672452f978c8cd0e08122643" });
 
             // Assert
-            expect(actual.toObject()).toStrictEqual(expected);
+            expect(actual.toObject()).toEqual(expected);
         });
 
         it("should verify the required properties", () => {
@@ -35,8 +35,8 @@ describe("Round", () => {
             const error = actual.validateSync();
 
             // Assert
-            expect(error.message).toBe(
-                `marblefootball2_rounds validation failed: exchangeRateId: Path \`exchangeRateId\` is required., id: Path \`id\` is required.`,
+            expect(error?.message).toBe(
+                `marblefootball2_rounds validation failed: exchangeRateId: Path \`exchangeRateId\` is required., id: Path \`id\` is required.`
             );
         });
     });

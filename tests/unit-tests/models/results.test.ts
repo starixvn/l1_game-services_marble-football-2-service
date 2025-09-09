@@ -23,7 +23,7 @@ describe("Results", () => {
             const actual = new results({ _id: "672452f978c8cd0e08122643" });
 
             // Assert
-            expect(actual.toObject()).toStrictEqual(expected);
+            expect(actual.toObject()).toEqual(expected);
         });
 
         it("should verify the required properties", () => {

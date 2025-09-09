@@ -4,7 +4,7 @@ import { MatchType } from "./tournaments";
 import { VoiceGenerationResult } from "../helpers/voices";
 
 export type ResultType = {
-    tournamentId?: mongoose.Types.ObjectId;
+    tournamentId?: mongoose.Schema.Types.ObjectId;
     firstHalf: string;
     secondHalf: string;
     firstHalfVideo: string;
@@ -18,12 +18,12 @@ export type ResultType = {
         timeLine: number[];
         eventName: string[];
         frame: number[];
-    }
+    };
     secondHalfEventTimeline?: {
         timeLine: number[];
         eventName: string[];
         frame: number[];
-    }
+    };
     voices?: VoiceGenerationResult;
 };
 
@@ -38,7 +38,7 @@ const resultSchema = new mongoose.Schema<ResultType>(
         homeWinsOnDraw: { type: Boolean },
         penalty: { type: Object },
     },
-    { _id: false },
+    { _id: false }
 );
 
 const matchSchema = new mongoose.Schema<MatchType>(
@@ -46,7 +46,7 @@ const matchSchema = new mongoose.Schema<MatchType>(
         home: { type: String },
         away: { type: String },
     },
-    { _id: false },
+    { _id: false }
 );
 
 export type SettlementResultType = {
@@ -58,7 +58,7 @@ const dynamicResultSchema = Object.values(ODDS_TYPE).reduce(
         ...schema,
         [item]: { type: Boolean },
     }),
-    {},
+    {}
 );
 
 const settlementResultSchema = new mongoose.Schema<SettlementResultType>(dynamicResultSchema, { _id: false });

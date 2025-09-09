@@ -38,15 +38,15 @@ export default class TournamentConsumer {
                 updateNext(tournament.matches, tournament.currentMatch, team);
             }
 
-            this.gameData.tournament = await this.tournamentRepository.findOneAndUpdate(
+            this.gameData.tournament = (await this.tournamentRepository.findOneAndUpdate(
                 { _id: tournament._id },
                 {
                     matches: tournament.matches,
                     ended: ended,
                     currentMatch: tournament.currentMatch + 1,
                 },
-                { new: true },
-            );
+                { new: true }
+            )) as ITournament;
         }
     }
 
@@ -55,7 +55,7 @@ export default class TournamentConsumer {
             return this.gameData.tournament;
         }
 
-        const runningTournament: ITournament = await this.tournamentRepository.findOne({ ended: false }).lean().exec();
+        const runningTournament = (await this.tournamentRepository.findOne({ ended: false }).lean().exec()) as ITournament;
 
         if (runningTournament) {
             this.gameData.tournament = runningTournament;
@@ -68,7 +68,7 @@ export default class TournamentConsumer {
     }
 
     async getLastTournament(): Promise<ITournament> {
-        const lastTournament: ITournament = await this.tournamentRepository.findOne().sort({ time: -1 }).lean().exec();
+        const lastTournament = (await this.tournamentRepository.findOne().sort({ time: -1 }).lean().exec()) as ITournament;
 
         return lastTournament;
     }

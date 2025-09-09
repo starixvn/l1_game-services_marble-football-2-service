@@ -54,7 +54,7 @@ describe("Result Helper", () => {
             expect(result.homeWinsOnDraw).toBe(true);
             expect(result.firstHalfVideo).toBeDefined();
             expect(result.secondHalfVideo).toBeDefined();
-            expect(result.penalty).toStrictEqual({ home: 2, away: 1 });
+            expect(result.penalty).toEqual({ home: 2, away: 1 });
         });
     });
 

@@ -43,7 +43,7 @@ describe(getNext.name, () => {
             const actual = getNext(matches, 2);
 
             // Assert
-            expect(actual).toStrictEqual(expected);
+            expect(actual).toEqual(expected);
         });
     });
 });

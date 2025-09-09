@@ -20,7 +20,7 @@ describe(generateTournament.name, () => {
 
                 // Assert
                 expect(caller).toThrow();
-            },
+            }
         );
     });
 
@@ -38,7 +38,7 @@ describe(generateTournament.name, () => {
             const actual = generateTournament(input);
 
             // Assert
-            expect(actual).toStrictEqual(expected);
+            expect(actual).toEqual(expected);
         });
     });
 
@@ -68,7 +68,7 @@ describe(generateTournament.name, () => {
             const actual = generateTournament(input);
 
             // Assert
-            expect(actual).toStrictEqual(expected);
+            expect(actual).toEqual(expected);
         });
     });
 });

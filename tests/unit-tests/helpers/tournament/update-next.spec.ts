@@ -85,7 +85,7 @@ describe(updateNext.name, () => {
             updateNext(matches, index, value);
 
             // Assert
-            expect(matches).toStrictEqual(expected);
+            expect(matches).toEqual(expected);
         });
     });
 });

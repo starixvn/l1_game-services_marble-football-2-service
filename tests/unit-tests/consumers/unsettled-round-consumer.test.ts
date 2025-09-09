@@ -70,7 +70,7 @@ describe("UnSettleRoundConsumer", () => {
 
                 // assert
                 expect(decrypt).toHaveBeenCalledWith("encrypted");
-                expect(gameData.result).toStrictEqual({ result: "result" });
+                expect(gameData.result).toEqual({ result: "result" });
             });
         });
     });

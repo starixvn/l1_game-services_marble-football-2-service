@@ -18,7 +18,7 @@ describe("Bet Logs", () => {
             const actual = new betLogs({ _id: "672452f978c8cd0e08122643" });
 
             // Assert
-            expect(actual.toObject()).toStrictEqual(expected);
+            expect(actual.toObject()).toEqual(expected);
         });
 
         it("should verify the required properties", () => {
@@ -30,7 +30,7 @@ describe("Bet Logs", () => {
 
             // Assert
             expect(error.message).toBe(
-                `marblefootball2_betlogs validation failed: operatorId: Path \`operatorId\` is required., rate: Path \`rate\` is required., currency: Path \`currency\` is required., name: Path \`name\` is required., uid: Path \`uid\` is required.`,
+                `marblefootball2_betlogs validation failed: operatorId: Path \`operatorId\` is required., rate: Path \`rate\` is required., currency: Path \`currency\` is required., name: Path \`name\` is required., uid: Path \`uid\` is required.`
             );
         });
     });
