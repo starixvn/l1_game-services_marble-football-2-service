@@ -68,9 +68,7 @@ export default class TournamentConsumer {
     }
 
     async getLastTournament(): Promise<ITournament> {
-        const lastTournament = (await this.tournamentRepository.findOne().sort({ time: -1 }).lean().exec()) as ITournament;
-
-        return lastTournament;
+        return (await this.tournamentRepository.findOne().sort({ time: -1 }).lean().exec()) as ITournament;
     }
 
     private async createNewTournament() {
