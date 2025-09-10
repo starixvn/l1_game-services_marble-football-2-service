@@ -70,7 +70,7 @@ export default {
     },
     proxyServer: {
         enabled: true,
-        url: "http://lisasqd.nebula.prod:8801",
+        url: "http://iusqd-uat.gamora.prod:8801",
     },
     cache: {
         ttl: 1000 * 60 * 5,
