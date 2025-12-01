@@ -42,7 +42,7 @@
         "lodash.shuffle": "^4.2.0",
         "random-js": "^2.1.0",
         "sc-core-rng": "^1.1.0",
-        "sc-game-base": "^5.4.0",
+        "sc-game-base": "5.4.1-hotdog-1",
         "sc-common": "2.0.0",
         "sc-game-management-client": "^0.1.0",
         "socket.io": "^4.5.4"
