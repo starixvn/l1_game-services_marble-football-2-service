@@ -53,11 +53,13 @@ export default class SettleGameRoundConsumer extends Table.EventConsumers.TableS
                 netWin: 0,
                 totalLost: 0,
                 winningByChoices: {},
-            },
+            }
         );
 
-        betResult.totalWin = parseFloat(betResult.totalWin.toFixed(2));
-        betResult.netWin = parseFloat(betResult.netWin.toFixed(2));
+        const fractionDigits = 4;
+
+        betResult.totalWin = parseFloat(betResult.totalWin.toFixed(fractionDigits));
+        betResult.netWin = parseFloat(betResult.netWin.toFixed(fractionDigits));
 
         return betResult;
     }
